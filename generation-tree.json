@@ -1,0 +1,70 @@
+{
+  "root": {
+    "nodeId": "gen-project-shell",
+    "kind": "project-shell",
+    "pageIds": ["page-forum", "page-stories", "page-submit", "page-chat"],
+    "output": "partials/project-shell.html",
+    "sharedRegions": ["header", "sidebar", "footer", "background"],
+    "privateRegions": [],
+    "mutableSlots": ["activeNavItem", "mainContent", "pageTitle"],
+    "status": "planned",
+    "children": [
+      {
+        "nodeId": "gen-forum-chat-shared",
+        "kind": "shared-branch",
+        "pageIds": ["page-forum", "page-chat"],
+        "output": "partials/forum-base.html",
+        "sharedRegions": ["forumLayout", "categorySidebar", "postList"],
+        "privateRegions": [],
+        "mutableSlots": ["chatOverlay"],
+        "status": "planned",
+        "children": [
+          {
+            "nodeId": "gen-page-forum",
+            "kind": "page-leaf",
+            "pageIds": ["page-forum"],
+            "output": "pages/forum.html",
+            "sharedRegions": [],
+            "privateRegions": ["forumContent"],
+            "mutableSlots": [],
+            "status": "planned",
+            "children": []
+          },
+          {
+            "nodeId": "gen-page-chat",
+            "kind": "page-leaf",
+            "pageIds": ["page-chat"],
+            "output": "pages/chat.html",
+            "sharedRegions": [],
+            "privateRegions": ["chatWindow"],
+            "mutableSlots": [],
+            "status": "planned",
+            "children": []
+          }
+        ]
+      },
+      {
+        "nodeId": "gen-page-stories",
+        "kind": "page-leaf",
+        "pageIds": ["page-stories"],
+        "output": "pages/stories.html",
+        "sharedRegions": [],
+        "privateRegions": ["storiesContent"],
+        "mutableSlots": [],
+        "status": "planned",
+        "children": []
+      },
+      {
+        "nodeId": "gen-page-submit",
+        "kind": "page-leaf",
+        "pageIds": ["page-submit"],
+        "output": "pages/submit.html",
+        "sharedRegions": [],
+        "privateRegions": ["submitContent"],
+        "mutableSlots": [],
+        "status": "planned",
+        "children": []
+      }
+    ]
+  }
+}

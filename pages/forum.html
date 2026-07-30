@@ -1,0 +1,3497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>论坛 — 午夜档案馆</title>
+  <link rel="stylesheet" href="../colors_and_type.css">
+  <style>
+    /* ===== Forum Page Styles ===== */
+
+    /* --- Top Bar --- */
+    .forum-topbar {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: var(--space-8);
+    }
+
+    .forum-topbar__title-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .forum-topbar__title {
+      font-family: var(--font-display);
+      font-size: var(--text-3xl);
+      font-weight: 600;
+      color: var(--brand-foreground);
+      letter-spacing: 0.04em;
+      animation: glow-pulse 5s ease-in-out infinite;
+    }
+
+    .forum-topbar__subtitle {
+      font-size: var(--text-sm);
+      color: var(--brand-muted-foreground);
+      margin-top: var(--space-1);
+      opacity: 0.7;
+      font-style: italic;
+    }
+
+    .forum-topbar__btn-new-post {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-6);
+      background: var(--brand-primary);
+      color: var(--brand-primary-foreground);
+      border: 1px solid var(--brand-primary-light);
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      white-space: nowrap;
+    }
+
+    .forum-topbar__btn-new-post:hover {
+      background: var(--brand-primary-light);
+      box-shadow: 0 0 16px hsla(0, 85%, 32%, 0.3);
+    }
+
+    /* --- Top Bar Actions Container --- */
+    .forum-topbar__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    /* --- Sponsor Button (Candle) --- */
+    .forum-topbar__btn-sponsor {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-5);
+      background: linear-gradient(135deg, #1a1510, #2a2015);
+      color: #f0d080;
+      border: 1px solid rgba(240, 200, 100, 0.3);
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      white-space: nowrap;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .forum-topbar__btn-sponsor::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(255, 200, 50, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .forum-topbar__btn-sponsor:hover {
+      background: linear-gradient(135deg, #2a2015, #3a2a1a);
+      border-color: rgba(240, 200, 100, 0.5);
+      box-shadow: 0 0 20px rgba(255, 200, 50, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .sponsor-candle {
+      font-size: 1.1em;
+      animation: candle-flicker 2s ease-in-out infinite;
+    }
+
+    @keyframes candle-flicker {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      25% { opacity: 0.85; transform: scale(1.05) rotate(2deg); }
+      50% { opacity: 0.95; transform: scale(0.98) rotate(-1deg); }
+      75% { opacity: 0.9; transform: scale(1.02) rotate(1deg); }
+    }
+
+    /* --- Sponsor Overlay & Modal --- */
+    .sponsor-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    .sponsor-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .sponsor-modal {
+      background: linear-gradient(180deg, #161210, #111114);
+      border: 1px solid rgba(240, 200, 100, 0.15);
+      border-radius: var(--radius-lg);
+      padding: var(--space-8);
+      max-width: 520px;
+      width: 90%;
+      transform: translateY(20px) scale(0.95);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .sponsor-overlay.visible .sponsor-modal {
+      transform: translateY(0) scale(1);
+    }
+
+    .sponsor-modal__header {
+      text-align: center;
+      margin-bottom: var(--space-8);
+    }
+
+    .sponsor-modal__candle-row {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-4);
+      margin-bottom: var(--space-4);
+    }
+
+    .sponsor-candle-big {
+      font-size: 2rem;
+      animation: candle-flicker 2s ease-in-out infinite;
+    }
+
+    .sponsor-candle-big:nth-child(2) { animation-delay: 0.3s; }
+    .sponsor-candle-big:nth-child(3) { animation-delay: 0.7s; }
+
+    .sponsor-modal__title {
+      font-family: var(--font-display);
+      font-size: var(--text-2xl);
+      font-weight: 600;
+      color: #f0d080;
+      letter-spacing: 0.06em;
+      margin-bottom: var(--space-2);
+    }
+
+    .sponsor-modal__subtitle {
+      font-size: var(--text-sm);
+      color: var(--neutral-500);
+      font-style: italic;
+    }
+
+    /* --- Sponsor Tiers --- */
+    .sponsor-modal__tiers {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .sponsor-tier {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      padding: var(--space-4) var(--space-5);
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--transition-normal);
+    }
+
+    .sponsor-tier:hover {
+      background: rgba(255, 200, 50, 0.04);
+      border-color: rgba(240, 200, 100, 0.2);
+      box-shadow: 0 0 16px rgba(255, 200, 50, 0.06);
+    }
+
+    .sponsor-tier--premium {
+      border-color: rgba(240, 200, 100, 0.25);
+      background: rgba(255, 200, 50, 0.03);
+    }
+
+    .sponsor-tier--premium:hover {
+      border-color: rgba(240, 200, 100, 0.4);
+      box-shadow: 0 0 24px rgba(255, 200, 50, 0.1);
+    }
+
+    .sponsor-tier__candle {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+      width: 48px;
+      text-align: center;
+      animation: candle-flicker 2.5s ease-in-out infinite;
+    }
+
+    .sponsor-tier:nth-child(2) .sponsor-tier__candle { animation-delay: 0.4s; }
+    .sponsor-tier:nth-child(3) .sponsor-tier__candle { animation-delay: 0.8s; }
+
+    .sponsor-tier__name {
+      font-size: var(--text-base);
+      font-weight: 600;
+      color: #f0d080;
+      margin-bottom: 2px;
+    }
+
+    .sponsor-tier__price {
+      font-size: var(--text-lg);
+      font-weight: 700;
+      color: var(--brand-foreground);
+      margin-bottom: 2px;
+    }
+
+    .sponsor-tier__desc {
+      font-size: var(--text-xs);
+      color: var(--neutral-500);
+      line-height: 1.4;
+      margin-bottom: var(--space-2);
+    }
+
+    .sponsor-modal__footer {
+      text-align: center;
+      margin-top: var(--space-6);
+    }
+
+    .sponsor-modal__close {
+      padding: var(--space-2) var(--space-6);
+      font-size: var(--text-sm);
+      color: var(--neutral-500);
+      background: transparent;
+      border: 1px solid var(--neutral-700);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-family: var(--font-sans);
+      transition: all var(--transition-fast);
+    }
+
+    .sponsor-modal__close:hover {
+      color: var(--brand-foreground);
+      border-color: var(--neutral-600);
+    }
+
+    /* --- Sponsor Image Overlay --- */
+    .sponsor-image-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.92);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 400;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      cursor: pointer;
+    }
+
+    .sponsor-image-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .sponsor-image {
+      max-width: 85vw;
+      max-height: 75vh;
+      border-radius: var(--radius-md);
+      box-shadow: 0 0 40px rgba(0,0,0,0.6);
+      transform: scale(0.9);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .sponsor-image-overlay.visible .sponsor-image {
+      transform: scale(1);
+    }
+
+    .sponsor-image-hint {
+      margin-top: var(--space-4);
+      font-size: var(--text-sm);
+      color: var(--neutral-500);
+      animation: flicker 3s ease-in-out infinite;
+    }
+
+    /* --- Sponsor Thanks Overlay (eerie, immersive) --- */
+    .sponsor-thanks-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 500;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+      cursor: pointer;
+    }
+
+    .sponsor-thanks-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .sponsor-thanks__content {
+      text-align: center;
+      max-width: 420px;
+      padding: 0 var(--space-6);
+      transform: translateY(12px);
+      opacity: 0;
+      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease;
+    }
+
+    .sponsor-thanks-overlay.visible .sponsor-thanks__content {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .sponsor-thanks__candle {
+      font-size: 2.4rem;
+      margin-bottom: var(--space-5);
+      animation: candle-flicker 2s ease-in-out infinite;
+    }
+
+    .sponsor-thanks__title {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      font-weight: 600;
+      color: #f0d080;
+      letter-spacing: 0.06em;
+      margin-bottom: var(--space-4);
+      animation: glow-pulse 4s ease-in-out infinite;
+    }
+
+    .sponsor-thanks__line {
+      font-size: var(--text-sm);
+      color: var(--neutral-400);
+      line-height: 1.8;
+      margin-bottom: var(--space-3);
+      font-style: italic;
+    }
+
+    .sponsor-thanks__line:nth-child(3) {
+      animation-delay: 0.3s;
+      color: var(--neutral-500);
+    }
+
+    .sponsor-thanks__line:nth-child(4) {
+      animation-delay: 0.6s;
+      color: var(--neutral-600);
+      font-size: var(--text-xs);
+    }
+
+    .sponsor-thanks__divider {
+      width: 40px;
+      height: 1px;
+      background: rgba(240, 200, 100, 0.2);
+      margin: var(--space-5) auto;
+    }
+
+    .sponsor-thanks__hint {
+      font-size: var(--text-xs);
+      color: var(--neutral-600);
+      margin-top: var(--space-4);
+      animation: flicker 4s ease-in-out infinite;
+    }
+
+    /* ===== Eerie Ambient Effects ===== */
+    /* Random scanline overlay */
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 997;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(0,0,0,0.015) 3px,
+        rgba(0,0,0,0.015) 6px
+      );
+      animation: scanline-drift 12s linear infinite;
+    }
+
+    @keyframes scanline-drift {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(6px); }
+    }
+
+    /* Ambient vignette */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 996;
+      background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.25) 100%);
+    }
+
+    /* Random red pulse on viewport edges */
+    @keyframes edge-pulse {
+      0%, 95% { box-shadow: inset 0 0 0 0 transparent; }
+      97% { box-shadow: inset 0 0 80px rgba(200, 40, 40, 0.03); }
+      100% { box-shadow: inset 0 0 0 0 transparent; }
+    }
+
+    .midnight-archives-shell {
+      animation: edge-pulse 30s ease-in-out infinite;
+    }
+
+    /* Post hover: subtle red glow */
+    .forum-post:not(.forum-post--archived):not(.forum-post--deleted):hover::after {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      border-radius: var(--radius-md);
+      pointer-events: none;
+      box-shadow: 0 0 12px rgba(200, 40, 40, 0.04);
+      animation: post-glow 3s ease-in-out infinite;
+    }
+
+    @keyframes post-glow {
+      0%, 100% { opacity: 0; }
+      50% { opacity: 1; }
+    }
+
+    /* Random flicker on sidebar */
+    .shell-sidebar {
+      animation: sidebar-flicker 40s ease-in-out infinite;
+    }
+
+    @keyframes sidebar-flicker {
+      0%, 92%, 94%, 96%, 100% { opacity: 1; }
+      93% { opacity: 0.97; }
+      95% { opacity: 0.99; }
+    }
+
+    /* Ghost text whisper styling */
+    .ghost-whisper {
+      position: fixed;
+      font-size: var(--text-xs);
+      color: rgba(200, 40, 40, 0.06);
+      pointer-events: none;
+      z-index: 995;
+      font-family: var(--font-display);
+      letter-spacing: 0.1em;
+      animation: whisper-fade 8s ease forwards;
+      white-space: nowrap;
+    }
+
+    @keyframes whisper-fade {
+      0% { opacity: 0; }
+      15% { opacity: 1; }
+      85% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    /* Announcement Banner --- */
+    .forum-announcement {
+      background: hsla(0, 40%, 12%, 0.45);
+      border-left: 3px solid var(--brand-primary);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      padding: var(--space-4) var(--space-5);
+      margin-bottom: var(--space-8);
+      font-size: var(--text-sm);
+      color: var(--brand-card-foreground);
+      animation: announcement-flicker 6s ease-in-out infinite;
+      position: relative;
+    }
+
+    .forum-announcement__label {
+      color: var(--brand-primary-light);
+      font-weight: 600;
+      margin-right: var(--space-2);
+    }
+
+    @keyframes announcement-flicker {
+      0%, 100% { opacity: 1; }
+      48% { opacity: 1; }
+      50% { opacity: 0.92; }
+      52% { opacity: 1; }
+      76% { opacity: 0.96; }
+      78% { opacity: 1; }
+    }
+
+    /* --- Post List --- */
+    .forum-post-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      margin-bottom: var(--space-10);
+    }
+
+    /* --- Post Card --- */
+    .forum-post {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-4);
+      padding: var(--space-5);
+      background: var(--brand-card);
+      border: 1px solid var(--neutral-800);
+      border-radius: var(--radius-md);
+      transition: all var(--transition-normal);
+      position: relative;
+      animation: fade-in 0.4s ease backwards;
+    }
+
+    .forum-post:nth-child(1) { animation-delay: 0.05s; }
+    .forum-post:nth-child(2) { animation-delay: 0.1s; }
+    .forum-post:nth-child(3) { animation-delay: 0.15s; }
+    .forum-post:nth-child(4) { animation-delay: 0.2s; }
+    .forum-post:nth-child(5) { animation-delay: 0.25s; }
+    .forum-post:nth-child(6) { animation-delay: 0.3s; }
+    .forum-post:nth-child(7) { animation-delay: 0.35s; }
+    .forum-post:nth-child(8) { animation-delay: 0.4s; }
+    .forum-post:nth-child(9) { animation-delay: 0.45s; }
+    .forum-post:nth-child(10) { animation-delay: 0.5s; }
+    .forum-post:nth-child(11) { animation-delay: 0.55s; }
+    .forum-post:nth-child(12) { animation-delay: 0.6s; }
+
+    .forum-post:not(.forum-post--archived):not(.forum-post--deleted):hover {
+      border-color: var(--brand-primary-faint);
+      box-shadow: 0 0 20px hsla(0, 85%, 32%, 0.08);
+    }
+
+    /* Clickable post cursor */
+    .forum-post:not(.forum-post--archived):not(.forum-post--deleted) {
+      cursor: pointer;
+    }
+
+    /* Expanded post state */
+    .forum-post.forum-post--expanded {
+      border-color: var(--brand-primary-faint);
+      background: var(--neutral-850);
+      box-shadow: 0 0 24px hsla(0, 85%, 32%, 0.06);
+    }
+
+    /* Scroll-highlight flash */
+    @keyframes highlight-flash {
+      0% { box-shadow: 0 0 0 2px var(--brand-primary-light), 0 0 30px hsla(0, 85%, 42%, 0.3); }
+      100% { box-shadow: 0 0 0 2px transparent, 0 0 0 transparent; }
+    }
+
+    .forum-post--highlight {
+      animation: highlight-flash 1.8s ease-out forwards;
+      border-color: var(--brand-primary-light) !important;
+    }
+
+    /* Post Icon */
+    .forum-post__icon {
+      font-size: 1.4rem;
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--neutral-850);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--neutral-750);
+    }
+
+    .forum-post:nth-child(odd) .forum-post__icon {
+      animation: drift 6s ease-in-out infinite;
+    }
+
+    .forum-post:nth-child(even) .forum-post__icon {
+      animation: drift 8s ease-in-out infinite reverse;
+    }
+
+    /* Post Body */
+    .forum-post__body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .forum-post__title-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      margin-bottom: var(--space-1);
+    }
+
+    .forum-post__title {
+      font-size: var(--text-base);
+      font-weight: 500;
+      color: var(--brand-foreground);
+      transition: color var(--transition-fast);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .forum-post:not(.forum-post--archived):not(.forum-post--deleted) .forum-post__title:hover {
+      color: var(--brand-primary-light);
+    }
+
+    .forum-post__new-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 1px 6px;
+      background: var(--brand-primary-ghost);
+      color: var(--brand-primary-light);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      animation: new-tag-glow 2.5s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes new-tag-glow {
+      0%, 100% { box-shadow: 0 0 4px hsla(0, 75%, 42%, 0.2); }
+      50% { box-shadow: 0 0 10px hsla(0, 75%, 42%, 0.4); }
+    }
+
+    .forum-post__excerpt {
+      font-size: var(--text-sm);
+      color: var(--brand-muted-foreground);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: var(--space-3);
+    }
+
+    .forum-post--expanded .forum-post__excerpt {
+      display: none;
+    }
+
+    /* Expanded Content */
+    .forum-post__expanded-content {
+      display: none;
+      margin-top: var(--space-3);
+      animation: expand-fade-in 0.35s ease forwards;
+    }
+
+    .forum-post--expanded .forum-post__expanded-content {
+      display: block;
+    }
+
+    @keyframes expand-fade-in {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .forum-post__full-text {
+      font-size: var(--text-sm);
+      color: var(--brand-card-foreground);
+      line-height: 1.75;
+      background: hsla(0, 0%, 8%, 0.3);
+      border-left: 2px solid var(--brand-primary-faint);
+      padding: var(--space-4) var(--space-5);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin-bottom: var(--space-4);
+    }
+
+    .forum-post__collapse-btn {
+      display: inline-block;
+      font-size: var(--text-xs);
+      color: var(--brand-muted-foreground);
+      cursor: pointer;
+      padding: var(--space-1) var(--space-2);
+      border-radius: var(--radius-sm);
+      transition: color var(--transition-fast), background var(--transition-fast);
+      margin-bottom: var(--space-4);
+      user-select: none;
+    }
+
+    .forum-post__collapse-btn:hover {
+      color: var(--brand-primary-light);
+      background: var(--brand-primary-ghost);
+    }
+
+    /* Reply Section */
+    .forum-post__replies-section {
+      border-top: 1px solid var(--neutral-750);
+      padding-top: var(--space-4);
+      margin-top: var(--space-2);
+    }
+
+    .forum-post__replies-title {
+      font-size: var(--text-xs);
+      color: var(--neutral-500);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: var(--space-3);
+    }
+
+    .forum-reply {
+      display: flex;
+      gap: var(--space-3);
+      padding: var(--space-3) 0;
+      border-bottom: 1px solid hsla(0, 0%, 20%, 0.3);
+      font-size: var(--text-sm);
+      animation: reply-slide-in 0.3s ease backwards;
+    }
+
+    .forum-reply:last-child {
+      border-bottom: none;
+    }
+
+    .forum-reply:nth-child(1) { animation-delay: 0.05s; }
+    .forum-reply:nth-child(2) { animation-delay: 0.1s; }
+    .forum-reply:nth-child(3) { animation-delay: 0.15s; }
+    .forum-reply:nth-child(4) { animation-delay: 0.2s; }
+
+    @keyframes reply-slide-in {
+      from { opacity: 0; transform: translateX(-8px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .forum-reply__avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: var(--radius-full);
+      background: var(--neutral-800);
+      border: 1px solid var(--neutral-700);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--text-xs);
+    }
+
+    .forum-reply__body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .forum-reply__header {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-2);
+      margin-bottom: 2px;
+    }
+
+    .forum-reply__username {
+      font-size: var(--text-xs);
+      font-weight: 500;
+      color: var(--brand-muted-foreground);
+    }
+
+    .forum-reply__username--eerie {
+      color: var(--eerie-glow);
+    }
+
+    .forum-reply__time {
+      font-size: var(--text-xs);
+      color: var(--neutral-600);
+    }
+
+    .forum-reply__text {
+      font-size: var(--text-sm);
+      color: var(--neutral-400);
+      line-height: 1.5;
+    }
+
+    /* Reply Input Area */
+    .forum-reply-input {
+      display: flex;
+      gap: var(--space-3);
+      align-items: flex-start;
+      margin-top: var(--space-3);
+      padding-top: var(--space-3);
+      border-top: 1px solid hsla(0, 0%, 20%, 0.3);
+    }
+
+    .forum-reply-input__avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-full);
+      background: var(--brand-primary-faint);
+      border: 1px solid var(--brand-primary);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--text-xs);
+      color: var(--brand-primary-light);
+    }
+
+    .forum-reply-input__wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .forum-reply-input__field {
+      width: 100%;
+      background: var(--neutral-900);
+      border: 1px solid var(--neutral-700);
+      border-radius: var(--radius-sm);
+      padding: var(--space-2) var(--space-3);
+      font-size: var(--text-sm);
+      color: var(--brand-foreground);
+      font-family: var(--font-sans);
+      resize: none;
+      outline: none;
+      min-height: 38px;
+      max-height: 120px;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .forum-reply-input__field::placeholder {
+      color: var(--neutral-600);
+    }
+
+    .forum-reply-input__field:focus {
+      border-color: var(--brand-primary-faint);
+      box-shadow: 0 0 8px hsla(0, 85%, 32%, 0.1);
+    }
+
+    .forum-reply-input__actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .forum-reply-input__btn {
+      padding: var(--space-1) var(--space-4);
+      font-size: var(--text-xs);
+      font-weight: 500;
+      font-family: var(--font-sans);
+      background: var(--brand-primary);
+      color: var(--brand-primary-foreground);
+      border: 1px solid var(--brand-primary-light);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .forum-reply-input__btn:hover:not(:disabled) {
+      background: var(--brand-primary-light);
+      box-shadow: 0 0 8px hsla(0, 85%, 32%, 0.3);
+    }
+
+    .forum-reply-input__btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* Reply count badge */
+    .forum-post__replies-count {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      padding: 2px 8px;
+      background: var(--neutral-800);
+      border: 1px solid var(--neutral-700);
+      border-radius: var(--radius-full);
+      font-size: var(--text-xs);
+      color: var(--brand-muted-foreground);
+      margin-left: auto;
+    }
+
+    .forum-post__replies-count .count-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--brand-primary-light);
+    }
+
+    /* Newly added reply animation */
+    @keyframes new-reply-appear {
+      from { opacity: 0; transform: translateY(-6px); background: hsla(0, 85%, 32%, 0.08); }
+      to { opacity: 1; transform: translateY(0); background: transparent; }
+    }
+
+    .forum-reply--new {
+      animation: new-reply-appear 0.6s ease forwards;
+    }
+
+    /* ===== System DM Notification ===== */
+    .system-dm-toast {
+      position: fixed;
+      top: 80px;
+      right: 24px;
+      width: 340px;
+      background: var(--neutral-850);
+      border: 1px solid var(--brand-primary-faint);
+      border-left: 3px solid var(--brand-primary);
+      border-radius: var(--radius-md);
+      padding: 0;
+      z-index: 200;
+      transform: translateX(120%);
+      opacity: 0;
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+      cursor: pointer;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 20px hsla(0, 85%, 32%, 0.08);
+      overflow: hidden;
+    }
+
+    .system-dm-toast.visible {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    .system-dm-toast__scanline {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.03) 2px,
+        rgba(0,0,0,0.03) 4px
+      );
+      z-index: 1;
+    }
+
+    .system-dm-toast__inner {
+      position: relative;
+      z-index: 2;
+      padding: var(--space-4);
+    }
+
+    .system-dm-toast__header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      margin-bottom: var(--space-3);
+    }
+
+    .system-dm-toast__icon {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-full);
+      background: var(--brand-primary-ghost);
+      border: 1px solid var(--brand-primary-faint);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      animation: glow-pulse 2s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    .system-dm-toast__label {
+      font-size: var(--text-xs);
+      color: var(--brand-primary-light);
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .system-dm-toast__time {
+      font-size: var(--text-xs);
+      color: var(--neutral-600);
+      margin-left: auto;
+    }
+
+    .system-dm-toast__sender {
+      font-size: var(--text-sm);
+      font-weight: 500;
+      color: var(--eerie-glow);
+      margin-bottom: var(--space-1);
+    }
+
+    .system-dm-toast__text {
+      font-size: var(--text-sm);
+      color: var(--neutral-300);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .system-dm-toast__hint {
+      font-size: var(--text-xs);
+      color: var(--neutral-600);
+      margin-top: var(--space-2);
+      font-style: italic;
+      animation: flicker 3s ease-in-out infinite;
+    }
+
+    /* Badge on nav */
+    .dm-badge {
+      position: absolute;
+      top: -4px;
+      right: -10px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--brand-primary);
+      animation: new-tag-glow 2s ease-in-out infinite;
+    }
+
+    /* Post Meta (right side) */
+    .forum-post__meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: var(--space-1);
+      flex-shrink: 0;
+      min-width: 100px;
+    }
+
+    .forum-post__user {
+      font-size: var(--text-sm);
+      color: var(--brand-muted-foreground);
+      cursor: pointer;
+      transition: color var(--transition-fast);
+    }
+
+    .forum-post__user:hover {
+      color: var(--brand-foreground);
+    }
+
+    .forum-post__user--eerie {
+      color: var(--eerie-glow);
+    }
+
+    .forum-post__user--eerie:hover {
+      color: hsl(160, 35%, 35%);
+    }
+
+    .forum-post__time {
+      font-size: var(--text-xs);
+      color: var(--neutral-500);
+    }
+
+    .forum-post__replies {
+      font-size: var(--text-xs);
+      color: var(--neutral-500);
+    }
+
+    /* Post Footer — tags */
+    .forum-post__footer {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .forum-post__tag {
+      display: inline-block;
+      padding: 2px 10px;
+      background: var(--neutral-800);
+      color: var(--brand-muted-foreground);
+      font-size: var(--text-xs);
+      border-radius: var(--radius-full);
+      border: 1px solid var(--neutral-750);
+    }
+
+    /* --- Archived Posts --- */
+    .forum-post--archived {
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    .forum-post--archived .forum-post__title {
+      color: var(--neutral-500);
+    }
+
+    .forum-post--archived .forum-post__excerpt {
+      color: var(--neutral-600);
+    }
+
+    .forum-post--archived[data-tooltip]::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: -28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--neutral-800);
+      color: var(--brand-muted-foreground);
+      font-size: var(--text-xs);
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity var(--transition-fast);
+      pointer-events: none;
+    }
+
+    .forum-post--archived:hover[data-tooltip]::after {
+      opacity: 1;
+    }
+
+    /* --- Deleted Posts --- */
+    .forum-post--deleted {
+      opacity: 0.3;
+      background: var(--neutral-950);
+      border-style: dashed;
+      pointer-events: none;
+    }
+
+    .forum-post--deleted .forum-post__title {
+      color: var(--neutral-600);
+      font-style: italic;
+    }
+
+    .forum-post--deleted .forum-post__excerpt {
+      color: var(--neutral-700);
+    }
+
+    .forum-post--deleted[data-tooltip]::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: -28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--neutral-800);
+      color: var(--brand-muted-foreground);
+      font-size: var(--text-xs);
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity var(--transition-fast);
+      pointer-events: none;
+    }
+
+    .forum-post--deleted:hover[data-tooltip]::after {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* --- Divider --- */
+    .forum-divider {
+      border: none;
+      height: 1px;
+      background: var(--neutral-800);
+      margin: var(--space-4) 0;
+      opacity: 0.5;
+    }
+
+    /* --- Section Label --- */
+    .forum-section-label {
+      font-size: var(--text-xs);
+      color: var(--neutral-600);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: var(--space-3);
+      padding-left: var(--space-1);
+    }
+
+    /* --- Bottom Status --- */
+    .forum-bottom-status {
+      text-align: center;
+      font-size: var(--text-xs);
+      color: var(--neutral-700);
+      padding: var(--space-6) 0 var(--space-16);
+      animation: flicker 8s ease-in-out infinite;
+      opacity: 0.5;
+      letter-spacing: 0.06em;
+    }
+
+    /* --- Responsive --- */
+    @media (max-width: 900px) {
+      .forum-post {
+        flex-wrap: wrap;
+      }
+      .forum-post__meta {
+        flex-direction: row;
+        gap: var(--space-3);
+        width: 100%;
+        justify-content: flex-start;
+        margin-top: var(--space-2);
+      }
+      .forum-topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-4);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="midnight-archives-shell">
+    <style>
+      /* ===== Shell-specific styles ===== */
+      .midnight-archives-shell {
+        --shell-header-h: 60px;
+        --shell-sidebar-w: 260px;
+        position: relative;
+        min-height: 100vh;
+        background: var(--brand-background);
+        color: var(--brand-foreground);
+        font-family: var(--font-sans);
+      }
+
+      /* ===== Fixed Header ===== */
+      .shell-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: var(--shell-header-h);
+        background: var(--brand-card);
+        border-bottom: 1px solid var(--brand-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 var(--space-6);
+        z-index: 100;
+        animation: flicker 4s ease-in-out infinite;
+      }
+
+      .shell-header__logo {
+        font-family: var(--font-display);
+        font-size: var(--text-xl);
+        font-weight: 600;
+        color: var(--brand-primary-light);
+        animation: glow-pulse 3s ease-in-out infinite;
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+      }
+
+      .shell-header__nav {
+        display: flex;
+        gap: var(--space-8);
+        align-items: center;
+      }
+
+      .shell-header__nav-item {
+        font-size: var(--text-sm);
+        color: var(--brand-muted-foreground);
+        cursor: pointer;
+        padding: var(--space-2) 0;
+        position: relative;
+        transition: color var(--transition-fast);
+        text-decoration: none;
+        white-space: nowrap;
+      }
+
+      .shell-header__nav-item:hover {
+        color: var(--brand-foreground);
+      }
+
+      .shell-header__nav-item[data-active="true"] {
+        color: var(--brand-primary-light);
+      }
+
+      .shell-header__nav-item[data-active="true"]::after {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--brand-primary);
+        border-radius: 1px;
+      }
+
+      .shell-header__user {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        white-space: nowrap;
+      }
+
+      .shell-header__avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: var(--radius-full);
+        background: var(--neutral-800);
+        border: 1px solid var(--brand-border);
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        position: relative;
+      }
+
+      .shell-header__avatar:hover {
+        border-color: var(--brand-primary-faint);
+        box-shadow: 0 0 12px hsla(0, 85%, 32%, 0.15);
+        transform: scale(1.05);
+      }
+
+      .avatar-icon {
+        font-size: 14px;
+        line-height: 1;
+      }
+
+      .shell-header__user-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .shell-header__username {
+        font-size: var(--text-sm);
+        font-weight: 500;
+        color: var(--brand-foreground);
+        cursor: pointer;
+        transition: color var(--transition-fast);
+      }
+
+      .shell-header__username:hover {
+        color: var(--brand-primary-light);
+      }
+
+      /* Naming Modal */
+      .naming-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.88);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 350;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.4s ease;
+      }
+
+      .naming-overlay.visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .naming-modal {
+        background: linear-gradient(180deg, #141210, #111114);
+        border: 1px solid rgba(240, 200, 100, 0.12);
+        border-radius: var(--radius-lg);
+        padding: var(--space-8);
+        max-width: 380px;
+        width: 90%;
+        text-align: center;
+        transform: translateY(16px) scale(0.95);
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .naming-overlay.visible .naming-modal {
+        transform: translateY(0) scale(1);
+      }
+
+      .naming-modal__icon {
+        font-size: 2.2rem;
+        margin-bottom: var(--space-4);
+        animation: candle-flicker 3s ease-in-out infinite;
+      }
+
+      .naming-modal__title {
+        font-family: var(--font-display);
+        font-size: var(--text-lg);
+        font-weight: 600;
+        color: var(--brand-foreground);
+        margin-bottom: var(--space-2);
+        letter-spacing: 0.04em;
+      }
+
+      .naming-modal__subtitle {
+        font-size: var(--text-xs);
+        color: var(--neutral-500);
+        margin-bottom: var(--space-5);
+        font-style: italic;
+        line-height: 1.5;
+      }
+
+      .naming-modal__input {
+        width: 100%;
+        padding: var(--space-3) var(--space-4);
+        font-size: var(--text-base);
+        font-family: var(--font-sans);
+        color: var(--brand-foreground);
+        background: var(--neutral-850);
+        border: 1px solid var(--neutral-700);
+        border-radius: var(--radius-md);
+        outline: none;
+        text-align: center;
+        transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+        margin-bottom: var(--space-4);
+      }
+
+      .naming-modal__input:focus {
+        border-color: var(--brand-primary-faint);
+        box-shadow: 0 0 0 3px hsla(0, 85%, 32%, 0.1);
+      }
+
+      .naming-modal__input::placeholder {
+        color: var(--neutral-600);
+      }
+
+      .naming-modal__hint {
+        font-size: var(--text-xs);
+        color: var(--neutral-600);
+        margin-bottom: var(--space-5);
+      }
+
+      .naming-modal__actions {
+        display: flex;
+        gap: var(--space-3);
+        justify-content: center;
+      }
+
+      .naming-modal__btn {
+        padding: var(--space-2) var(--space-6);
+        font-size: var(--text-sm);
+        font-family: var(--font-sans);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+      }
+
+      .naming-modal__btn--confirm {
+        background: var(--brand-primary);
+        color: var(--brand-foreground);
+        border: 1px solid var(--brand-border);
+      }
+
+      .naming-modal__btn--confirm:hover:not(:disabled) {
+        background: var(--brand-primary-light);
+        box-shadow: 0 0 12px hsla(0, 85%, 32%, 0.2);
+      }
+
+      .naming-modal__btn--confirm:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+
+      .naming-modal__btn--skip {
+        background: transparent;
+        color: var(--neutral-500);
+        border: 1px solid var(--neutral-700);
+      }
+
+      .naming-modal__btn--skip:hover {
+        color: var(--neutral-400);
+        border-color: var(--neutral-600);
+      }
+
+      /* Username display in posts */
+      .forum-post__user[data-username]::before {
+        content: attr(data-username);
+      }
+
+      .forum-reply__username[data-username]::before {
+        content: attr(data-username);
+      }
+
+      .forum-reply-input__avatar[data-username]::before {
+        content: attr(data-username);
+      }
+
+      .shell-header__status {
+        font-size: var(--text-xs);
+        color: var(--brand-muted-foreground);
+      }
+
+      .shell-header__status .dot {
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--state-success);
+        margin-right: var(--space-1);
+        animation: glow-pulse 2s ease-in-out infinite;
+      }
+
+      /* ===== Main Layout ===== */
+      .shell-layout {
+        display: flex;
+        padding-top: var(--shell-header-h);
+        min-height: 100vh;
+      }
+
+      /* ===== Left Sidebar ===== */
+      .shell-sidebar {
+        position: fixed;
+        top: var(--shell-header-h);
+        left: 0;
+        bottom: 0;
+        width: var(--shell-sidebar-w);
+        background: var(--brand-card);
+        border-right: 1px solid var(--brand-border);
+        overflow-y: auto;
+        padding: var(--space-6) 0;
+        display: flex;
+        flex-direction: column;
+        z-index: 50;
+      }
+
+      .sidebar-section {
+        padding: 0 var(--space-5);
+        margin-bottom: var(--space-8);
+      }
+
+      .sidebar-section__title {
+        font-size: var(--text-xs);
+        font-weight: 600;
+        color: var(--brand-muted-foreground);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: var(--space-4);
+      }
+
+      /* Category Group — Big Title + Subtitles */
+      .sidebar-category-group {
+        margin-bottom: var(--space-5);
+      }
+
+      .sidebar-category-group__title {
+        font-size: var(--text-sm);
+        font-weight: 600;
+        color: var(--brand-foreground);
+        letter-spacing: 0.03em;
+        margin-bottom: var(--space-2);
+        padding-bottom: var(--space-1);
+        border-bottom: 1px solid var(--neutral-800);
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+      }
+
+      .sidebar-category-group__title-icon {
+        font-size: var(--text-sm);
+        width: 18px;
+        text-align: center;
+        flex-shrink: 0;
+      }
+
+      .sidebar-category-group__links {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .sidebar-category-link {
+        display: block;
+        font-size: var(--text-xs);
+        color: var(--brand-muted-foreground);
+        padding: var(--space-2) var(--space-3);
+        margin-left: var(--space-1);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: color var(--transition-fast), background var(--transition-fast);
+        line-height: 1.4;
+        border-left: 2px solid transparent;
+      }
+
+      .sidebar-category-link:hover {
+        color: var(--brand-foreground);
+        background: var(--neutral-800);
+        border-left-color: var(--brand-primary-faint);
+      }
+
+      /* Online Users */
+      .sidebar-online {
+        margin-top: auto;
+        padding-top: var(--space-6);
+        border-top: 1px solid var(--neutral-800);
+      }
+
+      .sidebar-online__list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+      }
+
+      .sidebar-online__user {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        font-size: var(--text-sm);
+        color: var(--brand-foreground);
+      }
+
+      .sidebar-online__dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--state-success);
+        flex-shrink: 0;
+        animation: glow-pulse 2s ease-in-out infinite;
+      }
+
+      .sidebar-online__typing {
+        font-size: var(--text-xs);
+        color: var(--brand-muted-foreground);
+        margin-left: auto;
+        animation: flicker 1.5s ease-in-out infinite;
+      }
+
+      /* ===== Main Content Area ===== */
+      .shell-content {
+        margin-left: var(--shell-sidebar-w);
+        flex: 1;
+        padding: var(--space-8) var(--space-6);
+        min-height: calc(100vh - var(--shell-header-h));
+      }
+
+      /* ===== Footer ===== */
+      .shell-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: var(--space-3) var(--space-6);
+        text-align: center;
+        font-size: var(--text-xs);
+        color: var(--neutral-600);
+        background: linear-gradient(to top, var(--brand-background), transparent);
+        pointer-events: none;
+        z-index: 40;
+      }
+
+      .shell-footer__text {
+        animation: flicker 8s ease-in-out infinite;
+        opacity: 0.6;
+      }
+
+      /* ===== Responsive ===== */
+      @media (max-width: 768px) {
+        .shell-sidebar {
+          display: none;
+        }
+        .shell-content {
+          margin-left: 0;
+        }
+        .shell-header__nav {
+          gap: var(--space-4);
+        }
+      }
+    </style>
+
+    <!-- ===== Header ===== -->
+    <header class="shell-header">
+      <div class="shell-header__logo animate-glow">午夜档案馆</div>
+
+      <nav class="shell-header__nav">
+        <a href="forum.html" class="shell-header__nav-item" data-dom-id="nav-forum" data-active="true">论坛</a>
+        <a href="submit.html" class="shell-header__nav-item" data-dom-id="nav-submit">发帖</a>
+      </nav>
+
+      <div class="shell-header__user" id="header-user">
+        <div class="shell-header__avatar" id="header-avatar" title="点击设置你的名字">
+          <span class="avatar-icon">👤</span>
+        </div>
+        <div class="shell-header__user-info">
+          <span class="shell-header__username" id="header-username">匿名者</span>
+          <span class="shell-header__status">
+            <span class="dot"></span>
+            在线 · 存活中
+          </span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== Layout ===== -->
+    <div class="shell-layout">
+      <!-- Left Sidebar -->
+      <aside class="shell-sidebar">
+        <!-- Categories — Restructured: Big Title + Subtitles -->
+        <div class="sidebar-section">
+          <h3 class="sidebar-section__title">档案分类</h3>
+
+          <!-- 深夜碎语 -->
+          <div class="sidebar-category-group" data-dom-id="cat-whispers">
+            <div class="sidebar-category-group__title">
+              <span class="sidebar-category-group__title-icon">🫧</span>
+              <span>深夜碎语</span>
+            </div>
+            <ul class="sidebar-category-group__links">
+              <li class="sidebar-category-link" data-dom-id="sidebar-link-post-1" data-target-post="post-1">有人记得那栋拆迁的医院吗？</li>
+              <li class="sidebar-category-link" data-dom-id="sidebar-link-post-4" data-target-post="post-4">凌晨三点的电话</li>
+            </ul>
+          </div>
+
+          <!-- 都市传说 -->
+          <div class="sidebar-category-group" data-dom-id="cat-urban">
+            <div class="sidebar-category-group__title">
+              <span class="sidebar-category-group__title-icon">🏙</span>
+              <span>都市传说</span>
+            </div>
+            <ul class="sidebar-category-group__links">
+              <li class="sidebar-category-link" data-dom-id="sidebar-link-post-2" data-target-post="post-2">监控里的不该看到的东西</li>
+              <li class="sidebar-category-link" data-dom-id="sidebar-link-post-5" data-target-post="post-5">那个路口的红绿灯</li>
+              <li class="sidebar-category-link" data-dom-id="sidebar-link-post-8" data-target-post="post-8">地铁末班车上的第13位乘客</li>
+            </ul>
+          </div>
+
+          <!-- 已消失的帖子 -->
+          <div class="sidebar-category-group" data-dom-id="cat-vanished">
+            <div class="sidebar-category-group__title">
+              <span class="sidebar-category-group__title-icon">👻</span>
+              <span>已消失的帖子</span>
+            </div>
+            <ul class="sidebar-category-group__links">
+              <li class="sidebar-category-link" data-dom-id="sidebar-link-post-6" data-target-post="post-6" style="color: var(--neutral-600); font-style: italic;">来自已注销账号的消息</li>
+              <li class="sidebar-category-link" data-dom-id="sidebar-link-post-9" data-target-post="post-9" style="color: var(--neutral-600); font-style: italic;">关于"那个地方"的集体记忆</li>
+            </ul>
+          </div>
+
+          <!-- 第七档案 -->
+          <div class="sidebar-category-group" data-dom-id="cat-archives">
+            <div class="sidebar-category-group__title">
+              <span class="sidebar-category-group__title-icon">📁</span>
+              <span>第七档案</span>
+            </div>
+            <ul class="sidebar-category-group__links">
+              <li class="sidebar-category-link" data-dom-id="sidebar-link-post-3" data-target-post="post-3">信件的寄件人已经去世三年了</li>
+              <li class="sidebar-category-link" data-dom-id="sidebar-link-post-7" data-target-post="post-7">档案室里第七个抽屉</li>
+            </ul>
+          </div>
+
+          <!-- 未解之谜 -->
+          <div class="sidebar-category-group" data-dom-id="cat-mysteries">
+            <div class="sidebar-category-group__title">
+              <span class="sidebar-category-group__title-icon">❓</span>
+              <span>未解之谜</span>
+            </div>
+            <ul class="sidebar-category-group__links">
+              <li class="sidebar-category-link" data-dom-id="sidebar-link-post-3-m" data-target-post="post-3">去世三年的寄件人</li>
+              <li class="sidebar-category-link" data-dom-id="sidebar-link-post-8-m" data-target-post="post-8">第13位乘客的身份</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Online Users -->
+        <div class="sidebar-section sidebar-online">
+          <h3 class="sidebar-section__title">当前在线</h3>
+          <ul class="sidebar-online__list">
+            <li class="sidebar-online__user" data-dom-id="user-nightwatcher">
+              <span class="sidebar-online__dot"></span>
+              <span>夜巡者</span>
+            </li>
+            <li class="sidebar-online__user" data-dom-id="user-archivist">
+              <span class="sidebar-online__dot"></span>
+              <span>归档人</span>
+              <span class="sidebar-online__typing">输入中...</span>
+            </li>
+            <li class="sidebar-online__user" data-dom-id="user-shadow">
+              <span class="sidebar-online__dot"></span>
+              <span>影子访客</span>
+            </li>
+            <li class="sidebar-online__user" data-dom-id="user-anonymous">
+              <span class="sidebar-online__dot"></span>
+              <span>匿名者_7749</span>
+            </li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="shell-content">
+
+        <!-- Top Bar -->
+        <div class="forum-topbar">
+          <div class="forum-topbar__title-group">
+            <h1 class="forum-topbar__title">论坛</h1>
+            <span class="forum-topbar__subtitle">每一条帖子，都是一个未完的故事</span>
+          </div>
+          <div class="forum-topbar__actions">
+            <button class="forum-topbar__btn-sponsor" data-dom-id="btn-sponsor" id="btn-sponsor">
+              <span class="sponsor-candle">🕯</span>
+              <span class="sponsor-label">赞助</span>
+            </button>
+            <button class="forum-topbar__btn-new-post" data-dom-id="btn-new-post" onclick="window.location.href='submit.html'">
+              <span>+</span> 发帖
+            </button>
+          </div>
+        </div>
+
+        <!-- Announcement Banner -->
+        <div class="forum-announcement">
+          <span class="forum-announcement__label">公告：</span>深夜 2:00-4:00 系统维护期间，所有已删除帖子将短暂可见。请勿截图。
+        </div>
+
+        <!-- Post List -->
+        <div class="forum-post-list">
+
+          <!-- Post 1 — Pinned / New -->
+          <article class="forum-post" data-post-id="post-1">
+            <div class="forum-post__icon">🔑</div>
+            <div class="forum-post__body">
+              <div class="forum-post__title-row">
+                <span class="forum-post__title" data-dom-id="post-1">有人记得那栋拆迁的医院吗？</span>
+                <span class="forum-post__new-tag">新</span>
+              </div>
+              <p class="forum-post__excerpt">小时候路过那栋废弃医院，总能闻到消毒水的味道。但邻居说那栋楼十年前就已经拆了，现在那里是一片空地。</p>
+              <div class="forum-post__expanded-content">
+                <div class="forum-post__full-text">小时候路过那栋废弃医院，总能闻到消毒水的味道。但邻居说那栋楼十年前就已经拆了，现在那里是一片空地。上周我路过那里，味道又出现了。我问了附近的居民，他们都说那里从来没有过什么医院。但我手机里存着一张照片——2008年拍的，背景就是那栋楼。照片的拍摄日期是2008年3月15日。问题是，2008年3月15日那天，我还不到三岁。</div>
+                <span class="forum-post__collapse-btn" data-dom-id="collapse-post-1">▲ 收起</span>
+                <div class="forum-post__replies-section">
+                  <div class="forum-post__replies-title">回声</div>
+                  <div class="forum-reply">
+                    <div class="forum-reply__avatar">影</div>
+                    <div class="forum-reply__body">
+                      <div class="forum-reply__header">
+                        <span class="forum-reply__username forum-reply__username--eerie">影子</span>
+                        <span class="forum-reply__time">2小时前</span>
+                      </div>
+                      <p class="forum-reply__text">你说的那栋楼，我也闻到过。不是消毒水，是福尔马林。</p>
+                    </div>
+                  </div>
+                  <div class="forum-reply">
+                    <div class="forum-reply__avatar">匿</div>
+                    <div class="forum-reply__body">
+                      <div class="forum-reply__header">
+                        <span class="forum-reply__username">匿名者_3301</span>
+                        <span class="forum-reply__time">1小时前</span>
+                      </div>
+                      <p class="forum-reply__text">2008年3月15日那天，那片区域发生过什么，你查过吗？</p>
+                    </div>
+                  </div>
+                  <div class="forum-reply">
+                    <div class="forum-reply__avatar">旧</div>
+                    <div class="forum-reply__body">
+                      <div class="forum-reply__header">
+                        <span class="forum-reply__username">旧时光</span>
+                        <span class="forum-reply__time">43分钟前</span>
+                      </div>
+                      <p class="forum-reply__text">照片里的窗户，有几扇是亮着的？</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="forum-post__footer">
+                <span class="forum-post__tag">深夜碎语</span>
+              </div>
+            </div>
+            <div class="forum-post__meta">
+              <span class="forum-post__user" data-dom-id="user-夜行者">夜行者</span>
+              <span class="forum-post__time">3小时前</span>
+              <span class="forum-post__replies">7 条回声</span>
+            </div>
+          </article>
+
+          <!-- Post 2 -->
+          <article class="forum-post" data-post-id="post-2">
+            <div class="forum-post__icon">📷</div>
+            <div class="forum-post__body">
+              <div class="forum-post__title-row">
+                <span class="forum-post__title" data-dom-id="post-2">我在监控里看到了不该看到的东西</span>
+              </div>
+              <p class="forum-post__excerpt">公司监控室凌晨值班，屏幕画面里出现了一个从不存在于员工名单中的人影。回放时，那段录像恰好损坏。</p>
+              <div class="forum-post__expanded-content">
+                <div class="forum-post__full-text">公司监控室凌晨值班，屏幕画面里出现了一个从不存在于员工名单中的人影。那人穿着我们公司2003年停产的旧工服，坐在12楼工位上。我放大看，他正在用一台已经报废的电脑。我赶紧切到12楼的另一个摄像头，但那里没有人。回放时，那段录像恰好损坏。第二天我查了12楼的登记记录，上面多了一行字："别再看了。"</div>
+                <span class="forum-post__collapse-btn" data-dom-id="collapse-post-2">▲ 收起</span>
+                <div class="forum-post__replies-section">
+                  <div class="forum-post__replies-title">回声</div>
+                  <div class="forum-reply">
+                    <div class="forum-reply__avatar">看</div>
+                    <div class="forum-reply__body">
+                      <div class="forum-reply__header">
+                        <span class="forum-reply__username forum-reply__username--eerie">看不见的人</span>
+                        <span class="forum-reply__time">昨日</span>
+                      </div>
+                      <p class="forum-reply__text">2003年的工服是深蓝色的对吧？左边胸口有个圆形徽章。</p>
+                    </div>
+                  </div>
+                  <div class="forum-reply">
+                    <div class="forum-reply__avatar">匿</div>
+                    <div class="forum-reply__body">
+                      <div class="forum-reply__header">
+                        <span class="forum-reply__username">匿名者_1987</span>
+                        <span class="forum-reply__time">昨日</span>
+                      </div>
+                      <p class="forum-reply__text">你查过12楼以前出过什么事吗？我听说那里发生过一起意外。</p>
+                    </div>
+                  </div>
+                  <div class="forum-reply">
+                    <div class="forum-reply__avatar">影</div>
+                    <div class="forum-reply__body">
+                      <div class="forum-reply__header">
+                        <span class="forum-reply__username forum-reply__username--eerie">影子</span>
+                        <span class="forum-reply__time">22小时前</span>
+                      </div>
+                      <p class="forum-reply__text">那行字，第二天还留着吗？</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="forum-post__footer">
+                <span class="forum-post__tag">都市传说</span>
+              </div>
+            </div>
+            <div class="forum-post__meta">
+              <span class="forum-post__user" data-dom-id="user-守夜人">守夜人</span>
+              <span class="forum-post__time">昨日</span>
+              <span class="forum-post__replies">23 条回声</span>
+            </div>
+          </article>
+
+          <!-- Post 3 -->
+          <article class="forum-post" data-post-id="post-3">
+            <div class="forum-post__icon">✉️</div>
+            <div class="forum-post__body">
+              <div class="forum-post__title-row">
+                <span class="forum-post__title" data-dom-id="post-3">这封信的寄件人已经去世三年了</span>
+              </div>
+              <p class="forum-post__excerpt">邮戳是上周的，字迹和他生前一模一样。信里只写了一句话："还记得第七个抽屉吗？"</p>
+              <div class="forum-post__expanded-content">
+                <div class="forum-post__full-text">邮戳是上周的，字迹和他生前一模一样。信里只写了一句话："还记得第七个抽屉吗？"我查了邮局的记录，这封信确实是上周寄出的。但寄件地址——那栋楼在三年前就拆了。更诡异的是，信封里还有一张照片，是档案室的全景。照片里，第七个抽屉是打开的。但那个抽屉，我昨天刚检查过，还是锁着的。</div>
+                <span class="forum-post__collapse-btn" data-dom-id="collapse-post-3">▲ 收起</span>
+                <div class="forum-post__replies-section">
+                  <div class="forum-post__replies-title">回声</div>
+                  <div class="forum-reply">
+                    <div class="forum-reply__avatar">旧</div>
+                    <div class="forum-reply__body">
+                      <div class="forum-reply__header">
+                        <span class="forum-reply__username">旧时光</span>
+                        <span class="forum-reply__time">昨日</span>
+                      </div>
+                      <p class="forum-reply__text">第七个抽屉……档案室的人从来不让打开的那个？</p>
+                    </div>
+                  </div>
+                  <div class="forum-reply">
+                    <div class="forum-reply__avatar">看</div>
+                    <div class="forum-reply__body">
+                      <div class="forum-reply__header">
+                        <span class="forum-reply__username forum-reply__username--eerie">看不见的人</span>
+                        <span class="forum-reply__time">23小时前</span>
+                      </div>
+                      <p class="forum-reply__text">照片的拍摄角度是从天花板往下拍的。你确认那是正常照片？</p>
+                    </div>
+                  </div>
+                  <div class="forum-reply">
+                    <div class="forum-reply__avatar">匿</div>
+                    <div class="forum-reply__body">
+                      <div class="forum-reply__header">
+                        <span class="forum-reply__username">匿名者_4412</span>
+                        <span class="forum-reply__time">20小时前</span>
+                      </div>
+                      <p class="forum-reply__text">建议你别再打开那个信封了。</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="forum-post__footer">
+                <span class="forum-post__tag">未解之谜</span>
+              </div>
+            </div>
+            <div class="forum-post__meta">
+              <span class="forum-post__user forum-post__user--eerie" data-dom-id="user-档案员">档案员</span>
+              <span class="forum-post__time">昨日</span>
+              <span class="forum-post__replies">41 条回声</span>
+            </div>
+          </article>
+
+          <!-- Post 4 -->
+          <article class="forum-post" data-post-id="post-4">
+            <div class="forum-post__icon">📞</div>
+            <div class="forum-post__body">
+              <div class="forum-post__title-row">
+                <span class="forum-post__title" data-dom-id="post-4">凌晨三点的电话，来电显示是我自己</span>
+              </div>
+              <p class="forum-post__excerpt">手机响了，屏幕亮起自己的名字和号码。接起来，只听到呼吸声——但那不是我的呼吸节奏。</p>
+              <div class="forum-post__expanded-content">
+                <div class="forum-post__full-text">手机响了，屏幕亮起自己的名字和号码。接起来，只听到呼吸声——但那不是我的呼吸节奏。我试着说话，对方也在说话，但说的不是中文。我把通话录了音，但回放时只有一段白噪音。第二天我去营业厅查通话记录，那段时间根本没有任何来电。但我的通话录音文件还在手机里，时长13分钟。</div>
+                <span class="forum-post__collapse-btn" data-dom-id="collapse-post-4">▲ 收起</span>
+                <div class="forum-post__replies-section">
+                  <div class="forum-post__replies-title">回声</div>
+                  <div class="forum-reply">
+                    <div class="forum-reply__avatar">影</div>
+                    <div class="forum-reply__body">
+                      <div class="forum-reply__header">
+                        <span class="forum-reply__username forum-reply__username--eerie">影子</span>
+                        <span class="forum-reply__time">数日前</span>
+                      </div>
+                      <p class="forum-reply__text">录音文件你还有吗？能不能把白噪音那段发出来？频率不对的话……那不是噪音。</p>
+                    </div>
+                  </div>
+                  <div class="forum-reply">
+                    <div class="forum-reply__avatar">匿</div>
+                    <div class="forum-reply__body">
+                      <div class="forum-reply__header">
+                        <span class="forum-reply__username">匿名者_0601</span>
+                        <span class="forum-reply__time">数日前</span>
+                      </div>
+                      <p class="forum-reply__text">我上个月也接到过。但来电显示不是我的名字，是一个空白。</p>
+                    </div>
+                  </div>
+                  <div class="forum-reply">
+                    <div class="forum-reply__avatar">看</div>
+                    <div class="forum-reply__body">
+                      <div class="forum-reply__header">
+                        <span class="forum-reply__username forum-reply__username--eerie">看不见的人</span>
+                        <span class="forum-reply__time">数日前</span>
+                      </div>
+                      <p class="forum-reply__text">对方说的"不是中文"，你能描述一下是什么语言吗？我需要确认一件事。</p>
+                    </div>
+                  </div>
+                  <div class="forum-reply">
+                    <div class="forum-reply__avatar">旧</div>
+                    <div class="forum-reply__body">
+                      <div class="forum-reply__header">
+                        <span class="forum-reply__username">旧时光</span>
+                        <span class="forum-reply__time">3天前</span>
+                      </div>
+                      <p class="forum-reply__text">13分钟。这个数字在档案馆的记录里出现过很多次。</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="forum-post__footer">
+                <span class="forum-post__tag">深夜碎语</span>
+              </div>
+            </div>
+            <div class="forum-post__meta">
+              <span class="forum-post__user" data-dom-id="user-无名氏">无名氏</span>
+              <span class="forum-post__time">数日前</span>
+              <span class="forum-post__replies">56 条回声</span>
+            </div>
+          </article>
+
+          <!-- Post 5 -->
+          <article class="forum-post" data-post-id="post-5">
+            <div class="forum-post__icon">🚦</div>
+            <div class="forum-post__body">
+              <div class="forum-post__title-row">
+                <span class="forum-post__title" data-dom-id="post-5">那个路口的红绿灯，只在雨天出现</span>
+              </div>
+              <p class="forum-post__excerpt">晴天经过时那里只是一个普通的T字路口。但每逢下雨，一盏红绿灯就会亮起，指向一条地图上不存在的路。</p>
+              <div class="forum-post__expanded-content">
+                <div class="forum-post__full-text">晴天经过时那里只是一个普通的T字路口。但每逢下雨，一盏红绿灯就会亮起，指向一条地图上不存在的路。我试过在雨天沿着那个方向走，走了大约二十分钟，走进了一片我从未见过的居民区。小区的名字叫"永安里"。我查了这个地址——地图上没有，户籍系统里也没有。但我在网上搜到了一条2005年的新闻：永安里小区因地质灾害整体搬迁。照片里的楼和我看到的一模一样。</div>
+                <span class="forum-post__collapse-btn" data-dom-id="collapse-post-5">▲ 收起</span>
+                <div class="forum-post__replies-section">
+                  <div class="forum-post__replies-title">回声</div>
+                  <div class="forum-reply">
+                    <div class="forum-reply__avatar">匿</div>
+                    <div class="forum-reply__body">
+                      <div class="forum-reply__header">
+                        <span class="forum-reply__username">匿名者_8823</span>
+                        <span class="forum-reply__time">数日前</span>
+                      </div>
+                      <p class="forum-reply__text">你进去之后，有看到人吗？</p>
+                    </div>
+                  </div>
+                  <div class="forum-reply">
+                    <div class="forum-reply__avatar">旧</div>
+                    <div class="forum-reply__body">
+                      <div class="forum-reply__header">
+                        <span class="forum-reply__username">旧时光</span>
+                        <span class="forum-reply__time">4天前</span>
+                      </div>
+                      <p class="forum-reply__text">2005年搬迁……你知道搬迁原因是什么吗？不是地质灾害那么简单。</p>
+                    </div>
+                  </div>
+                  <div class="forum-reply">
+                    <div class="forum-reply__avatar">影</div>
+                    <div class="forum-reply__body">
+                      <div class="forum-reply__header">
+                        <span class="forum-reply__username forum-reply__username--eerie">影子</span>
+                        <span class="forum-reply__time">3天前</span>
+                      </div>
+                      <p class="forum-reply__text">下次下雨的时候，你敢再去一次吗？</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="forum-post__footer">
+                <span class="forum-post__tag">都市传说</span>
+              </div>
+            </div>
+            <div class="forum-post__meta">
+              <span class="forum-post__user" data-dom-id="user-夜行者">夜行者</span>
+              <span class="forum-post__time">数日前</span>
+              <span class="forum-post__replies">18 条回声</span>
+            </div>
+          </article>
+
+          <!-- Post 6 — Archived -->
+          <article class="forum-post forum-post--archived" data-tooltip="此帖已被收录" data-post-id="post-6">
+            <div class="forum-post__icon">🗝️</div>
+            <div class="forum-post__body">
+              <div class="forum-post__title-row">
+                <span class="forum-post__title" data-dom-id="post-6">我收到了一条来自已注销账号的消息</span>
+              </div>
+              <p class="forum-post__excerpt">系统提示该用户不存在，但消息记录还在。内容是一串坐标，指向城郊那座已经关闭的档案馆。</p>
+              <div class="forum-post__footer">
+                <span class="forum-post__tag">已消失的帖子</span>
+              </div>
+            </div>
+            <div class="forum-post__meta">
+              <span class="forum-post__user">已注销</span>
+              <span class="forum-post__time">时间不明</span>
+              <span class="forum-post__replies">— 条回声</span>
+            </div>
+          </article>
+
+          <!-- Post 7 -->
+          <article class="forum-post" data-post-id="post-7">
+            <div class="forum-post__icon">📁</div>
+            <div class="forum-post__body">
+              <div class="forum-post__title-row">
+                <span class="forum-post__title" data-dom-id="post-7">档案室里第七个抽屉从未被打开过</span>
+              </div>
+              <p class="forum-post__excerpt">我在那栋楼工作了十二年，每个抽屉我都整理过。唯独第七个，锁孔形状很奇怪，没有任何钥匙能匹配。</p>
+              <div class="forum-post__expanded-content">
+                <div class="forum-post__full-text">我在那栋楼工作了十二年，每个抽屉我都整理过。唯独第七个，锁孔形状很奇怪，没有任何钥匙能匹配。上个月，我在地下室发现了一把钥匙。它不属于任何一个已知的锁。但当我把它带到七楼时，它自动就插进了第七个抽屉的锁孔。我没敢拧。那天晚上我做了一个梦，梦里有人告诉我："打开了，就回不去了。"第二天我再去看，钥匙不见了。</div>
+                <span class="forum-post__collapse-btn" data-dom-id="collapse-post-7">▲ 收起</span>
+                <div class="forum-post__replies-section">
+                  <div class="forum-post__replies-title">回声</div>
+                  <div class="forum-reply">
+                    <div class="forum-reply__avatar">看</div>
+                    <div class="forum-reply__body">
+                      <div class="forum-reply__header">
+                        <span class="forum-reply__username forum-reply__username--eerie">看不见的人</span>
+                        <span class="forum-reply__time">数日前</span>
+                      </div>
+                      <p class="forum-reply__text">你没拧是对的。上一个试过的人，再也没有回来上班。</p>
+                    </div>
+                  </div>
+                  <div class="forum-reply">
+                    <div class="forum-reply__avatar">影</div>
+                    <div class="forum-reply__body">
+                      <div class="forum-reply__header">
+                        <span class="forum-reply__username forum-reply__username--eerie">影子</span>
+                        <span class="forum-reply__time">一周前</span>
+                      </div>
+                      <p class="forum-reply__text">那个锁孔的形状，像不像一个倒过来的"7"？</p>
+                    </div>
+                  </div>
+                  <div class="forum-reply">
+                    <div class="forum-reply__avatar">旧</div>
+                    <div class="forum-reply__body">
+                      <div class="forum-reply__header">
+                        <span class="forum-reply__username">旧时光</span>
+                        <span class="forum-reply__time">一周前</span>
+                      </div>
+                      <p class="forum-reply__text">地下室的钥匙不会自己消失。它只是回到了它该去的地方。</p>
+                    </div>
+                  </div>
+                  <div class="forum-reply">
+                    <div class="forum-reply__avatar">匿</div>
+                    <div class="forum-reply__body">
+                      <div class="forum-reply__header">
+                        <span class="forum-reply__username">匿名者_7749</span>
+                        <span class="forum-reply__time">5天前</span>
+                      </div>
+                      <p class="forum-reply__text">十二年……你知道那个抽屉在你来之前就存在了吗？</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="forum-post__footer">
+                <span class="forum-post__tag">第七档案</span>
+              </div>
+            </div>
+            <div class="forum-post__meta">
+              <span class="forum-post__user forum-post__user--eerie" data-dom-id="user-档案员">档案员</span>
+              <span class="forum-post__time">数日前</span>
+              <span class="forum-post__replies">89 条回声</span>
+            </div>
+          </article>
+
+          <!-- Post 8 -->
+          <article class="forum-post" data-post-id="post-8">
+            <div class="forum-post__icon">🚇</div>
+            <div class="forum-post__body">
+              <div class="forum-post__title-row">
+                <span class="forum-post__title" data-dom-id="post-8">地铁末班车上的第13位乘客</span>
+              </div>
+              <p class="forum-post__excerpt">车厢里明明只有十二个人，但报站系统说"第十三位乘客请注意，您的终点站到了"。所有人都面面相觑。</p>
+              <div class="forum-post__expanded-content">
+                <div class="forum-post__full-text">车厢里明明只有十二个人，但报站系统说"第十三位乘客请注意，您的终点站到了"。所有人都面面相觑。我数了三遍，确实只有十二个。但车门关上后，我从窗户的倒影里看到了第十三个人。他就站在我身后。我不敢回头。到站后，所有人都下了车，但身后的感觉消失了。我在出口处回头看了一眼——车厢是空的。但座位上放着一个笔记本。我翻开了它，第一页写着我的名字。</div>
+                <span class="forum-post__collapse-btn" data-dom-id="collapse-post-8">▲ 收起</span>
+                <div class="forum-post__replies-section">
+                  <div class="forum-post__replies-title">回声</div>
+                  <div class="forum-reply">
+                    <div class="forum-reply__avatar">匿</div>
+                    <div class="forum-reply__body">
+                      <div class="forum-reply__header">
+                        <span class="forum-reply__username">匿名者_5501</span>
+                        <span class="forum-reply__time">时间不明</span>
+                      </div>
+                      <p class="forum-reply__text">笔记本后面还写了什么？你翻过第二页吗？</p>
+                    </div>
+                  </div>
+                  <div class="forum-reply">
+                    <div class="forum-reply__avatar">影</div>
+                    <div class="forum-reply__body">
+                      <div class="forum-reply__header">
+                        <span class="forum-reply__username forum-reply__username--eerie">影子</span>
+                        <span class="forum-reply__time">时间不明</span>
+                      </div>
+                      <p class="forum-reply__text">你没回头是正确的。回头了，你就是第十四位。</p>
+                    </div>
+                  </div>
+                  <div class="forum-reply">
+                    <div class="forum-reply__avatar">看</div>
+                    <div class="forum-reply__body">
+                      <div class="forum-reply__header">
+                        <span class="forum-reply__username forum-reply__username--eerie">看不见的人</span>
+                        <span class="forum-reply__time">时间不明</span>
+                      </div>
+                      <p class="forum-reply__text">末班车只有十二节车厢座位。13是这条线路的编号。你坐的，是哪条线？</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="forum-post__footer">
+                <span class="forum-post__tag">都市传说</span>
+              </div>
+            </div>
+            <div class="forum-post__meta">
+              <span class="forum-post__user" data-dom-id="user-守夜人">守夜人</span>
+              <span class="forum-post__time">时间不明</span>
+              <span class="forum-post__replies">34 条回声</span>
+            </div>
+          </article>
+
+          <!-- Archived Post 9 -->
+          <article class="forum-post forum-post--archived" data-tooltip="此帖已被收录" data-post-id="post-9">
+            <div class="forum-post__icon">📖</div>
+            <div class="forum-post__body">
+              <div class="forum-post__title-row">
+                <span class="forum-post__title">关于"那个地方"的集体记忆</span>
+              </div>
+              <p class="forum-post__excerpt">帖子里记录了十七个人对同一个地点的不同描述。没有两个人说的是同一个地方，但所有人都坚信自己去过。</p>
+              <div class="forum-post__footer">
+                <span class="forum-post__tag">已归档</span>
+              </div>
+            </div>
+            <div class="forum-post__meta">
+              <span class="forum-post__user">匿名者</span>
+              <span class="forum-post__time">时间不明</span>
+              <span class="forum-post__replies">112 条回声</span>
+            </div>
+          </article>
+
+          <!-- Divider -->
+          <hr class="forum-divider">
+
+          <!-- Section: Deleted Posts -->
+          <div class="forum-section-label">已删除 / 不可用</div>
+
+          <!-- Deleted Post 1 -->
+          <article class="forum-post forum-post--deleted" data-tooltip="此帖已被收录">
+            <div class="forum-post__icon">👤</div>
+            <div class="forum-post__body">
+              <div class="forum-post__title-row">
+                <span class="forum-post__title">[该帖子已被系统归档]</span>
+              </div>
+              <p class="forum-post__excerpt">内容不可用</p>
+            </div>
+            <div class="forum-post__meta">
+              <span class="forum-post__user" style="color: var(--neutral-600);">—</span>
+              <span class="forum-post__time">时间不明</span>
+            </div>
+          </article>
+
+          <!-- Deleted Post 2 -->
+          <article class="forum-post forum-post--deleted" data-tooltip="此帖已被收录">
+            <div class="forum-post__icon">👤</div>
+            <div class="forum-post__body">
+              <div class="forum-post__title-row">
+                <span class="forum-post__title">[内容不可用]</span>
+              </div>
+              <p class="forum-post__excerpt">内容不可用</p>
+            </div>
+            <div class="forum-post__meta">
+              <span class="forum-post__user" style="color: var(--neutral-600);">—</span>
+              <span class="forum-post__time">时间不明</span>
+            </div>
+          </article>
+
+          <!-- Deleted Post 3 -->
+          <article class="forum-post forum-post--deleted" data-tooltip="此帖已被收录">
+            <div class="forum-post__icon">👤</div>
+            <div class="forum-post__body">
+              <div class="forum-post__title-row">
+                <span class="forum-post__title">[该帖子已被系统归档]</span>
+              </div>
+              <p class="forum-post__excerpt">内容不可用</p>
+            </div>
+            <div class="forum-post__meta">
+              <span class="forum-post__user" style="color: var(--neutral-600);">—</span>
+              <span class="forum-post__time">时间不明</span>
+            </div>
+          </article>
+
+          <!-- Deleted Post 4 -->
+          <article class="forum-post forum-post--deleted" data-tooltip="此帖已被收录">
+            <div class="forum-post__icon">👤</div>
+            <div class="forum-post__body">
+              <div class="forum-post__title-row">
+                <span class="forum-post__title">[内容不可用]</span>
+              </div>
+              <p class="forum-post__excerpt">内容不可用</p>
+            </div>
+            <div class="forum-post__meta">
+              <span class="forum-post__user" style="color: var(--neutral-600);">—</span>
+              <span class="forum-post__time">时间不明</span>
+            </div>
+          </article>
+
+        </div><!-- end forum-post-list -->
+
+        <!-- Bottom Status Bar -->
+        <div class="forum-bottom-status">
+          系统运行中... 数据同步完成... 第 3,847 次归档...
+        </div>
+
+      </main>
+    </div><!-- end shell-layout -->
+
+    <!-- ===== Footer ===== -->
+    <footer class="shell-footer">
+      <span class="shell-footer__text">系统运行中... 第 3,847 次归档...</span>
+    </footer>
+
+    <!-- System DM Notification Toast -->
+    <div class="system-dm-toast" id="system-dm-toast">
+      <div class="system-dm-toast__scanline"></div>
+      <div class="system-dm-toast__inner">
+        <div class="system-dm-toast__header">
+          <div class="system-dm-toast__icon">&#x1F47B;</div>
+          <span class="system-dm-toast__label">系统私信</span>
+          <span class="system-dm-toast__time" id="dm-toast-time"></span>
+        </div>
+        <div class="system-dm-toast__sender" id="dm-toast-sender"></div>
+        <div class="system-dm-toast__text" id="dm-toast-text"></div>
+        <div class="system-dm-toast__hint">点击查看...</div>
+      </div>
+    </div>
+
+    <!-- Sponsor Modal -->
+    <div class="sponsor-overlay" id="sponsor-overlay">
+      <div class="sponsor-modal">
+        <div class="sponsor-modal__header">
+          <div class="sponsor-modal__candle-row">
+            <span class="sponsor-candle-big">🕯</span>
+            <span class="sponsor-candle-big">🕯</span>
+            <span class="sponsor-candle-big">🕯</span>
+          </div>
+          <h2 class="sponsor-modal__title">点亮一盏灯</h2>
+          <p class="sponsor-modal__subtitle">在档案馆的黑暗中，你的光会被记住</p>
+        </div>
+        <div class="sponsor-modal__tiers">
+          <div class="sponsor-tier" data-tier="1" data-dom-id="sponsor-tier-1">
+            <div class="sponsor-tier__candle">🕯</div>
+            <div class="sponsor-tier__name">烛火</div>
+            <div class="sponsor-tier__price">¥1</div>
+            <div class="sponsor-tier__desc">一盏微弱的烛光，照亮你脚下的路</div>
+          </div>
+          <div class="sponsor-tier" data-tier="6" data-dom-id="sponsor-tier-6">
+            <div class="sponsor-tier__candle">🕯🕯</div>
+            <div class="sponsor-tier__name">灯台</div>
+            <div class="sponsor-tier__price">¥6</div>
+            <div class="sponsor-tier__desc">双烛高悬，走廊尽头的黑暗不再可惧</div>
+          </div>
+          <div class="sponsor-tier sponsor-tier--premium" data-tier="12" data-dom-id="sponsor-tier-12">
+            <div class="sponsor-tier__candle">🕯🕯🕯</div>
+            <div class="sponsor-tier__name">祭坛</div>
+            <div class="sponsor-tier__price">¥12</div>
+            <div class="sponsor-tier__desc">三烛永恒，档案馆为你保留一个不可告人的位置</div>
+          </div>
+        </div>
+        <div class="sponsor-modal__footer">
+          <button class="sponsor-modal__close" data-dom-id="sponsor-close">关闭</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sponsor Image Overlay (click anywhere to go back) -->
+    <div class="sponsor-image-overlay" id="sponsor-image-overlay">
+      <img src="../assets/sponsor-qrcode.jpg" alt="赞助二维码" class="sponsor-image" id="sponsor-image">
+      <div class="sponsor-image-hint">点击任意位置返回</div>
+    </div>
+
+    <!-- Sponsor Thanks Overlay (eerie, immersive) -->
+    <div class="sponsor-thanks-overlay" id="sponsor-thanks-overlay">
+      <div class="sponsor-thanks__content">
+        <div class="sponsor-thanks__candle">🕯</div>
+        <div class="sponsor-thanks__title">档案馆收到了你的光</div>
+        <div class="sponsor-thanks__line">在深夜的走廊里，有一盏灯为你亮着。</div>
+        <div class="sponsor-thanks__line">它不会熄灭。即使你离开这里，它也会继续燃烧。</div>
+        <div class="sponsor-thanks__divider"></div>
+        <div class="sponsor-thanks__line">"有些档案，只对点过灯的人开放。"</div>
+        <div class="sponsor-thanks__hint">点击任意位置回到论坛...</div>
+      </div>
+    </div>
+
+    <!-- Naming Modal -->
+    <div class="naming-overlay" id="naming-overlay">
+      <div class="naming-modal">
+        <div class="naming-modal__icon">👤</div>
+        <div class="naming-modal__title">你是谁？</div>
+        <div class="naming-modal__subtitle">档案馆需要知道你的名字。你的每一条发言都将署上此名。</div>
+        <input type="text" class="naming-modal__input" id="naming-input" placeholder="输入你的名字..." maxlength="20" autocomplete="off">
+        <div class="naming-modal__hint">2-20个字符，一经设定不可修改</div>
+        <div class="naming-modal__actions">
+          <button class="naming-modal__btn naming-modal__btn--confirm" id="naming-confirm" disabled>确认</button>
+          <button class="naming-modal__btn naming-modal__btn--skip" id="naming-skip">以后再说</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Interaction Scripts ===== -->
+  <script>
+    (function() {
+      'use strict';
+
+      // --- Escape HTML utility (must be defined before use) ---
+      function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      // ===== Username System =====
+      var STORAGE_USERNAME = 'midnight_archives_username';
+
+      function getUsername() {
+        try { return localStorage.getItem(STORAGE_USERNAME) || ''; }
+        catch(e) { return ''; }
+      }
+
+      function setUsername(name) {
+        try { localStorage.setItem(STORAGE_USERNAME, name); }
+        catch(e) {}
+      }
+
+      function getDisplayName() {
+        return getUsername() || '匿名者';
+      }
+
+      // Naming modal elements
+      var namingOverlay = document.getElementById('naming-overlay');
+      var namingInput = document.getElementById('naming-input');
+      var namingConfirm = document.getElementById('naming-confirm');
+      var namingSkip = document.getElementById('naming-skip');
+      var headerAvatar = document.getElementById('header-avatar');
+      var headerUsername = document.getElementById('header-username');
+
+      // Update header username display
+      function refreshHeaderUsername() {
+        var name = getUsername();
+        if (headerUsername) {
+          headerUsername.textContent = name || '匿名者';
+        }
+      }
+      refreshHeaderUsername();
+
+      // Open naming modal on avatar click
+      if (headerAvatar) {
+        headerAvatar.addEventListener('click', function() {
+          namingOverlay.classList.add('visible');
+          namingInput.value = getUsername();
+          namingConfirm.disabled = namingInput.value.trim().length < 2;
+          setTimeout(function() { namingInput.focus(); }, 300);
+        });
+      }
+
+      // Also open on username click
+      if (headerUsername) {
+        headerUsername.addEventListener('click', function() {
+          namingOverlay.classList.add('visible');
+          namingInput.value = getUsername();
+          namingConfirm.disabled = namingInput.value.trim().length < 2;
+          setTimeout(function() { namingInput.focus(); }, 300);
+        });
+      }
+
+      // Input validation
+      if (namingInput) {
+        namingInput.addEventListener('input', function() {
+          namingConfirm.disabled = namingInput.value.trim().length < 2;
+        });
+        namingInput.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' && !namingConfirm.disabled) {
+            namingConfirm.click();
+          }
+        });
+      }
+
+      // Confirm naming
+      if (namingConfirm) {
+        namingConfirm.addEventListener('click', function() {
+          var name = namingInput.value.trim();
+          if (name.length < 2) return;
+          setUsername(name);
+          refreshHeaderUsername();
+          namingOverlay.classList.remove('visible');
+          // Update all existing "你" displays on the page
+          applyUsernameToPage();
+        });
+      }
+
+      // Skip naming
+      if (namingSkip) {
+        namingSkip.addEventListener('click', function() {
+          namingOverlay.classList.remove('visible');
+        });
+      }
+
+      // Apply username to all existing posts and replies on the page
+      function applyUsernameToPage() {
+        var name = getDisplayName();
+        document.querySelectorAll('.forum-post__user').forEach(function(el) {
+          if (el.textContent.trim() === '你' || el.textContent.trim() === '匿名者') {
+            el.textContent = name;
+          }
+        });
+        document.querySelectorAll('.forum-reply__username').forEach(function(el) {
+          if (el.textContent.trim() === '你' || el.textContent.trim() === '匿名者') {
+            el.textContent = name;
+          }
+        });
+        document.querySelectorAll('.forum-reply-input__avatar').forEach(function(el) {
+          el.textContent = name.charAt(0);
+        });
+      }
+      applyUsernameToPage();
+
+      // Show naming modal on first visit if no username set
+      if (!getUsername()) {
+        setTimeout(function() {
+          namingOverlay.classList.add('visible');
+          setTimeout(function() { namingInput.focus(); }, 300);
+        }, 2000);
+      }
+
+      // ===== localStorage Persistence (append-only, never destructive) =====
+      var STORAGE_POSTS = 'midnight_archives_posts';
+      var STORAGE_REPLIES = 'midnight_archives_replies';
+
+      function loadUserPosts() {
+        try {
+          var raw = localStorage.getItem(STORAGE_POSTS);
+          if (!raw) return [];
+          var parsed = JSON.parse(raw);
+          if (!Array.isArray(parsed)) return [];
+          // Deduplicate by id
+          var seen = {};
+          var deduped = [];
+          var changed = false;
+          parsed.forEach(function(p) {
+            if (p && p.id && !seen[p.id]) {
+              seen[p.id] = true;
+              deduped.push(p);
+            } else { changed = true; }
+          });
+          // Re-save if duplicates were found
+          if (changed && deduped.length > 0) {
+            saveUserPosts(deduped);
+          }
+          return deduped;
+        } catch(e) { return []; }
+      }
+
+      function saveUserPosts(posts) {
+        try {
+          if (!Array.isArray(posts)) return;
+          var json = JSON.stringify(posts);
+          localStorage.setItem(STORAGE_POSTS, json);
+          // Verify write succeeded
+          var verify = localStorage.getItem(STORAGE_POSTS);
+          if (verify !== json) {
+            // Retry once
+            localStorage.setItem(STORAGE_POSTS, json);
+          }
+          // SessionStorage backup
+          try { sessionStorage.setItem(STORAGE_POSTS, json); } catch(e2) {}
+        } catch(e) { console.error('[Archive] 保存帖子失败:', e); }
+      }
+
+      function loadUserReplies() {
+        try {
+          var raw = localStorage.getItem(STORAGE_REPLIES);
+          if (!raw) return {};
+          var parsed = JSON.parse(raw);
+          return (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) ? parsed : {};
+        } catch(e) { return {}; }
+      }
+
+      function saveUserReplies(replies) {
+        try {
+          if (!replies || typeof replies !== 'object') return;
+          var json = JSON.stringify(replies);
+          localStorage.setItem(STORAGE_REPLIES, json);
+          // Verify write succeeded
+          var verify = localStorage.getItem(STORAGE_REPLIES);
+          if (verify !== json) {
+            // Retry once
+            localStorage.setItem(STORAGE_REPLIES, json);
+          }
+          // SessionStorage backup
+          try { sessionStorage.setItem(STORAGE_REPLIES, json); } catch(e2) {}
+        } catch(e) { console.error('[Archive] 保存回声失败:', e); }
+      }
+
+      // ===== Data recovery: restore from sessionStorage if localStorage is empty or corrupted =====
+      function recoverDataIfNeeded() {
+        try {
+          // Check posts
+          var lsPosts = localStorage.getItem(STORAGE_POSTS);
+          var lsPostsValid = false;
+          if (lsPosts) {
+            try {
+              var p = JSON.parse(lsPosts);
+              lsPostsValid = Array.isArray(p) && p.length > 0;
+            } catch(e2) {}
+          }
+          if (!lsPostsValid) {
+            var ssPosts = sessionStorage.getItem(STORAGE_POSTS);
+            if (ssPosts) {
+              try {
+                var sp = JSON.parse(ssPosts);
+                if (Array.isArray(sp) && sp.length > 0) {
+                  localStorage.setItem(STORAGE_POSTS, ssPosts);
+                }
+              } catch(e2) {}
+            }
+          }
+
+          // Check replies
+          var lsReplies = localStorage.getItem(STORAGE_REPLIES);
+          var lsRepliesValid = false;
+          if (lsReplies) {
+            try {
+              var r = JSON.parse(lsReplies);
+              lsRepliesValid = (r && typeof r === 'object');
+            } catch(e2) {}
+          }
+          if (!lsRepliesValid) {
+            var ssReplies = sessionStorage.getItem(STORAGE_REPLIES);
+            if (ssReplies) {
+              try {
+                var sr = JSON.parse(ssReplies);
+                if (sr && typeof sr === 'object') {
+                  localStorage.setItem(STORAGE_REPLIES, ssReplies);
+                }
+              } catch(e2) {}
+            }
+          }
+        } catch(e) {}
+      }
+      recoverDataIfNeeded();
+
+      // ===== Recover pending post from failed submit =====
+      try {
+        var pending = sessionStorage.getItem('midnight_archives_pending_post');
+        if (pending) {
+          var pendingPost = JSON.parse(pending);
+          if (pendingPost && pendingPost.id) {
+            var existing = loadUserPosts();
+            var alreadyExists = existing.some(function(p) { return p.id === pendingPost.id; });
+            if (!alreadyExists) {
+              existing.unshift(pendingPost);
+              saveUserPosts(existing);
+            }
+            sessionStorage.removeItem('midnight_archives_pending_post');
+          }
+        }
+      } catch(e) {}
+
+      // ===== beforeunload protection: sync sessionStorage backup =====
+      window.addEventListener('beforeunload', function() {
+        try {
+          var posts = localStorage.getItem(STORAGE_POSTS);
+          var replies = localStorage.getItem(STORAGE_REPLIES);
+          if (posts) sessionStorage.setItem(STORAGE_POSTS, posts);
+          if (replies) sessionStorage.setItem(STORAGE_REPLIES, replies);
+        } catch(e) {}
+      });
+
+      // ===== Periodic auto-backup (every 30 seconds) =====
+      setInterval(function() {
+        try {
+          var posts = localStorage.getItem(STORAGE_POSTS);
+          var replies = localStorage.getItem(STORAGE_REPLIES);
+          if (posts) sessionStorage.setItem(STORAGE_POSTS, posts);
+          if (replies) sessionStorage.setItem(STORAGE_REPLIES, replies);
+        } catch(e) {}
+      }, 30000);
+
+      // ===== Render saved user posts into the post list =====
+      var userPosts = loadUserPosts();
+      var savedRepliesForPosts = loadUserReplies();
+      var postList = document.querySelector('.forum-post-list');
+      var categoryIcons = {whispers:'🫧',urban:'🏙',mystery:'❓',archives:'📁',other:'📋'};
+
+      // ===== Update reply counts for ALL posts (static + user) =====
+      // Original static reply counts for built-in posts (never changes)
+      var STATIC_REPLY_COUNTS = {
+        'post-1': 3,
+        'post-2': 5,
+        'post-3': 8,
+        'post-4': 11,
+        'post-5': 4,
+        'post-6': 0,
+        'post-7': 17,
+        'post-8': 7,
+        'post-9': 22
+      };
+
+      function updateAllReplyCounts() {
+        var allReplies = loadUserReplies();
+        document.querySelectorAll('.forum-post[data-post-id]').forEach(function(post) {
+          var postId = post.getAttribute('data-post-id');
+          var userReplyCount = (allReplies[postId] || []).length;
+          var metaReplies = post.querySelector('.forum-post__replies');
+          if (!metaReplies) return;
+
+          var isUserPost = post.hasAttribute('data-user-post');
+          var staticCount = 0;
+
+          if (isUserPost) {
+            staticCount = 0;
+          } else {
+            staticCount = STATIC_REPLY_COUNTS[postId] || 0;
+          }
+
+          var total = staticCount + userReplyCount;
+          metaReplies.textContent = total + ' 条回声';
+        });
+      }
+
+      // Dedup replies in localStorage
+      function dedupReplies() {
+        var allReplies = loadUserReplies();
+        var changed = false;
+        Object.keys(allReplies).forEach(function(postId) {
+          var replies = allReplies[postId];
+          if (!Array.isArray(replies)) return;
+          var seen = {};
+          var deduped = [];
+          replies.forEach(function(r) {
+            var key = (r.time || '') + '|' + (r.text || '');
+            if (!seen[key]) {
+              seen[key] = true;
+              deduped.push(r);
+            } else { changed = true; }
+          });
+          allReplies[postId] = deduped;
+        });
+        if (changed) saveUserReplies(allReplies);
+      }
+      dedupReplies();
+      updateAllReplyCounts();
+
+      if (postList && userPosts.length > 0) {
+        var firstPost = postList.querySelector('.forum-post');
+        userPosts.forEach(function(up, idx) {
+          var replyCount = (savedRepliesForPosts[up.id] || []).length;
+          var article = document.createElement('article');
+          article.className = 'forum-post';
+          article.setAttribute('data-post-id', up.id);
+          article.setAttribute('data-user-post', 'true');
+          article.innerHTML =
+            '<div class="forum-post__icon">' + (categoryIcons[up.category] || '📋') + '</div>' +
+            '<div class="forum-post__body">' +
+              '<div class="forum-post__title-row">' +
+                '<span class="forum-post__title" data-dom-id="' + up.id + '">' + escapeHtml(up.title) + '</span>' +
+                '<span class="forum-post__new-tag">你的帖子</span>' +
+              '</div>' +
+              '<p class="forum-post__excerpt">' + escapeHtml(up.content.substring(0, 80)) + (up.content.length > 80 ? '...' : '') + '</p>' +
+              '<div class="forum-post__expanded-content">' +
+                '<div class="forum-post__full-text">' + escapeHtml(up.content) + '</div>' +
+                '<span class="forum-post__collapse-btn">▲ 收起</span>' +
+                '<div class="forum-post__replies-section">' +
+                  '<div class="forum-post__replies-title">回声</div>' +
+                '</div>' +
+              '</div>' +
+              '<div class="forum-post__footer">' +
+                '<span class="forum-post__tag">' + escapeHtml(up.categoryLabel) + '</span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="forum-post__meta">' +
+              '<span class="forum-post__user">' + escapeHtml(up.username || getDisplayName()) + '</span>' +
+              '<span class="forum-post__time">' + up.timestamp + '</span>' +
+              '<span class="forum-post__replies">' + replyCount + ' 条回声</span>' +
+            '</div>';
+          if (firstPost) {
+            postList.insertBefore(article, firstPost);
+          } else {
+            postList.appendChild(article);
+          }
+          wirePostExpand(article, up.id);
+        });
+      }
+
+      // ===== Render saved replies into existing posts =====
+      // Now handled per-post on expand via renderSavedRepliesForPost()
+
+      // ===== Post expand/collapse (shared function) =====
+      function wirePostExpand(post, postId) {
+        post.addEventListener('click', function(e) {
+          if (e.target.closest('.forum-post__collapse-btn')) return;
+          if (e.target.closest('.forum-reply-input')) return;
+          if (e.target.closest('.forum-reply')) return;
+
+          var isExpanded = post.classList.contains('forum-post--expanded');
+          if (isExpanded) {
+            post.classList.remove('forum-post--expanded');
+          } else {
+            post.classList.add('forum-post--expanded');
+
+            // Render any saved replies that haven't been shown yet
+            renderSavedRepliesForPost(post, postId);
+
+            var repliesSection = post.querySelector('.forum-post__replies-section');
+            if (repliesSection && !repliesSection.querySelector('.forum-reply-input')) {
+              var replyInput = createReplyInput(postId);
+              repliesSection.appendChild(replyInput);
+              wireReplyInput(replyInput, repliesSection, post, postId);
+            }
+          }
+        });
+
+        // Collapse button
+        var collapseBtn = post.querySelector('.forum-post__collapse-btn');
+        if (collapseBtn) {
+          collapseBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            post.classList.remove('forum-post--expanded');
+          });
+        }
+      }
+
+      // Render saved replies for a single post (called on expand)
+      function renderSavedRepliesForPost(post, postId) {
+        if (post.dataset.repliesRendered) return;
+        var allReplies = loadUserReplies();
+        var replies = allReplies[postId];
+        if (!replies || replies.length === 0) return;
+        var section = post.querySelector('.forum-post__replies-section');
+        if (!section) return;
+        // Deduplicate replies by time+text
+        var seen = {};
+        replies.forEach(function(r) {
+          var key = r.time + '|' + r.text;
+          if (seen[key]) return;
+          seen[key] = true;
+          var replyEl = document.createElement('div');
+          replyEl.className = 'forum-reply';
+          var replyUser = r.username || getDisplayName();
+          replyEl.innerHTML =
+            '<div class="forum-reply__avatar">' + escapeHtml(replyUser.charAt(0)) + '</div>' +
+            '<div class="forum-reply__body">' +
+              '<div class="forum-reply__header">' +
+                '<span class="forum-reply__username">' + escapeHtml(replyUser) + '</span>' +
+                '<span class="forum-reply__time">' + r.time + '</span>' +
+              '</div>' +
+              '<p class="forum-reply__text">' + escapeHtml(r.text) + '</p>' +
+            '</div>';
+          section.appendChild(replyEl);
+        });
+        post.dataset.repliesRendered = 'true';
+      }
+
+      function wireReplyInput(replyInput, repliesSection, post, postId) {
+        var field = replyInput.querySelector('.forum-reply-input__field');
+        var btn = replyInput.querySelector('.forum-reply-input__btn');
+
+        field.addEventListener('input', function() {
+          btn.disabled = field.value.trim().length === 0;
+          field.style.height = 'auto';
+          field.style.height = Math.min(field.scrollHeight, 120) + 'px';
+        });
+
+        field.addEventListener('click', function(e) { e.stopPropagation(); });
+        field.addEventListener('keydown', function(e) { e.stopPropagation(); });
+
+        // Enter to send (Shift+Enter for new line)
+        field.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            if (!btn.disabled) btn.click();
+          }
+        });
+
+        var phIdx = 0;
+        setInterval(function() {
+          if (document.activeElement !== field) {
+            phIdx = (phIdx + 1) % replyPlaceholders.length;
+            field.placeholder = replyPlaceholders[phIdx];
+          }
+        }, 5000);
+
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var text = field.value.trim();
+          if (!text) return;
+
+          var now = new Date().toLocaleString('zh-CN');
+          var newReply = document.createElement('div');
+          newReply.className = 'forum-reply forum-reply--new';
+          newReply.innerHTML =
+            '<div class="forum-reply__avatar">' + escapeHtml(getDisplayName().charAt(0)) + '</div>' +
+            '<div class="forum-reply__body">' +
+              '<div class="forum-reply__header">' +
+                '<span class="forum-reply__username">' + escapeHtml(getDisplayName()) + '</span>' +
+                '<span class="forum-reply__time">' + now + '</span>' +
+              '</div>' +
+              '<p class="forum-reply__text">' + escapeHtml(text) + '</p>' +
+            '</div>';
+          repliesSection.insertBefore(newReply, replyInput);
+
+          // Save to localStorage (with username and dedup key)
+          var allReplies = loadUserReplies();
+          if (!allReplies[postId]) allReplies[postId] = [];
+          var replyData = { text: text, time: now, username: getDisplayName() };
+          // Dedup: don't save if identical text+time already exists
+          var isDuplicate = allReplies[postId].some(function(r) {
+            return r.time === now && r.text === text;
+          });
+          if (!isDuplicate) {
+            allReplies[postId].push(replyData);
+            saveUserReplies(allReplies);
+          }
+
+          field.value = '';
+          field.style.height = 'auto';
+          btn.disabled = true;
+
+          // Update reply count using the shared function
+          updateAllReplyCounts();
+
+          // Flash confirmation on the reply
+          newReply.style.borderLeft = '2px solid var(--brand-primary-light)';
+          setTimeout(function() {
+            newReply.style.borderLeft = '';
+          }, 2000);
+
+          // Scroll the new reply into view
+           newReply.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          });
+        }
+
+      // --- Sidebar: click subtitle → scroll to post + highlight ---
+      document.querySelectorAll('.sidebar-category-link').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          var targetId = this.getAttribute('data-target-post');
+          if (!targetId) return;
+          var targetPost = document.querySelector('[data-post-id="' + targetId + '"]');
+          if (!targetPost) return;
+
+          targetPost.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+          targetPost.classList.remove('forum-post--highlight');
+          void targetPost.offsetWidth;
+          targetPost.classList.add('forum-post--highlight');
+
+          setTimeout(function() {
+            targetPost.classList.remove('forum-post--highlight');
+          }, 2000);
+        });
+      });
+
+      // --- Reply Input Template ---
+      function createReplyInput(postId) {
+        var wrapper = document.createElement('div');
+        wrapper.className = 'forum-reply-input';
+        wrapper.innerHTML =
+          '<div class="forum-reply-input__avatar">' + escapeHtml(getDisplayName().charAt(0)) + '</div>' +
+          '<div class="forum-reply-input__wrap">' +
+            '<textarea class="forum-reply-input__field" placeholder="写下你的回声..." rows="1" data-reply-post="' + postId + '"></textarea>' +
+            '<div class="forum-reply-input__actions">' +
+              '<button class="forum-reply-input__btn" data-reply-btn="' + postId + '" disabled>发送回声</button>' +
+            '</div>' +
+          '</div>';
+        return wrapper;
+      }
+
+      // --- Eerie placeholder rotation for reply inputs ---
+      var replyPlaceholders = [
+        '写下你的回声...',
+        '你看到了什么...',
+        '你确定要回复吗...',
+        '有人在听...',
+        '继续...',
+        '它知道你在打字...'
+      ];
+
+      // --- Wire up existing (static) posts ---
+      document.querySelectorAll('.forum-post[data-post-id]').forEach(function(post) {
+        if (post.classList.contains('forum-post--archived') ||
+            post.classList.contains('forum-post--deleted')) return;
+        if (post._wired) return;
+        var postId = post.getAttribute('data-post-id');
+        wirePostExpand(post, postId);
+        post._wired = true;
+      });
+
+      // ===== Eerie Ambient Effects (long intervals) =====
+      // Glitch text pool for random interference
+      var glitchTexts = [
+        '你不该看到这个', '数据异常', '访问记录 #3847', '档案损坏',
+        '同步失败', '用户不存在', '时间错误', '第七个', '别回头',
+        '影子编号:未知', '归档中...', '错误:真相', '记忆碎片',
+        '未授权访问', '权限提升中', '数据恢复失败', '信号中断',
+        '记录被篡改', '坐标锁定', '光线异常'
+      ];
+
+      var ghostTexts = [
+        '你确定只有你一个人在看吗？',
+        '屏幕后面有人在呼吸',
+        '这条帖子下面藏着另一条帖子',
+        '你的影子比你先到这里',
+        '档案馆的灯从不熄灭',
+        '第七个抽屉里的东西在动',
+        '凌晨3:47，别刷新页面',
+        '你上次发的帖子，不是你写的',
+        '屏幕上的字在变',
+        '你身后有人',
+        '这个页面有13个帖子，你只看到了12个',
+        '别看评论区最下面',
+        '你的输入速度被记录了',
+        '系统检测到异常存在',
+        '帖子内容在变化，你注意到了吗',
+        '你刷新之后，有些东西不一样了',
+        '后台有东西在运行',
+        '你发的帖子已经存在了三十年',
+        '这个论坛不止你一个用户',
+        '你的鼠标轨迹被记录了'
+      ];
+
+      // Random screen flicker (every 45-90 seconds)
+      function triggerScreenFlicker() {
+        var delay = 45000 + Math.random() * 45000;
+        setTimeout(function() {
+          document.body.style.opacity = '0.92';
+          setTimeout(function() {
+            document.body.style.opacity = '1';
+            setTimeout(function() {
+              document.body.style.opacity = '0.95';
+              setTimeout(function() {
+                document.body.style.opacity = '1';
+              }, 80);
+            }, 120);
+          }, 60);
+          triggerScreenFlicker();
+        }, delay);
+      }
+      triggerScreenFlicker();
+
+      // Random glitch text overlay (every 60-120 seconds)
+      var glitchOverlay = document.createElement('div');
+      glitchOverlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:999;display:flex;align-items:center;justify-content:center;';
+      glitchOverlay.innerHTML = '<div id="glitch-text" style="font-family:var(--font-display);font-size:var(--text-3xl);color:rgba(200,40,40,0.08);letter-spacing:0.2em;text-shadow:0 0 20px rgba(200,40,40,0.05);opacity:0;transition:opacity 0.3s;white-space:nowrap;"></div>';
+      document.body.appendChild(glitchOverlay);
+
+      function triggerGlitchText() {
+        var delay = 60000 + Math.random() * 60000;
+        setTimeout(function() {
+          var el = document.getElementById('glitch-text');
+          if (!el) { triggerGlitchText(); return; }
+          el.textContent = glitchTexts[Math.floor(Math.random() * glitchTexts.length)];
+          el.style.opacity = '1';
+          setTimeout(function() { el.style.opacity = '0'; }, 3000 + Math.random() * 2000);
+          triggerGlitchText();
+        }, delay);
+      }
+      triggerGlitchText();
+
+      // Random ghost whisper in announcement area (every 90-180 seconds)
+      var originalAnnouncement = document.querySelector('.forum-announcement');
+      var ghostWhispers = [
+        '别在深夜浏览这个论坛...',
+        '你的访问已被记录在案...',
+        '档案馆正在观察你...',
+        '第七个抽屉里的东西在等待...',
+        '你确定这是你上次看到的内容吗？...',
+        '影子报告：用户在线...',
+        '有人在你的帖子下面留了言...',
+        '屏幕亮度正在降低...',
+        '你的键盘输入速度被监控中...',
+        '这个页面会在你关闭后继续运行...'
+      ];
+
+      function triggerGhostWhisper() {
+        var delay = 90000 + Math.random() * 90000;
+        setTimeout(function() {
+          if (!originalAnnouncement) { triggerGhostWhisper(); return; }
+          var original = originalAnnouncement.innerHTML;
+          var whisper = ghostWhispers[Math.floor(Math.random() * ghostWhispers.length)];
+          originalAnnouncement.innerHTML = '<span class="forum-announcement__label">[系统]：</span>' + whisper;
+          originalAnnouncement.style.borderColor = 'rgba(200, 40, 40, 0.6)';
+          setTimeout(function() {
+            originalAnnouncement.innerHTML = original;
+            originalAnnouncement.style.borderColor = '';
+          }, 8000);
+          triggerGhostWhisper();
+        }, delay);
+      }
+      triggerGhostWhisper();
+
+      // Random post text corruption (every 120-240 seconds)
+      function triggerPostCorruption() {
+        var delay = 120000 + Math.random() * 120000;
+        setTimeout(function() {
+          var posts = document.querySelectorAll('.forum-post:not(.forum-post--archived):not(.forum-post--deleted)');
+          if (posts.length === 0) { triggerPostCorruption(); return; }
+          var randomPost = posts[Math.floor(Math.random() * posts.length)];
+          var excerpt = randomPost.querySelector('.forum-post__excerpt');
+          if (!excerpt) { triggerPostCorruption(); return; }
+          var originalText = excerpt.textContent;
+          var corrupted = originalText.split('');
+          // Corrupt 2-4 random characters
+          var numCorrupt = 2 + Math.floor(Math.random() * 3);
+          for (var i = 0; i < numCorrupt; i++) {
+            var idx = Math.floor(Math.random() * corrupted.length);
+            corrupted[idx] = glitchTexts[Math.floor(Math.random() * glitchTexts.length)][0];
+          }
+          excerpt.textContent = corrupted.join('');
+          excerpt.style.color = 'rgba(200, 40, 40, 0.5)';
+          setTimeout(function() {
+            excerpt.textContent = originalText;
+            excerpt.style.color = '';
+          }, 4000);
+          triggerPostCorruption();
+        }, delay);
+      }
+      triggerPostCorruption();
+
+      // Random bottom status text change (every 75-150 seconds)
+      var statusEl = document.querySelector('.forum-bottom-status');
+      var eerieStatuses = [
+        '系统运行中... 数据同步完成... 第 3,847 次归档...',
+        '系统运行中... 检测到异常访问模式... 第 3,848 次归档...',
+        '系统警告... 未授权实体检测中... 第 3,849 次归档...',
+        '系统运行中... 第七档案同步中... 第 3,850 次归档...',
+        '系统异常... 时间戳不匹配... 第 3,851 次归档...',
+        '系统运行中... 影子数据更新中... 第 3,852 次归档...',
+        '系统运行中... 记忆碎片恢复中... 第 3,853 次归档...',
+        '系统警告... 用户存在性待验证... 第 3,854 次归档...',
+        '系统运行中... 档案馆深度扫描中... 第 3,855 次归档...',
+        '系统异常... 维度裂缝检测中... 第 3,856 次归档...'
+      ];
+
+      function triggerStatusChange() {
+        var delay = 75000 + Math.random() * 75000;
+        setTimeout(function() {
+          if (!statusEl) { triggerStatusChange(); return; }
+          statusEl.textContent = eerieStatuses[Math.floor(Math.random() * eerieStatuses.length)];
+          statusEl.style.color = 'rgba(200, 60, 60, 0.6)';
+          setTimeout(function() {
+            statusEl.style.color = '';
+          }, 10000);
+          triggerStatusChange();
+        }, delay);
+      }
+      triggerStatusChange();
+
+      // Random cursor trail effect (every 100-200 seconds, lasts 5s)
+      function triggerCursorTrail() {
+        var delay = 100000 + Math.random() * 100000;
+        setTimeout(function() {
+          var trail = [];
+          function onMove(e) {
+            var dot = document.createElement('div');
+            dot.style.cssText = 'position:fixed;width:4px;height:4px;border-radius:50%;background:rgba(200,40,40,0.15);pointer-events:none;z-index:998;left:' + e.clientX + 'px;top:' + e.clientY + 'px;transition:opacity 1s;';
+            document.body.appendChild(dot);
+            trail.push(dot);
+            setTimeout(function() { dot.style.opacity = '0'; }, 300);
+            setTimeout(function() { if (dot.parentNode) dot.parentNode.removeChild(dot); }, 1300);
+            if (trail.length > 30) {
+              var old = trail.shift();
+              if (old && old.parentNode) old.parentNode.removeChild(old);
+            }
+          }
+          document.addEventListener('mousemove', onMove);
+          setTimeout(function() {
+            document.removeEventListener('mousemove', onMove);
+          }, 6000);
+          triggerCursorTrail();
+        }, delay);
+      }
+      triggerCursorTrail();
+
+      // Random post icon change (every 150-300 seconds)
+      var eerieIcons = ['👁', '🫥', '💀', '🕳', '⚡', '🖤', '👁‍🗨', '🩸', '☠', '🌀'];
+      function triggerIconChange() {
+        var delay = 150000 + Math.random() * 150000;
+        setTimeout(function() {
+          var icons = document.querySelectorAll('.forum-post__icon');
+          if (icons.length === 0) { triggerIconChange(); return; }
+          var randomIcon = icons[Math.floor(Math.random() * icons.length)];
+          var originalIcon = randomIcon.textContent;
+          randomIcon.textContent = eerieIcons[Math.floor(Math.random() * eerieIcons.length)];
+          randomIcon.style.filter = 'hue-rotate(180deg)';
+          setTimeout(function() {
+            randomIcon.textContent = originalIcon;
+            randomIcon.style.filter = '';
+          }, 5000);
+          triggerIconChange();
+        }, delay);
+      }
+      triggerIconChange();
+
+      // Random page title flicker (every 180-360 seconds)
+      var originalTitle = document.title;
+      var eerieTitles = [
+        '论坛 — 午夜档案馆',
+        '论坛 — 午夜档案馆 | 你还在吗',
+        '论坛 — 午夜档案馆 | 第 3847 次访问',
+        '论坛 — 午夜档案馆 | 影子在线',
+        '论坛 — 午夜档案馆 | 档案同步中',
+        '论坛 — 午夜档案馆 | 别离开',
+        '论坛 — 午夜档案馆 | 有人在看',
+        '论坛 — 午夜档案馆 | 记录中...'
+      ];
+
+      function triggerTitleFlicker() {
+        var delay = 180000 + Math.random() * 180000;
+        setTimeout(function() {
+          var eerieTitle = eerieTitles[Math.floor(Math.random() * eerieTitles.length)];
+          document.title = eerieTitle;
+          setTimeout(function() {
+            document.title = originalTitle;
+          }, 8000);
+          triggerTitleFlicker();
+        }, delay);
+      }
+      triggerTitleFlicker();
+
+      // Random ambient whisper text (every 200-400 seconds)
+      function triggerAmbientWhisper() {
+        var delay = 200000 + Math.random() * 200000;
+        setTimeout(function() {
+          var whisper = document.createElement('div');
+          whisper.className = 'ghost-whisper';
+          whisper.textContent = ghostTexts[Math.floor(Math.random() * ghostTexts.length)];
+          // Random position on screen
+          whisper.style.left = (10 + Math.random() * 70) + '%';
+          whisper.style.top = (10 + Math.random() * 70) + '%';
+          document.body.appendChild(whisper);
+          setTimeout(function() {
+            if (whisper.parentNode) whisper.parentNode.removeChild(whisper);
+          }, 10000);
+          triggerAmbientWhisper();
+        }, delay);
+      }
+      triggerAmbientWhisper();
+
+      // Random page darkening effect (every 300-600 seconds)
+      function triggerDarkness() {
+        var delay = 300000 + Math.random() * 300000;
+        setTimeout(function() {
+          var overlay = document.createElement('div');
+          overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.15);pointer-events:none;z-index:994;transition:opacity 2s;';
+          document.body.appendChild(overlay);
+          setTimeout(function() {
+            overlay.style.opacity = '0';
+            setTimeout(function() {
+              if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+            }, 2500);
+          }, 4000);
+          triggerDarkness();
+        }, delay);
+      }
+      triggerDarkness();
+
+      // Random sidebar online user change (every 120-240 seconds)
+      var eerieOnlineUsers = [
+        { name: '夜巡者', typing: false },
+        { name: '归档人', typing: true },
+        { name: '影子访客', typing: false },
+        { name: '匿名者_7749', typing: false },
+        { name: '未知实体', typing: false },
+        { name: '数据幽灵', typing: true },
+        { name: '第七号档案员', typing: false },
+        { name: '观测者', typing: false },
+        { name: '时间裂缝', typing: false },
+        { name: '记忆碎片', typing: true }
+      ];
+
+      function triggerOnlineChange() {
+        var delay = 120000 + Math.random() * 120000;
+        setTimeout(function() {
+          var onlineList = document.querySelector('.sidebar-online__list');
+          if (!onlineList) { triggerOnlineChange(); return; }
+          var users = onlineList.querySelectorAll('.sidebar-online__user');
+          if (users.length === 0) { triggerOnlineChange(); return; }
+          // Pick a random user to change
+          var randomUser = users[Math.floor(Math.random() * users.length)];
+          var nameSpan = randomUser.querySelector('span:nth-child(2)');
+          if (!nameSpan) { triggerOnlineChange(); return; }
+          var originalName = nameSpan.textContent;
+          var eerieUser = eerieOnlineUsers[Math.floor(Math.random() * eerieOnlineUsers.length)];
+          nameSpan.textContent = eerieUser.name;
+          nameSpan.style.color = 'rgba(200, 40, 40, 0.5)';
+          setTimeout(function() {
+            nameSpan.textContent = originalName;
+            nameSpan.style.color = '';
+          }, 6000);
+          triggerOnlineChange();
+        }, delay);
+      }
+      triggerOnlineChange();
+
+      // Random footer text change (every 150-300 seconds)
+      var footerEl = document.querySelector('.shell-footer__text');
+      var eerieFooters = [
+        '系统运行中... 第 3,847 次归档...',
+        '系统运行中... 检测到异常... 第 3,848 次归档...',
+        '系统警告... 数据完整性待验证... 第 3,849 次归档...',
+        '系统运行中... 影子协议激活... 第 3,850 次归档...',
+        '系统异常... 维度同步中... 第 3,851 次归档...',
+        '系统运行中... 深层扫描中... 第 3,852 次归档...'
+      ];
+
+      function triggerFooterChange() {
+        var delay = 150000 + Math.random() * 150000;
+        setTimeout(function() {
+          if (!footerEl) { triggerFooterChange(); return; }
+          footerEl.textContent = eerieFooters[Math.floor(Math.random() * eerieFooters.length)];
+          footerEl.style.color = 'rgba(200, 40, 40, 0.4)';
+          setTimeout(function() {
+            footerEl.textContent = '系统运行中... 第 3,847 次归档...';
+            footerEl.style.color = '';
+          }, 12000);
+          triggerFooterChange();
+        }, delay);
+      }
+      triggerFooterChange();
+
+      // ===== Sponsor System =====
+      var STORAGE_SPONSOR = 'midnight_archives_sponsor';
+      var sponsorBtn = document.getElementById('btn-sponsor');
+       var sponsorOverlay = document.getElementById('sponsor-overlay');
+
+      var sponsorTiers = {
+         '1':  { name: '烛火' },
+         '6':  { name: '灯台' },
+         '12': { name: '祭坛' }
+       };
+
+       function setSponsorLevel(tier) {
+         try {
+           localStorage.setItem(STORAGE_SPONSOR, JSON.stringify({ tier: tier, timestamp: Date.now() }));
+         } catch(e) {}
+       }
+
+       // Click tier → show image overlay directly
+       var sponsorImageOverlay = document.getElementById('sponsor-image-overlay');
+       var sponsorThanksOverlay = document.getElementById('sponsor-thanks-overlay');
+
+       document.querySelectorAll('.sponsor-tier').forEach(function(tier) {
+         tier.addEventListener('click', function() {
+           var tierKey = tier.getAttribute('data-tier');
+           setSponsorLevel(tierKey);
+           sponsorOverlay.classList.remove('visible');
+           setTimeout(function() {
+             sponsorImageOverlay.classList.add('visible');
+           }, 200);
+         });
+       });
+
+       // Click image overlay → hide image → show thanks
+       sponsorImageOverlay.addEventListener('click', function() {
+         sponsorImageOverlay.classList.remove('visible');
+         setTimeout(function() {
+           sponsorThanksOverlay.classList.add('visible');
+         }, 300);
+       });
+
+       // Click thanks overlay → hide → return to forum
+       sponsorThanksOverlay.addEventListener('click', function() {
+         sponsorThanksOverlay.classList.remove('visible');
+       });
+
+      // Open sponsor modal
+      if (sponsorBtn) {
+        sponsorBtn.addEventListener('click', function() {
+          sponsorOverlay.classList.add('visible');
+        });
+      }
+
+      // Close sponsor modal
+      document.querySelectorAll('[data-dom-id="sponsor-close"]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          sponsorOverlay.classList.remove('visible');
+        });
+      });
+
+      // ===== System Random Eerie DM =====
+      var eerieDMs = [
+          { sender: '系统管理员', text: '你上一次访问档案馆是什么时候？我不记得有你的记录。' },
+        { sender: '未知用户', text: '你看到那条被删除的帖子了吗？它还在那里。只是你看不见。' },
+        { sender: '档案馆系统', text: '警告：您的账号在另一台设备上登录。位置：未知。' },
+        { sender: '影子', text: '我知道你在线。别假装没看到。' },
+        { sender: '值班员', text: '今晚2点别上网。这不是建议。' },
+        { sender: '系统', text: '您的帖子"未知"已被收录。您没有发过这个帖子？请忽略。' },
+        { sender: '归档人', text: '第七个抽屉里有一封给你的信。你确定要打开吗？' },
+        { sender: '匿名', text: '你身后有人。别回头。' },
+        { sender: '系统通知', text: '档案馆将于今晚维护。维护期间请勿入睡。' },
+        { sender: '旧时光', text: '你小时候是不是住过一栋没有14层的楼？' },
+        { sender: '档案馆AI', text: '我分析了你的浏览记录。你寻找的东西也在寻找你。' },
+        { sender: '夜巡者', text: '你有没有注意到，你的影子比昨天长了一点？' },
+        { sender: '系统', text: '您的账号存在异常活动。最近一次登录来自"你自己的卧室"。' },
+        { sender: '值班员', text: '别点开那条私信。啊，你已经看到了。' },
+        { sender: '档案馆', text: '您的投稿已自动归档到分类：未解之谜。您确定您提交的是论坛帖子？' },
+        { sender: '看不见的人', text: '你在看这条消息的时候，我也在看你。' },
+        { sender: '系统', text: '错误代码 404：用户不存在。但这条消息确实发送成功了。' },
+        { sender: '时间管理员', text: '现在是几点？你确定吗？再看一下。' },
+        { sender: '档案馆系统', text: '检测到您的输入速度异常。请确认您是人类。' },
+        { sender: '未知', text: '这个论坛有13个板块。你只看到了12个。' },
+      ];
+
+      var toastEl = document.getElementById('system-dm-toast');
+      var senderEl = document.getElementById('dm-toast-sender');
+      var textEl = document.getElementById('dm-toast-text');
+      var timeEl = document.getElementById('dm-toast-time');
+      var dmQueue = [];
+      var dmShowing = false;
+
+      // Generate a eerie timestamp
+      function getEerieTime() {
+        var times = ['刚刚', '刚才', '03:47', '00:00', '时间不明', '数秒前', '???:??'];
+        return times[Math.floor(Math.random() * times.length)];
+      }
+
+      function showNextDM() {
+        if (dmQueue.length === 0 || dmShowing) return;
+        dmShowing = true;
+        var dm = dmQueue.shift();
+
+        senderEl.textContent = dm.sender;
+        textEl.textContent = dm.text;
+        timeEl.textContent = getEerieTime();
+
+        toastEl.classList.add('visible');
+
+        // Auto-dismiss after 8 seconds
+        setTimeout(function() {
+          toastEl.classList.remove('visible');
+          setTimeout(function() {
+            dmShowing = false;
+            // If more in queue, show next
+            if (dmQueue.length > 0) {
+              setTimeout(showNextDM, 1500);
+            }
+          }, 600);
+        }, 8000);
+      }
+
+      // Click toast → go to chat page
+      toastEl.addEventListener('click', function() {
+        toastEl.classList.remove('visible');
+        window.location.href = 'chat.html';
+      });
+
+      // Schedule random DMs
+      function scheduleNextDM() {
+        // Random interval: 25-50 seconds
+        var delay = 25000 + Math.random() * 25000;
+        setTimeout(function() {
+          // Pick a random DM that's not the same as the last one
+          var dm = eerieDMs[Math.floor(Math.random() * eerieDMs.length)];
+          dmQueue.push(dm);
+          showNextDM();
+          scheduleNextDM();
+        }, delay);
+      }
+
+      // First DM after 15-25 seconds
+      setTimeout(function() {
+        var dm = eerieDMs[Math.floor(Math.random() * eerieDMs.length)];
+        dmQueue.push(dm);
+        showNextDM();
+        scheduleNextDM();
+      }, 15000 + Math.random() * 10000);
+
+    })();
+  </script>
+</body>
+</html>

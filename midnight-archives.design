@@ -1,0 +1,142 @@
+{
+  "data": [
+    {
+      "id": "page-forum",
+      "title": "论坛",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1753859580000,
+      "canvasData": {
+        "x": 820,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 900,
+          "viewportWidth": 1440,
+          "sourceHash": "fnv1a-6cb6cc29",
+          "measuredAt": 1785406764258
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/forum.html",
+        "interactions": [
+          {
+            "domId": "nav-submit",
+            "targetPageId": "page-submit",
+            "transitionLabel": "导航到发帖"
+          },
+          {
+            "domId": "btn-new-post",
+            "targetPageId": "page-submit",
+            "hideEdge": true,
+            "transitionLabel": "发帖"
+          },
+          {
+            "domId": "user-夜行者",
+            "targetPageId": "page-chat",
+            "transitionLabel": "打开私聊"
+          },
+          {
+            "domId": "user-守夜人",
+            "targetPageId": "page-chat",
+            "hideEdge": true,
+            "transitionLabel": "打开私聊"
+          },
+          {
+            "domId": "user-无名氏",
+            "targetPageId": "page-chat",
+            "hideEdge": true,
+            "transitionLabel": "打开私聊"
+          },
+          {
+            "domId": "user-档案员",
+            "targetPageId": "page-chat",
+            "hideEdge": true,
+            "transitionLabel": "打开私聊"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-submit",
+      "title": "发帖",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1753859580000,
+      "canvasData": {
+        "x": 200,
+        "y": 377,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 900,
+          "viewportWidth": 1440,
+          "sourceHash": "fnv1a-c3c57ec5",
+          "measuredAt": 1785406764258
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/submit.html",
+        "interactions": [
+          {
+            "domId": "nav-forum",
+            "targetPageId": "page-forum",
+            "hideEdge": true,
+            "transitionLabel": "导航到论坛"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-chat",
+      "title": "私聊窗口",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1753859580000,
+      "canvasData": {
+        "x": 200,
+        "y": 754,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 900,
+          "viewportWidth": 1440,
+          "sourceHash": "fnv1a-bc10c920",
+          "measuredAt": 1785406087671
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/chat.html",
+        "interactions": [
+          {
+            "domId": "chat-backdrop",
+            "targetPageId": "page-forum",
+            "hideEdge": true,
+            "transitionLabel": "关闭私聊"
+          },
+          {
+            "domId": "chat-close",
+            "targetPageId": "page-forum",
+            "hideEdge": true,
+            "transitionLabel": "关闭私聊"
+          },
+          {
+            "domId": "nav-submit",
+            "targetPageId": "page-submit",
+            "hideEdge": true,
+            "transitionLabel": "导航到发帖"
+          }
+        ]
+      }
+    }
+  ],
+  "config": {
+    "autoLayout": false,
+    "deviceType": "desktop",
+    "projectName": "午夜档案馆",
+    "designLibrary": null,
+    "visualEditorEnabled": false,
+    "showEdge": true
+  }
+}
