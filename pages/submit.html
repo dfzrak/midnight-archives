@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>发帖 — 午夜档案馆</title>
   <link rel="stylesheet" href="../colors_and_type.css">
+  <script src="../shared_data.js"></script>
   <style>
     /* ===== Page: Submit ===== */
     .submit-page { position: relative; }
@@ -974,60 +975,14 @@
       replies: []
     };
 
-    function savePostToStorage(post) {
-      var STORAGE_KEY = 'midnight_archives_posts';
-      var maxRetries = 3;
-
-      // Step 0: Recover from sessionStorage if localStorage is empty/corrupted
-      try {
-        var lsRaw = localStorage.getItem(STORAGE_KEY);
-        var lsValid = false;
-        if (lsRaw) {
-          try { var p = JSON.parse(lsRaw); lsValid = Array.isArray(p); } catch(e) {}
+    // Initialize shared data and save post
+    SharedData.init(function() {
+      SharedData.addPost(newPost, function(ok) {
+        if (!ok) {
+          console.warn('[发帖] 远程保存失败，已保存到本地');
         }
-        if (!lsValid) {
-          var ssRaw = sessionStorage.getItem(STORAGE_KEY);
-          if (ssRaw) {
-            try { var sp = JSON.parse(ssRaw); if (Array.isArray(sp)) localStorage.setItem(STORAGE_KEY, ssRaw); } catch(e) {}
-          }
-        }
-      } catch(e) {}
-
-      for (var attempt = 0; attempt < maxRetries; attempt++) {
-        try {
-          var existing = [];
-          try {
-            var raw = localStorage.getItem(STORAGE_KEY);
-            if (raw) {
-              var parsed = JSON.parse(raw);
-              if (Array.isArray(parsed)) existing = parsed;
-            }
-          } catch(e) {}
-          // Dedup check
-          var isDuplicate = existing.some(function(p) { return p.id === post.id; });
-          if (isDuplicate) return true;
-          existing.unshift(post);
-          var json = JSON.stringify(existing);
-          localStorage.setItem(STORAGE_KEY, json);
-          // Verify
-          var verify = localStorage.getItem(STORAGE_KEY);
-          if (verify === json) {
-            // Backup to sessionStorage
-            try { sessionStorage.setItem(STORAGE_KEY, json); } catch(e2) {}
-            return true;
-          }
-        } catch(e) {
-          console.error('[Archive] 保存帖子失败 (attempt ' + (attempt+1) + '):', e);
-        }
-      }
-      return false;
-    }
-
-    var saveSuccess = savePostToStorage(newPost);
-    // If all retries failed, show warning
-    if (!saveSuccess) {
-      try { sessionStorage.setItem('midnight_archives_pending_post', JSON.stringify(newPost)); } catch(e) {}
-    }
+      });
+    });
 
     overlay.classList.add('visible');
 

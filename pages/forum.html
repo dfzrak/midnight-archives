@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>论坛 — 午夜档案馆</title>
   <link rel="stylesheet" href="../colors_and_type.css">
+  <script src="../shared_data.js"></script>
   <style>
     /* ===== Forum Page Styles ===== */
 
@@ -2547,163 +2548,13 @@
         }, 2000);
       }
 
-      // ===== localStorage Persistence (append-only, never destructive) =====
-      var STORAGE_POSTS = 'midnight_archives_posts';
-      var STORAGE_REPLIES = 'midnight_archives_replies';
-
-      function loadUserPosts() {
-        try {
-          var raw = localStorage.getItem(STORAGE_POSTS);
-          if (!raw) return [];
-          var parsed = JSON.parse(raw);
-          if (!Array.isArray(parsed)) return [];
-          // Deduplicate by id
-          var seen = {};
-          var deduped = [];
-          var changed = false;
-          parsed.forEach(function(p) {
-            if (p && p.id && !seen[p.id]) {
-              seen[p.id] = true;
-              deduped.push(p);
-            } else { changed = true; }
-          });
-          // Re-save if duplicates were found
-          if (changed && deduped.length > 0) {
-            saveUserPosts(deduped);
-          }
-          return deduped;
-        } catch(e) { return []; }
-      }
-
-      function saveUserPosts(posts) {
-        try {
-          if (!Array.isArray(posts)) return;
-          var json = JSON.stringify(posts);
-          localStorage.setItem(STORAGE_POSTS, json);
-          // Verify write succeeded
-          var verify = localStorage.getItem(STORAGE_POSTS);
-          if (verify !== json) {
-            // Retry once
-            localStorage.setItem(STORAGE_POSTS, json);
-          }
-          // SessionStorage backup
-          try { sessionStorage.setItem(STORAGE_POSTS, json); } catch(e2) {}
-        } catch(e) { console.error('[Archive] 保存帖子失败:', e); }
-      }
-
-      function loadUserReplies() {
-        try {
-          var raw = localStorage.getItem(STORAGE_REPLIES);
-          if (!raw) return {};
-          var parsed = JSON.parse(raw);
-          return (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) ? parsed : {};
-        } catch(e) { return {}; }
-      }
-
-      function saveUserReplies(replies) {
-        try {
-          if (!replies || typeof replies !== 'object') return;
-          var json = JSON.stringify(replies);
-          localStorage.setItem(STORAGE_REPLIES, json);
-          // Verify write succeeded
-          var verify = localStorage.getItem(STORAGE_REPLIES);
-          if (verify !== json) {
-            // Retry once
-            localStorage.setItem(STORAGE_REPLIES, json);
-          }
-          // SessionStorage backup
-          try { sessionStorage.setItem(STORAGE_REPLIES, json); } catch(e2) {}
-        } catch(e) { console.error('[Archive] 保存回声失败:', e); }
-      }
-
-      // ===== Data recovery: restore from sessionStorage if localStorage is empty or corrupted =====
-      function recoverDataIfNeeded() {
-        try {
-          // Check posts
-          var lsPosts = localStorage.getItem(STORAGE_POSTS);
-          var lsPostsValid = false;
-          if (lsPosts) {
-            try {
-              var p = JSON.parse(lsPosts);
-              lsPostsValid = Array.isArray(p) && p.length > 0;
-            } catch(e2) {}
-          }
-          if (!lsPostsValid) {
-            var ssPosts = sessionStorage.getItem(STORAGE_POSTS);
-            if (ssPosts) {
-              try {
-                var sp = JSON.parse(ssPosts);
-                if (Array.isArray(sp) && sp.length > 0) {
-                  localStorage.setItem(STORAGE_POSTS, ssPosts);
-                }
-              } catch(e2) {}
-            }
-          }
-
-          // Check replies
-          var lsReplies = localStorage.getItem(STORAGE_REPLIES);
-          var lsRepliesValid = false;
-          if (lsReplies) {
-            try {
-              var r = JSON.parse(lsReplies);
-              lsRepliesValid = (r && typeof r === 'object');
-            } catch(e2) {}
-          }
-          if (!lsRepliesValid) {
-            var ssReplies = sessionStorage.getItem(STORAGE_REPLIES);
-            if (ssReplies) {
-              try {
-                var sr = JSON.parse(ssReplies);
-                if (sr && typeof sr === 'object') {
-                  localStorage.setItem(STORAGE_REPLIES, ssReplies);
-                }
-              } catch(e2) {}
-            }
-          }
-        } catch(e) {}
-      }
-      recoverDataIfNeeded();
-
-      // ===== Recover pending post from failed submit =====
-      try {
-        var pending = sessionStorage.getItem('midnight_archives_pending_post');
-        if (pending) {
-          var pendingPost = JSON.parse(pending);
-          if (pendingPost && pendingPost.id) {
-            var existing = loadUserPosts();
-            var alreadyExists = existing.some(function(p) { return p.id === pendingPost.id; });
-            if (!alreadyExists) {
-              existing.unshift(pendingPost);
-              saveUserPosts(existing);
-            }
-            sessionStorage.removeItem('midnight_archives_pending_post');
-          }
-        }
-      } catch(e) {}
-
-      // ===== beforeunload protection: sync sessionStorage backup =====
-      window.addEventListener('beforeunload', function() {
-        try {
-          var posts = localStorage.getItem(STORAGE_POSTS);
-          var replies = localStorage.getItem(STORAGE_REPLIES);
-          if (posts) sessionStorage.setItem(STORAGE_POSTS, posts);
-          if (replies) sessionStorage.setItem(STORAGE_REPLIES, replies);
-        } catch(e) {}
-      });
-
-      // ===== Periodic auto-backup (every 30 seconds) =====
-      setInterval(function() {
-        try {
-          var posts = localStorage.getItem(STORAGE_POSTS);
-          var replies = localStorage.getItem(STORAGE_REPLIES);
-          if (posts) sessionStorage.setItem(STORAGE_POSTS, posts);
-          if (replies) sessionStorage.setItem(STORAGE_REPLIES, replies);
-        } catch(e) {}
-      }, 30000);
+      // ===== Shared Data Initialization =====
+      // Username is still local per user
+      var STORAGE_USERNAME = 'midnight_archives_username';
 
       // ===== Render saved user posts into the post list =====
-      var userPosts = loadUserPosts();
-      var savedRepliesForPosts = loadUserReplies();
+      var userPosts = SharedData.getPosts();
+      var savedRepliesForPosts = SharedData.getReplies();
       var postList = document.querySelector('.forum-post-list');
       var categoryIcons = {whispers:'🫧',urban:'🏙',mystery:'❓',archives:'📁',other:'📋'};
 
@@ -2722,7 +2573,7 @@
       };
 
       function updateAllReplyCounts() {
-        var allReplies = loadUserReplies();
+        var allReplies = SharedData.getReplies();
         document.querySelectorAll('.forum-post[data-post-id]').forEach(function(post) {
           var postId = post.getAttribute('data-post-id');
           var userReplyCount = (allReplies[postId] || []).length;
@@ -2743,9 +2594,9 @@
         });
       }
 
-      // Dedup replies in localStorage
+      // Dedup replies (in-memory via SharedData)
       function dedupReplies() {
-        var allReplies = loadUserReplies();
+        var allReplies = SharedData.getReplies();
         var changed = false;
         Object.keys(allReplies).forEach(function(postId) {
           var replies = allReplies[postId];
@@ -2761,7 +2612,6 @@
           });
           allReplies[postId] = deduped;
         });
-        if (changed) saveUserReplies(allReplies);
       }
       dedupReplies();
       updateAllReplyCounts();
@@ -2769,7 +2619,7 @@
       if (postList && userPosts.length > 0) {
         var firstPost = postList.querySelector('.forum-post');
         userPosts.forEach(function(up, idx) {
-          var replyCount = (savedRepliesForPosts[up.id] || []).length;
+          var replyCount = SharedData.getRepliesForPost(up.id).length;
           var article = document.createElement('article');
           article.className = 'forum-post';
           article.setAttribute('data-post-id', up.id);
@@ -2848,7 +2698,7 @@
       // Render saved replies for a single post (called on expand)
       function renderSavedRepliesForPost(post, postId) {
         if (post.dataset.repliesRendered) return;
-        var allReplies = loadUserReplies();
+        var allReplies = SharedData.getReplies();
         var replies = allReplies[postId];
         if (!replies || replies.length === 0) return;
         var section = post.querySelector('.forum-post__replies-section');
@@ -2924,18 +2774,11 @@
             '</div>';
           repliesSection.insertBefore(newReply, replyInput);
 
-          // Save to localStorage (with username and dedup key)
-          var allReplies = loadUserReplies();
-          if (!allReplies[postId]) allReplies[postId] = [];
+          // Save to shared data (synced to all users)
           var replyData = { text: text, time: now, username: getDisplayName() };
-          // Dedup: don't save if identical text+time already exists
-          var isDuplicate = allReplies[postId].some(function(r) {
-            return r.time === now && r.text === text;
+          SharedData.addReply(postId, replyData, function(ok) {
+            if (ok) console.log('[论坛] 回声已同步');
           });
-          if (!isDuplicate) {
-            allReplies[postId].push(replyData);
-            saveUserReplies(allReplies);
-          }
 
           field.value = '';
           field.style.height = 'auto';
@@ -3343,6 +3186,22 @@
         }, delay);
       }
       triggerFooterChange();
+
+      // ===== Initialize Shared Data & Auto-refresh =====
+      SharedData.init(function(isOnline) {
+        if (isOnline) {
+          console.log('[论坛] 共享数据已连接，所有用户可互相看到帖子和回声');
+          // Update display with remote data
+          userPosts = SharedData.getPosts();
+          updateAllReplyCounts();
+        }
+      });
+
+      // When remote data updates, refresh the display
+      SharedData.onDataUpdate = function() {
+        updateAllReplyCounts();
+        // Could add notification here
+      };
 
       // ===== Sponsor System =====
       var STORAGE_SPONSOR = 'midnight_archives_sponsor';
