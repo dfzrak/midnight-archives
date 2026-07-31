@@ -40,7 +40,7 @@
       "device_token": "dt_zero_twgiry4b5odpsh"
     },
     "旅行者": {
-      "coins": 55,
+      "coins": 50,
       "transactions": [
         {
           "amount": 100,
@@ -61,11 +61,16 @@
           "amount": -20,
           "desc": "通灵",
           "time": "2026-07-31T20:47:27.081Z"
+        },
+        {
+          "amount": -5,
+          "desc": "解锁档案",
+          "time": "2026-07-31T20:47:34.353Z"
         }
       ],
       "registered_at": "2026-08-01T04:35:00Z",
       "device_token": "dt_traveler_1bedrd381lfv"
     }
   },
-  "last_updated": "2026-07-31T20:47:27.081Z"
+  "last_updated": "2026-07-31T20:47:34.353Z"
 }
