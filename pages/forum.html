@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="../colors_and_type.css">
   <script src="../security.js"></script>
   <script src="../shared_data.js?v=4"></script>
-  <script src="../ai/recharge.js"></script>
   <style>
     /* ===== Forum Page Styles ===== */
 
@@ -1672,7 +1671,7 @@
             <span class="forum-topbar__subtitle">每一条帖子，都是一个未完的故事</span>
           </div>
           <div class="forum-topbar__actions">
-            <span id="topbar-coin-spot"></span>
+            
             <button class="forum-topbar__btn-new-post" data-dom-id="btn-new-post" onclick="window.location.href='submit.html'">
               <span>+</span> 发帖
             </button>
@@ -2714,14 +2713,15 @@
       });
 
       </script>
-
+  <script src="../ai/recharge.js"></script>
   <script>
     (function() {
-      if (window.MidnightRecharge) {
-        MidnightRecharge.renderTopbarCoin('topbar-coin-spot');
-        var spot = document.getElementById('topbar-coin-spot');
-        if (spot) spot.style.cursor = 'pointer';
-      }
+      setTimeout(function() {
+        if (window.MidnightRecharge) {
+          // Just init, no render - keep it out of the way
+          console.log('[Archive] 充值系统余额:', MidnightRecharge.getBalance());
+        }
+      }, 2000);
     })();
   </script>
 </body>
