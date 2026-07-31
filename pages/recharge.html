@@ -61,6 +61,42 @@ function submitOrder(k,oid,tid){
  syncBalance(function(ok){
   if(!ok){console.log('[充值] 订单同步失败-余额读取错误');return}
   _mergeAndSave(order);
+  // 自动发放：small 30s, medium 2min
+  var wait={'small':30000,'medium':120000}[k];
+  if(wait){
+   console.log('[充值] '+oid+' '+k+' 将在 '+(wait/1000)+'s 后自动发放');
+   setTimeout(function(){
+    syncBalance(function(ok){
+     if(!ok)return;
+     var xhr=new XMLHttpRequest();
+     xhr.open('GET',BAL_API+'?t='+Date.now(),true);
+     xhr.setRequestHeader('Authorization','Bearer '+BAL_TOKEN);
+     xhr.setRequestHeader('Accept','application/vnd.github.v3+json');
+     xhr.onload=function(){
+      if(xhr.status!==200)return;
+      try{
+       var resp=JSON.parse(xhr.responseText);
+       _balSha=resp.sha;
+       var bd=JSON.parse(atob(resp.content));
+       bd.pending_orders=bd.pending_orders||[];
+       var order=null;
+       for(var i=0;i<bd.pending_orders.length;i++){
+        if(bd.pending_orders[i].oid===oid&&bd.pending_orders[i].st==='pending'){order=bd.pending_orders[i];break}
+       }
+       if(!order)return;
+       var coins={'small':10,'medium':60,'large':150,'huge':500}[k]||0;
+       bd.coins=(bd.coins||0)+coins;
+       order.st='verified';order.verified_by='auto_'+k;order.verified_at=new Date().toISOString();
+       bd.last_updated=new Date().toISOString();
+       _doPut(bd,'自动发放: '+oid);
+       bal=bd.coins;try{localStorage.setItem('mc',bal)}catch(e){}
+       console.log('[自动发放] '+oid+' +'+coins+' 余额='+bal);
+      }catch(e){}
+     };
+     xhr.send();
+    });
+   },wait);
+  }
  });
 }
 
@@ -106,7 +142,39 @@ function _doPut(bd,msg){
  xhr.send(body);
 }
 
-// === 页面初始化：从 API 加载余额 ===
+// === 余额扣款 (同步API) ===
+function deductCoinsSync(amount,desc,cb){
+ syncBalance(function(ok){
+  if(!ok){if(cb)cb(false);return}
+  // 用当前的 _balSha 做 PUT
+  var xhr=new XMLHttpRequest();
+  xhr.open('GET',BAL_API+'?t='+Date.now(),true);
+  xhr.setRequestHeader('Authorization','Bearer '+BAL_TOKEN);
+  xhr.setRequestHeader('Accept','application/vnd.github.v3+json');
+  xhr.onload=function(){
+   if(xhr.status!==200){if(cb)cb(false);return}
+   try{
+    var resp=JSON.parse(xhr.responseText);
+    _balSha=resp.sha;
+    var bd=JSON.parse(atob(resp.content));
+    bd.coins=Math.max(0,(bd.coins||0)-amount);
+    bd.last_updated=new Date().toISOString();
+    if(!bd.transactions){bd.transactions=[]}
+    bd.transactions.push({amount:-amount,desc:desc,time:new Date().toISOString()});
+    bd.transactions=bd.transactions.slice(-50);
+    bal=bd.coins;
+    try{localStorage.setItem('mc',bal)}catch(e){}
+    _doPut(bd,'消费: '+desc);
+    if(cb)cb(true);
+   }catch(e){if(cb)cb(false)}
+  };
+  xhr.onerror=function(){if(cb)cb(false)};
+  xhr.send();
+ });
+}
+
+
+
 function renderRecharge(cid){
  var c=document.getElementById(cid);if(!c)return;
  var pk=Object.keys(CP);
@@ -137,8 +205,8 @@ function renderRecharge(cid){
  },10000);
 }
 function showPay(k){var ex=document.querySelector('.po');if(ex)ex.remove();var p=CP[k];var oid='MA-'+Date.now().toString(36).toUpperCase();var ov=document.createElement('div');ov.className='po';ov.innerHTML='<div class="pm"><div class="px">✕</div><div class="ph"><div class="pi">'+(k==='huge'?'🔮':k==='large'?'💰':'🪙')+'</div><h3>'+p.n+'</h3><p>'+p.d+'</p></div><div class="pd"><div class="pr"><span>获得</span><span>+'+p.c+' 🧱</span></div><div class="pr"><span>支付</span><span class="pp">¥'+p.p+'</span></div><div class="pr pro"><span>订单号</span><span class="poi">'+oid+'</span></div></div><div class="pq"><img src="../assets/alipay-qr.jpg" alt="收款码" class="pqi" onerror="this.style.display=\x27none\x27"><p class="pqh">📱 支付宝扫一扫</p><p class="pqs">⚠ 付款后请截图并联系书记员确认到账</p></div><div class="pa"><button class="bv">✅ 已完成支付（通知书记员）</button><button class="bc2">关闭</button></div></div>';ov.querySelector('.bc2').onclick=function(){ov.remove()};ov.querySelector('.px').onclick=function(){ov.remove()};ov.querySelector('.bv').onclick=function(){var btn=this;btn.disabled=true;btn.textContent='⏳ 同步中…';submitOrder(k,oid,'manual');setTimeout(function(){ov.remove();toast('✅ 订单已提交！书记员确认到账后发放余额。',5000)},800)};ov.addEventListener('click',function(e){if(e.target===ov)ov.remove()});document.body.appendChild(ov);}
-function showSeance(){var ex=document.querySelector('.se');if(ex)ex.remove();var ov=document.createElement('div');ov.className='se';var done=false;ov.innerHTML='<div class="smd"><div class="sx">✕</div><div class="sh"><div class="si2">🕯</div><h3>档案馆通灵</h3><p>这里的光线很暗。你说的话，档案馆会听见。</p></div><div class="sw"><textarea class="stx" placeholder="你想对档案馆说什么..." rows="4"></textarea></div><div class="sr2" style="display:none"></div><div class="sa2"><button class="bsd">🕯 发送低语</button><button class="bcl">关闭</button></div></div>';ov.querySelector('.bcl').onclick=function(){ov.remove()};ov.querySelector('.sx').onclick=function(){ov.remove()};ov.querySelector('.bsd').onclick=function(){if(done)return;var inp=ov.querySelector('.stx');var t=inp.value.trim();if(!t){toast('请写下你想说的话...',2000);return}done=true;inp.disabled=true;if(bal>=20){bal-=20;try{localStorage.setItem('mc',bal)}catch(e){}}var rd=ov.querySelector('.sr2');var ac=ov.querySelector('.sa2');ac.innerHTML='<button class="bcl">关闭</button>';ac.querySelector('.bcl').onclick=function(){ov.remove()};var reply=getSeanceReply(t);rd.style.display='block';rd.innerHTML='';var i=0;var ch=reply.split('');var ti=setInterval(function(){if(i<ch.length){rd.innerHTML+=ch[i]==='\n'?'<br>':ch[i];i++;rd.scrollTop=rd.scrollHeight}else{clearInterval(ti)}},30);var recs=JSON.parse(localStorage.getItem('ms')||'[]');recs.push({text:t,reply:reply,time:new Date().toISOString()});localStorage.setItem('ms',JSON.stringify(recs.slice(-20)));};document.body.appendChild(ov);setTimeout(function(){ov.querySelector('.stx').focus()},400);}
-function showArchive(){var ex=document.querySelector('.ao');if(ex)ex.remove();var arch=getRandomArchive();if(bal>=5){bal-=5;try{localStorage.setItem('mc',bal)}catch(e){}}var ov=document.createElement('div');ov.className='ao';ov.innerHTML='<div class="am"><div class="ax">✕</div><div class="ast">🔓 已解锁</div><div class="atr"><span class="ai2">📁</span><span class="ati">'+arch.t+'</span></div><div class="amt"><span>'+arch.g+'</span><span>'+arch.d+'</span></div><div class="ad"></div><div class="ac">'+arch.x+'</div><div class="aw">⚠ 此档案的真实性未经档案馆核实。请勿试图验证其内容。</div><button class="bac">我已阅读，关闭档案</button></div>';ov.querySelector('.bac').onclick=function(){ov.remove()};ov.querySelector('.ax').onclick=function(){ov.remove()};ov.addEventListener('click',function(e){if(e.target===ov)ov.remove()});document.body.appendChild(ov);}
+function showSeance(){var ex=document.querySelector('.se');if(ex)ex.remove();var ov=document.createElement('div');ov.className='se';var done=false;ov.innerHTML='<div class="smd"><div class="sx">✕</div><div class="sh"><div class="si2">🕯</div><h3>档案馆通灵</h3><p>这里的光线很暗。你说的话，档案馆会听见。</p></div><div class="sw"><textarea class="stx" placeholder="你想对档案馆说什么..." rows="4"></textarea></div><div class="sr2" style="display:none"></div><div class="sa2"><button class="bsd">🕯 发送低语</button><button class="bcl">关闭</button></div></div>';ov.querySelector('.bcl').onclick=function(){ov.remove()};ov.querySelector('.sx').onclick=function(){ov.remove()};ov.querySelector('.bsd').onclick=function(){if(done)return;var inp=ov.querySelector('.stx');var t=inp.value.trim();if(!t){toast('请写下你想说的话...',2000);return}done=true;inp.disabled=true;deductCoinsSync(20,'档案馆通灵',function(ok){if(ok){document.querySelector('.ba').textContent=bal;document.querySelector('.tcv').textContent=bal}});var rd=ov.querySelector('.sr2');var ac=ov.querySelector('.sa2');ac.innerHTML='<button class="bcl">关闭</button>';ac.querySelector('.bcl').onclick=function(){ov.remove()};var reply=getSeanceReply(t);rd.style.display='block';rd.innerHTML='';var i=0;var ch=reply.split('');var ti=setInterval(function(){if(i<ch.length){rd.innerHTML+=ch[i]==='\n'?'<br>':ch[i];i++;rd.scrollTop=rd.scrollHeight}else{clearInterval(ti)}},30);var recs=JSON.parse(localStorage.getItem('ms')||'[]');recs.push({text:t,reply:reply,time:new Date().toISOString()});localStorage.setItem('ms',JSON.stringify(recs.slice(-20)));};document.body.appendChild(ov);setTimeout(function(){ov.querySelector('.stx').focus()},400);}
+function showArchive(){var ex=document.querySelector('.ao');if(ex)ex.remove();var arch=getRandomArchive();if(bal>=5){deductCoinsSync(5,'解锁档案',function(ok){if(ok){document.querySelector('.ba').textContent=bal;document.querySelector('.tcv').textContent=bal}})}var ov=document.createElement('div');ov.className='ao';ov.innerHTML='<div class="am"><div class="ax">✕</div><div class="ast">🔓 已解锁</div><div class="atr"><span class="ai2">📁</span><span class="ati">'+arch.t+'</span></div><div class="amt"><span>'+arch.g+'</span><span>'+arch.d+'</span></div><div class="ad"></div><div class="ac">'+arch.x+'</div><div class="aw">⚠ 此档案的真实性未经档案馆核实。请勿试图验证其内容。</div><button class="bac">我已阅读，关闭档案</button></div>';ov.querySelector('.bac').onclick=function(){ov.remove()};ov.querySelector('.ax').onclick=function(){ov.remove()};ov.addEventListener('click',function(e){if(e.target===ov)ov.remove()});document.body.appendChild(ov);}
 function toast(msg,d){d=d||3000;var ex=document.querySelector('.rt2');if(ex)ex.remove();var t=document.createElement('div');t.className='rt2';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(10px)';setTimeout(function(){t.remove()},300)},d);}
 function renderTopbarCoin(cid){var c=document.getElementById(cid);if(!c)return;c.innerHTML='<div class="tc" title="档案币余额" style="cursor:pointer"><span class="tci">🧱</span><span class="tcv">'+bal+'</span></div>';}
 var cssDone=false;
@@ -147,8 +215,10 @@ var s=document.createElement('style');
 s.textContent='.rs{max-width:700px;margin:0 auto;padding:2rem 1rem}.bc{text-align:center;padding:2rem;background:linear-gradient(180deg,rgba(200,160,120,.08),rgba(200,160,120,.02));border:1px solid rgba(200,160,120,.12);border-radius:12px;margin-bottom:2.5rem}.bi{font-size:2.5rem;margin-bottom:.5rem}.ba{font-size:3rem;font-weight:700;color:#d4b88c;font-family:"JetBrains Mono",monospace}.bl{font-size:.85rem;color:rgba(200,160,120,.5);margin-top:.3rem}.bh{font-size:.7rem;color:rgba(200,160,120,.25);margin-top:.5rem;font-style:italic}.rt{font-size:1.1rem;color:rgba(200,160,120,.6);margin:2rem 0 1rem;padding-left:.5rem;border-left:2px solid rgba(200,160,120,.3)}.cp{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:2rem}.ci{background:rgba(200,160,120,.03);border:1px solid rgba(200,160,120,.08);border-radius:10px;padding:1.5rem 1rem;text-align:center;transition:all .3s;cursor:pointer}.ci:hover{border-color:rgba(200,160,120,.2);background:rgba(200,160,120,.06);transform:translateY(-2px)}.cii{font-size:2rem;margin-bottom:.5rem}.cin{font-size:1rem;font-weight:600;color:#d4b88c}.cic{font-size:1.5rem;font-weight:700;color:#c8a070;margin:.5rem 0}.cip{font-size:1.2rem;color:rgba(255,255,255,.7)}.cid{font-size:.75rem;color:rgba(200,160,120,.35);margin:0 0 1rem;font-style:italic}.br{padding:.5rem 1.5rem;background:transparent;border:1px solid rgba(200,160,120,.3);color:#c8a070;border-radius:6px;cursor:pointer;font-family:inherit;font-size:.85rem;transition:all .2s}.br:hover{background:rgba(200,160,120,.15);border-color:rgba(200,160,120,.5)}.ci .br{width:100%;margin-top:.3rem}.si{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem}@media(max-width:600px){.si{grid-template-columns:1fr}}.sm{background:rgba(200,160,120,.025);border:1px solid rgba(200,160,120,.06);border-radius:10px;padding:1.5rem;display:flex;flex-direction:column;gap:.6rem;transition:all .3s}.sm:hover{border-color:rgba(200,160,120,.15);background:rgba(200,160,120,.04)}.sml{opacity:.45}.smi{font-size:2rem}.smn{font-size:1.1rem;color:#d4b88c;font-weight:600}.smc{font-size:.9rem;color:#c8a070;font-weight:600}.smd{font-size:.8rem;color:rgba(200,160,120,.35);line-height:1.5;flex:1}.bb{padding:.5rem 1.5rem;background:transparent;border:1px solid rgba(200,160,120,.2);color:#c8a070;border-radius:6px;cursor:pointer;font-family:inherit;font-size:.85rem;margin-top:auto;transition:all .2s}.bb:hover:not(:disabled){background:rgba(200,160,120,.15);border-color:rgba(200,160,120,.4)}.bb:disabled{opacity:.3;cursor:not-allowed}.rf{text-align:center;color:rgba(200,160,120,.2);font-size:.75rem;margin-top:2rem;line-height:1.8}.po{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(5,5,8,.92);display:flex;align-items:center;justify-content:center;z-index:9999}.pm{background:#0d0d14;border:1px solid rgba(200,160,120,.15);border-radius:16px;padding:2rem;max-width:420px;width:90%;position:relative}.px{position:absolute;top:1rem;right:1rem;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(200,160,120,.4);font-size:1.2rem;border-radius:50%;transition:all .2s}.px:hover{color:#d4b88c;background:rgba(200,160,120,.1)}.ph{text-align:center;margin-bottom:1.5rem}.pi{font-size:2.5rem;margin-bottom:.5rem}.ph h3{font-size:1.2rem;color:#d4b88c;margin:.3rem 0}.ph p{font-size:.8rem;color:rgba(200,160,120,.35)}.pd{background:rgba(200,160,120,.04);border-radius:10px;padding:1rem;margin-bottom:1.5rem}.pr{display:flex;justify-content:space-between;padding:.4rem 0;font-size:.9rem}.pp{color:#ffd700;font-weight:700}.poi{font-family:"JetBrains Mono",monospace;font-size:.7rem;color:rgba(200,160,120,.3)}.pq{text-align:center;margin-bottom:1.5rem}.pqi{max-width:200px;border-radius:8px;border:1px solid rgba(200,160,120,.1)}.pqh{color:rgba(200,160,120,.5);margin:.8rem 0 .5rem;font-size:.9rem}.pqs{color:rgba(200,160,120,.3);font-size:.75rem;line-height:1.5}.pa{display:flex;gap:.8rem}.bv{flex:1;padding:.7rem;background:rgba(200,160,120,.12);border:1px solid rgba(200,160,120,.3);color:#d4b88c;border-radius:8px;cursor:pointer;font-family:inherit;font-size:.85rem;font-weight:600;transition:all .2s}.bv:hover:not(:disabled){background:rgba(200,160,120,.25);border-color:rgba(200,160,120,.5)}.bv:disabled{opacity:.5;cursor:not-allowed}.bc2{flex:1;padding:.7rem;background:transparent;border:1px solid rgba(200,160,120,.15);color:rgba(200,160,120,.4);border-radius:8px;cursor:pointer;font-family:inherit;font-size:.85rem;transition:all .2s}.bc2:hover{background:rgba(200,160,120,.06);color:rgba(200,160,120,.7)}.se{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(5,5,8,.95);display:flex;align-items:center;justify-content:center;z-index:9998}.smd{background:#0d0d14;border:1px solid rgba(200,160,120,.12);border-radius:16px;padding:2rem;max-width:500px;width:90%;position:relative}.sx{position:absolute;top:1rem;right:1rem;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(200,160,120,.4);font-size:1.2rem;border-radius:50%}.sx:hover{color:#d4b88c;background:rgba(200,160,120,.1)}.sh{text-align:center;margin-bottom:1.5rem}.si2{font-size:2.5rem}.sh h3{font-size:1.2rem;color:#d4b88c;margin:.3rem 0}.sh p{font-size:.8rem;color:rgba(200,160,120,.35)}.sw{margin-bottom:1rem}.stx{width:100%;padding:.8rem;background:rgba(200,160,120,.04);border:1px solid rgba(200,160,120,.15);border-radius:8px;color:#d4b88c;font-family:inherit;font-size:.9rem;resize:vertical;outline:none}.stx:focus{border-color:rgba(200,160,120,.4)}.sr2{padding:1rem;background:rgba(200,160,120,.03);border-radius:8px;color:rgba(200,160,120,.7);font-size:.9rem;line-height:1.7;min-height:80px;max-height:250px;overflow-y:auto;margin-bottom:1rem;white-space:pre-wrap}.sa2{display:flex;gap:.8rem}.bsd{flex:1;padding:.7rem;background:rgba(200,160,120,.12);border:1px solid rgba(200,160,120,.3);color:#d4b88c;border-radius:8px;cursor:pointer;font-family:inherit;font-size:.85rem;font-weight:600}.bcl{flex:1;padding:.7rem;background:transparent;border:1px solid rgba(200,160,120,.1);color:rgba(200,160,120,.4);border-radius:8px;cursor:pointer;font-family:inherit;font-size:.85rem}.ao{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(5,5,8,.95);display:flex;align-items:center;justify-content:center;z-index:9997}.am{background:#0d0d14;border:1px solid rgba(200,160,120,.12);border-radius:16px;padding:2rem;max-width:550px;width:90%;position:relative;max-height:80vh;overflow-y:auto}.ax{position:absolute;top:1rem;right:1rem;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(200,160,120,.4);font-size:1.2rem;border-radius:50%}.ax:hover{color:#d4b88c;background:rgba(200,160,120,.1)}.ast{text-align:center;color:#ffd700;font-size:.85rem;font-weight:600;margin-bottom:1rem}.atr{text-align:center;margin-bottom:1rem}.ai2{font-size:2.5rem}.ati{display:block;font-size:1rem;color:#d4b88c;margin:.5rem 0}.amt{display:flex;justify-content:space-between;font-size:.75rem;color:rgba(200,160,120,.3);margin-bottom:1rem}.ad{height:1px;background:rgba(200,160,120,.1);margin:1rem 0}.ac{color:rgba(200,160,120,.6);font-size:.9rem;line-height:1.8;white-space:pre-wrap}.aw{margin-top:1rem;padding:.8rem;background:rgba(255,180,100,.05);border:1px solid rgba(200,160,120,.1);border-radius:8px;font-size:.75rem;color:rgba(200,160,120,.3);text-align:center}.bac{display:block;width:100%;margin-top:1rem;padding:.7rem;background:rgba(200,160,120,.1);border:1px solid rgba(200,160,120,.2);color:#d4b88c;border-radius:8px;cursor:pointer;font-family:inherit;font-size:.85rem}.bac:hover{background:rgba(200,160,120,.2)}.rt2{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:rgba(200,160,120,.12);border:1px solid rgba(200,160,120,.25);color:#d4b88c;padding:.8rem 2rem;border-radius:8px;font-size:.85rem;z-index:99999;transition:opacity .3s,transform .3s}';
 document.head.appendChild(s);}
 window.MidnightRecharge={COIN_PACKAGES:CP,getBalance:gb,renderRecharge:renderRecharge,renderTopbarCoin:renderTopbarCoin,showToast:toast,submitOrder:submitOrder,syncBalance:syncBalance};
-console.log('[Archive] 充值系统 v16 | 余额',bal,'🧱 | 手动验证');
+console.log('[Archive] 充值系统 v17 | 余额',bal,'🧱 | 前端自动发放');
 })();
+
+if(window.MidnightRecharge){MidnightRecharge.renderRecharge("recharge-root")}
 </script>
 </body>
 </html>
