@@ -1,5 +1,5 @@
 {
-  "coins": 20,
+  "coins": 10,
   "pending_orders": [
     {
       "oid": "MA-MS978MHE",
@@ -14,9 +14,7 @@
       "oid": "MA-MS98K1PO",
       "pk": "small",
       "tm": 1785520088580,
-      "st": "verified",
-      "verified_by": "auto",
-      "verified_at": "2026-07-31T17:48:12+08:00"
+      "st": "pending"
     }
   ],
   "last_updated": "2026-07-31T17:48:12+08:00"
