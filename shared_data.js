@@ -34,7 +34,7 @@
   };
 
    // 内置 token（由 GitHub Actions 在构建时注入）
-   var BUILTIN_TOKEN = 'github_pat_11CKD6AFQ0P6ktLeJ8Ohzs_vH046f3sXpkK8JfnzZ4LkWOF1tZU1lp6TQ8B2'+'HqV9sF7MTBNMDEblMI9BHe';
+   var BUILTIN_TOKEN = 'ghp_cHuHuP24J392M7jHtgaeI4KRLWtYry'+'298doJ';
 
   // ===== 防护系统 =====
   var _lastPostTime = 0;
