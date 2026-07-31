@@ -1,42 +1,32 @@
 {
   "users": {
-    "Ã§Â®Â¡Ã§ÂÂÃ¥ÂÂ": {
+    "管理员": {
       "coins": 100,
       "transactions": [
         {
           "amount": 100,
-          "desc": "Ã§Â®Â¡Ã§ÂÂÃ¥ÂÂÃ¥ÂÂÃ¥Â§ÂÃ¤Â½ÂÃ©Â¢Â",
-          "time": "2026-08-01T04:25:00Z"
+          "desc": "初始余额",
+          "time": "2026-08-01T04:30:00Z"
         }
       ],
-      "registered_at": "2026-08-01T04:25:00Z"
+      "registered_at": "2026-08-01T04:30:00Z"
     },
     "zero": {
       "coins": 10,
       "transactions": [
         {
           "amount": 10,
-          "desc": "Ã¥ÂÂÃ¥Â§ÂÃ¤Â½ÂÃ©Â¢Â",
-          "time": "2026-08-01T04:25:00Z"
+          "desc": "初始余额",
+          "time": "2026-08-01T04:30:00Z"
         }
       ],
-      "registered_at": "2026-08-01T04:25:00Z"
+      "registered_at": "2026-08-01T04:30:00Z"
     },
-    "Ã¦ÂÂÃ¨Â¡ÂÃ¨ÂÂ": {
+    "旅行者": {
       "coins": 0,
       "transactions": [],
-      "registered_at": "2026-08-01T04:25:00Z"
-    },
-    "ç®¡çå": {
-      "coins": 0,
-      "transactions": [],
-      "registered_at": "2026-07-31T20:23:29.835Z"
-    },
-    "管理员": {
-      "coins": 0,
-      "transactions": [],
-      "registered_at": "2026-07-31T20:23:49.969Z"
+      "registered_at": "2026-08-01T04:30:00Z"
     }
   },
-  "last_updated": "2026-07-31T20:23:49.969Z"
+  "last_updated": "2026-08-01T04:30:00Z"
 }
