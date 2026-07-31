@@ -1,5 +1,5 @@
 {
-  "coins": 20,
+  "coins": 15,
   "pending_orders": [
     {
       "oid": "MA-MS978MHE",
@@ -20,5 +20,12 @@
       "verified_by": "manual"
     }
   ],
-  "last_updated": "2026-07-31T18:04:43.840Z"
+  "last_updated": "2026-07-31T18:27:45.323Z",
+  "transactions": [
+    {
+      "amount": -5,
+      "desc": "解锁档案",
+      "time": "2026-07-31T18:27:45.327Z"
+    }
+  ]
 }
