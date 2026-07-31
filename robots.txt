@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://dfzrak.github.io/midnight-archives/sitemap.xml
