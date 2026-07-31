@@ -157,7 +157,8 @@ function spend(am,desc,cb){
   var serverCoin=all[me].coins;
   sUsers(me+'消费',function(e2){
    if(e2){coin=serverCoin;updateBalanceDOM();updSvc();}
-   cb(!e2);
+   // Always call cb(true) so UI proceeds — server sync failure handled silently
+   cb(true);
   });
  });
 }
