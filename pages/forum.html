@@ -2897,7 +2897,7 @@
           } else {
             postList.appendChild(article);
           }
-          wirePostExpand(article, up.id);
+          setTimeout(function() { wirePostExpand(article, up.id); }, 0);
         });
       }
       // Initial render (from localStorage data loaded by init's _loadFromLocal)
