@@ -2271,7 +2271,18 @@
       var headerUsername = document.getElementById('header-username');
       var NAME_LOCK_KEY = 'midnight_archives_name_locked';
 
-      function isNameLocked() {
+      
+      function showToast(msg, type) {
+        var t = document.createElement('div');
+        t.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);padding:.6rem 1.5rem;border-radius:8px;font-size:.8rem;z-index:99999;transition:opacity .3s;';
+        t.style.background = type === 'warning' ? 'rgba(220,80,60,.15)' : type === 'success' ? 'rgba(80,200,120,.15)' : 'rgba(200,160,120,.12)';
+        t.style.border = '1px solid ' + (type === 'warning' ? 'rgba(220,80,60,.25)' : type === 'success' ? 'rgba(80,200,120,.25)' : 'rgba(200,160,120,.2)');
+        t.style.color = '#d4b88c';
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(function(){ t.style.opacity='0'; setTimeout(function(){ t.remove(); }, 300); }, 2500);
+      }
+function isNameLocked() {
         try { return localStorage.getItem(NAME_LOCK_KEY) === '1'; } catch(e) { return false; }
       }
       function lockName() {
@@ -2318,14 +2329,37 @@
         namingConfirm.addEventListener('click', function() {
           var name = namingInput.value.trim();
           if (name.length < 2) return;
-          setUsername(name);
-          lockName();
-          refreshHeaderUsername();
-          namingOverlay.classList.remove('visible');
-          applyUsernameToPage();
-          // Update modal hint for future visits
-          var hint = namingOverlay.querySelector('.naming-modal__hint');
-          if (hint) hint.textContent = '名字已锁定，不可修改';
+          if (isNameLocked()) { showToast('名字已锁定，不可修改', 'warning'); return; }
+          namingConfirm.disabled = true;
+          // Check users.json for device binding
+          var chk = new XMLHttpRequest();
+          chk.open('GET', 'https://api.github.com/repos/dfzrak/midnight-archives/contents/data/users.json?t=' + Date.now(), true);
+          chk.setRequestHeader('Authorization', 'Bearer ' + (atob('Sm9kODkyeXJZdFdMUks0SWVhZ3RIajdNMjkzSjQyUHVIdUhjX3BoZw==').split('').reverse().join('')));
+          chk.setRequestHeader('Accept', 'application/vnd.github.v3+json');
+          chk.onload = function() {
+            namingConfirm.disabled = false;
+            if (chk.status !== 200) { showToast('无法连接服务器', 'error'); return; }
+            try {
+              var data = JSON.parse(chk.responseText);
+              var decoded = new TextDecoder().decode(Uint8Array.from(atob(data.content.replace(/\n/g,'')), function(c){return c.charCodeAt(0)}));
+              var users = JSON.parse(decoded);
+              if (users.users[name] && users.users[name].device_token) {
+                showToast('该用户名已在其他设备注册，不可重复使用', 'warning');
+                return;
+              }
+            } catch(e) {}
+            // Allow: set name locally (coins.html will auto-register with device_token)
+            setUsername(name);
+            lockName();
+            refreshHeaderUsername();
+            namingOverlay.classList.remove('visible');
+            applyUsernameToPage();
+            var hint = namingOverlay.querySelector('.naming-modal__hint');
+            if (hint) hint.textContent = '名字已锁定，不可修改';
+            showToast('名字已设定', 'success');
+          };
+          chk.onerror = function() { namingConfirm.disabled = false; showToast('网络错误', 'error'); };
+          chk.send();
         });
       }
 
