@@ -5,31 +5,35 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>档案币 — 午夜档案馆</title>
 <style>
-:root {
-  --bg: #050508;
-  --surface: rgba(200,160,120,.04);
-  --border: rgba(200,160,120,.12);
-  --text: #d4b88c;
-  --text-muted: rgba(200,160,120,.35);
-  --gold: #c8a070;
-}
+:root{--bg:#050508;--surface:rgba(200,160,120,.04);--border:rgba(200,160,120,.12);--text:#d4b88c;--muted:rgba(200,160,120,.35);--gold:#c8a070}
 *{margin:0;padding:0;box-sizing:border-box}
 body{min-height:100vh;background:var(--bg);color:var(--text);font-family:"Noto Serif SC",serif;display:flex;flex-direction:column;align-items:center}
-
 .page{max-width:700px;width:100%;padding:2rem 1.5rem 4rem}
-
 .topbar{display:flex;align-items:center;gap:1rem;margin-bottom:2.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
 .topbar a{color:rgba(200,160,120,.4);text-decoration:none;font-size:.8rem;transition:.2s}
 .topbar a:hover{color:var(--text)}
-.topbar .nav-gap{flex:1}
+.topbar .gap{flex:1}
 .topbar .nav-link{font-size:.8rem;color:rgba(200,160,120,.35);text-decoration:none;padding:.3rem .8rem;border:1px solid var(--border);border-radius:4px;transition:.2s}
 .topbar .nav-link:hover{color:var(--text);border-color:rgba(200,160,120,.3)}
+.topbar .user-badge{display:flex;align-items:center;gap:.4rem;font-size:.8rem;color:var(--text);cursor:pointer;padding:.2rem .6rem;border:1px solid rgba(200,120,60,.2);border-radius:4px;transition:.2s}
+.topbar .user-badge:hover{border-color:rgba(200,120,60,.4)}
+
+.login-card{text-align:center;padding:3rem 2rem;background:linear-gradient(180deg,rgba(200,160,120,.05),rgba(200,160,120,.01));border:1px solid var(--border);border-radius:12px;margin-bottom:2rem}
+.login-card h2{font-size:1.3rem;margin-bottom:.5rem}
+.login-card p{font-size:.8rem;color:var(--muted);margin-bottom:1.5rem}
+.login-card .input-row{display:flex;gap:.5rem;max-width:360px;margin:0 auto}
+.login-card input{flex:1;padding:.6rem .8rem;background:rgba(200,160,120,.05);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:.9rem;outline:none}
+.login-card input:focus{border-color:rgba(200,160,120,.35)}
+.login-card button{padding:.6rem 1.4rem;background:rgba(200,160,120,.1);border:1px solid rgba(200,160,120,.25);color:var(--text);border-radius:6px;cursor:pointer;font-family:inherit;font-size:.85rem;font-weight:600;transition:.2s}
+.login-card button:hover{background:rgba(200,160,120,.2)}
+.login-card button:disabled{opacity:.3;cursor:not-allowed}
+.login-card .err{color:rgba(220,80,60,.8);font-size:.75rem;margin-top:.5rem;min-height:1rem}
 
 .balance-card{text-align:center;padding:2.5rem 1.5rem;background:linear-gradient(180deg,rgba(200,160,120,.06),rgba(200,160,120,.01));border:1px solid var(--border);border-radius:12px;margin-bottom:2.5rem}
 .balance-icon{font-size:3rem;margin-bottom:.5rem}
 .balance-num{font-size:4rem;font-weight:700;color:var(--text);font-family:"JetBrains Mono",monospace;transition:color .4s}
-.balance-num.flash{color:#ffd700 !important}
-.balance-label{font-size:.85rem;color:rgba(200,160,120,.45);margin-top:.3rem}
+.balance-num.flash{color:#ffd700!important}
+.balance-label{font-size:.85rem;color:rgba(200,160,120,.45)}
 .balance-hint{font-size:.65rem;color:rgba(200,160,120,.2);margin-top:.5rem;font-style:italic}
 
 .section-title{font-size:1.05rem;color:rgba(200,160,120,.45);margin:2rem 0 1rem;padding-left:.5rem;border-left:2px solid rgba(200,160,120,.25)}
@@ -42,7 +46,7 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:"Noto S
 .svc-icon{font-size:2rem}
 .svc-name{font-size:1.05rem;color:var(--text);font-weight:600}
 .svc-cost{font-size:.85rem;color:var(--gold);font-weight:600}
-.svc-desc{font-size:.75rem;color:var(--text-muted);line-height:1.5;flex:1}
+.svc-desc{font-size:.75rem;color:var(--muted);line-height:1.5;flex:1}
 
 .btn{padding:.55rem 1.2rem;background:transparent;border:1px solid rgba(200,160,120,.18);color:var(--gold);border-radius:6px;cursor:pointer;font-family:inherit;font-size:.82rem;margin-top:auto;transition:.2s}
 .btn:hover:not(:disabled){background:rgba(200,160,120,.12);border-color:rgba(200,160,120,.35)}
@@ -52,13 +56,13 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:"Noto S
 
 .admin-note{text-align:center;margin-top:3rem;padding:1.5rem;background:rgba(200,160,120,.02);border:1px dashed rgba(200,160,120,.1);border-radius:10px}
 .admin-note h3{font-size:.95rem;color:var(--text);margin-bottom:.4rem}
-.admin-note p{font-size:.75rem;color:var(--text-muted);line-height:1.6}
+.admin-note p{font-size:.75rem;color:var(--muted);line-height:1.6}
 
 .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:rgba(200,160,120,.12);border:1px solid rgba(200,160,120,.2);color:var(--text);padding:.7rem 1.8rem;border-radius:8px;font-size:.82rem;z-index:9999;transition:opacity .3s}
 
 .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(5,5,8,.94);display:flex;align-items:center;justify-content:center;z-index:9998}
 .modal-box{background:#0d0d14;border:1px solid rgba(200,160,120,.12);border-radius:14px;padding:2rem;max-width:500px;width:90%;max-height:80vh;overflow-y:auto;position:relative}
-.modal-close{position:absolute;top:.8rem;right:.8rem;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(200,160,120,.35);font-size:1.1rem;border-radius:50%;transition:.2s}
+.modal-close{position:absolute;top:.8rem;right:.8rem;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:1.1rem;border-radius:50%;transition:.2s}
 .modal-close:hover{color:var(--text);background:rgba(200,160,120,.08)}
 </style>
 </head>
@@ -66,39 +70,43 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:"Noto S
 <div class="page">
   <div class="topbar">
     <a href="../index.html">← 档案馆</a>
-    <span class="nav-gap"></span>
+    <span class="gap"></span>
     <a href="forum.html" class="nav-link">论坛</a>
     <a href="submit.html" class="nav-link">发帖</a>
+    <div class="user-badge" id="user-badge" title="点击设置用户名">👤 <span id="uname">未登录</span></div>
   </div>
 
-  <div class="balance-card">
-    <div class="balance-icon">🧱</div>
-    <div class="balance-num" id="bal">…</div>
-    <div class="balance-label">档案币</div>
-    <div class="balance-hint">余额自动同步 · 15秒刷新</div>
-  </div>
-
-  <div class="section-title">档案服务</div>
-  <div class="services">
-    <div class="svc" id="svc-seance">
-      <div class="svc-icon">🕯</div>
-      <div class="svc-name">档案馆通灵</div>
-      <div class="svc-cost">20 🧱</div>
-      <div class="svc-desc">写下你想说的话，档案馆以它的身份与风格回应你。</div>
-      <button class="btn btn-primary" id="btn-seance">开启通灵</button>
+  <div id="login-area"></div>
+  <div id="main-area" style="display:none">
+    <div class="balance-card">
+      <div class="balance-icon">🧱</div>
+      <div class="balance-num" id="bal">0</div>
+      <div class="balance-label">档案币</div>
+      <div class="balance-hint">余额云端同步 · 15秒刷新</div>
     </div>
-    <div class="svc" id="svc-archive">
-      <div class="svc-icon">📁</div>
-      <div class="svc-name">解锁隐藏档案</div>
-      <div class="svc-cost">5 🧱</div>
-      <div class="svc-desc">来自深网、废弃病历、绝密文件——真实度极高。</div>
-      <button class="btn btn-primary" id="btn-archive">解锁档案</button>
-    </div>
-  </div>
 
-  <div class="admin-note">
-    <h3>📬 获取档案币</h3>
-    <p>档案币由管理员手动发放。如需购买，请联系档案馆书记员。</p>
+    <div class="section-title">档案服务</div>
+    <div class="services">
+      <div class="svc" id="svc-seance">
+        <div class="svc-icon">🕯</div>
+        <div class="svc-name">档案馆通灵</div>
+        <div class="svc-cost">20 🧱</div>
+        <div class="svc-desc">写下你想说的话，档案馆以它的身份与风格回应你。</div>
+        <button class="btn btn-primary" id="btn-seance">开启通灵</button>
+      </div>
+      <div class="svc" id="svc-archive">
+        <div class="svc-icon">📁</div>
+        <div class="svc-name">解锁隐藏档案</div>
+        <div class="svc-cost">5 🧱</div>
+        <div class="svc-desc">来自深网、废弃病历、绝密文件——真实度极高。</div>
+        <button class="btn btn-primary" id="btn-archive">解锁档案</button>
+      </div>
+    </div>
+
+    <div class="admin-note">
+      <h3>📬 获取档案币</h3>
+      <p>档案币由管理员手动发放。联系书记员，告知你的用户名即可充值。</p>
+    </div>
   </div>
 </div>
 
@@ -106,11 +114,9 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:"Noto S
 (function(){
 'use strict';
 
-var BAL_API='https://api.github.com/repos/dfzrak/midnight-archives/contents/data/balance.json';
-var BAL_TOKEN=atob('Sm9kODkyeXJZdFdMUks0SWVhZ3RIajdNMjkzSjQyUHVIdUhjX3BoZw==').split('').reverse().join('');
-var bal=0,_sha=null;
-
-try{bal=parseInt(localStorage.getItem('mc')||'0',10)}catch(e){bal=0}
+var USERS_API='https://api.github.com/repos/dfzrak/midnight-archives/contents/data/users.json';
+var TOKEN=atob('Sm9kODkyeXJZdFdMUks0SWVhZ3RIajdNMjkzSjQyUHVIdUhjX3BoZw==').split('').reverse().join('');
+var _sha=null, _users={}, _allNames=[], _username=null, _coins=0;
 
 var HA=[
 {t:'档案 #0774 — 镜像',g:'未归档',d:'2019-03-14',x:'2019年3月，杭州某小区监控拍到一名女性在凌晨2:17进入电梯。她在电梯里站了四分钟，没有按任何楼层。电梯内壁的镜面反射中，她的倒影一直在微笑——但她本人的面部表情没有任何变化。物业检查了监控设备，一切正常。这段录像被删除前，有三位保安亲眼看过。其中一位在第二天辞职，至今联系不上。'},
@@ -124,6 +130,85 @@ var HA=[
 ];
 var revealed=[];
 try{revealed=JSON.parse(localStorage.getItem('mr')||'[]')}catch(e){revealed=[]}
+
+function http(method, url, body, cb){
+ var x=new XMLHttpRequest();
+ x.open(method, url, true);
+ x.setRequestHeader('Authorization','Bearer '+TOKEN);
+ x.setRequestHeader('Accept','application/vnd.github.v3+json');
+ if(body){x.setRequestHeader('Content-Type','application/json')}
+ x.onload=function(){
+  if(x.status>=200&&x.status<300){try{cb(null,JSON.parse(x.responseText))}catch(e){cb(e)}}
+  else{cb(new Error('HTTP '+x.status))}
+ };
+ x.onerror=function(){cb(new Error('network'))};
+ x.send(body?JSON.stringify(body):null);
+}
+
+function loadUsers(cb){
+ http('GET', USERS_API+'?t='+Date.now(), null, function(err, data){
+  if(err){cb(err);return}
+  _sha=data.sha;
+  try{
+   var ud=JSON.parse(atob(data.content));
+   _users=ud.users||{};
+   _allNames=ud.registered_usernames||[];
+   cb(null);
+  }catch(e){cb(e)}
+ });
+}
+
+function saveUsers(msg,cb){
+ var ud={users:_users,registered_usernames:_allNames,last_updated:new Date().toISOString()};
+ var c=btoa(unescape(encodeURIComponent(JSON.stringify(ud,null,2))));
+ http('PUT', USERS_API, {message:msg||'update users',content:c,sha:_sha}, function(err,data){
+  if(err){cb(err);return}
+  _sha=data.content?data.content.sha:data.sha;
+  cb(null);
+ });
+}
+
+function register(name, cb){
+ name=name.replace(/<[^>]*>/g,'').replace(/[^\u4e00-\u9fa5a-zA-Z0-9_\-]/g,'').trim().substring(0,20);
+ if(!name||name.length<1){cb('用户名不能为空');return}
+ if(name==='匿名者'||name==='未登录'||name==='档案馆'||name==='书记员'){cb('该用户名为保留名');return}
+ if(_allNames.indexOf(name)!==-1){cb('该用户名已被注册');return}
+ _allNames.push(name);
+ _users[name]={coins:0,transactions:[],registered_at:new Date().toISOString()};
+ saveUsers('注册用户: '+name, function(err){
+  if(err){cb('注册失败，请重试');return}
+  _username=name;
+  _coins=0;
+  try{localStorage.setItem('ma_username',name)}catch(e){}
+  cb(null);
+ });
+}
+
+function login(name,cb){
+ name=name.replace(/<[^>]*>/g,'').trim();
+ if(!_users[name]){cb('用户名不存在，请先注册');return}
+ _username=name;
+ _coins=_users[name].coins||0;
+ try{localStorage.setItem('ma_username',name)}catch(e){}
+ cb(null);
+}
+
+function spend(amount,desc,cb){
+ loadUsers(function(err){
+  if(err){cb(false);return}
+  if(!_users[_username]){cb(false);return}
+  _users[_username].coins=Math.max(0,(_users[_username].coins||0)-amount);
+  if(!_users[_username].transactions)_users[_username].transactions=[];
+  _users[_username].transactions.push({amount:-amount,desc:desc,time:new Date().toISOString()});
+  _users[_username].transactions=_users[_username].transactions.slice(-30);
+  _coins=_users[_username].coins;
+  saveUsers('消费: '+_username+' '+desc, function(err){
+   cb(!err);
+  });
+ });
+}
+
+function toast(m,d){d=d||3000;var e=document.querySelector('.toast');if(e)e.remove();var t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(10px)';setTimeout(function(){t.remove()},300)},d)}
 
 function getArchive(){
  var av=HA.filter(function(_,i){return revealed.indexOf(i)===-1});
@@ -142,130 +227,136 @@ function getSeanceReply(t){
  return '档案馆收到了你关于「'+kw+'」的低语。\n\n在深夜的走廊里，这个回声被记录在第七档案架第三层编号'+(Math.floor(Math.random()*9000)+1000)+'。它不会消失。\n\n——档案馆，凌晨三点。';
 }
 
-function syncBal(cb){
- var x=new XMLHttpRequest();
- x.open('GET',BAL_API+'?t='+Date.now(),true);
- x.setRequestHeader('Authorization','Bearer '+BAL_TOKEN);
- x.setRequestHeader('Accept','application/vnd.github.v3+json');
- x.onload=function(){
-  if(x.status!==200){if(cb)cb(false);return}
-  try{
-   var r=JSON.parse(x.responseText);_sha=r.sha;
-   var bd=JSON.parse(atob(r.content));
-   var nb=parseInt(bd.coins||0,10);
-   if(nb!==bal){bal=nb;try{localStorage.setItem('mc',bal)}catch(e){}if(cb)cb(true,bal);return}
-   if(cb)cb(true,bal);
-  }catch(e){if(cb)cb(false)}
- };
- x.send();
-}
-
-function doPut(bd,msg){
- var c=btoa(unescape(encodeURIComponent(JSON.stringify(bd,null,2))));
- var body=JSON.stringify({message:msg||'update',content:c,sha:_sha});
- var x=new XMLHttpRequest();
- x.open('PUT',BAL_API,true);
- x.setRequestHeader('Authorization','Bearer '+BAL_TOKEN);
- x.setRequestHeader('Accept','application/vnd.github.v3+json');
- x.setRequestHeader('Content-Type','application/json');
- x.onload=function(){
-  if(x.status===200||x.status===201){
-   try{var r=JSON.parse(x.responseText);_sha=r.content?r.content.sha:r.sha}catch(e){}
-  }
- };
- x.send(body);
-}
-
-function spend(amount,desc,cb){
- syncBal(function(ok){
-  if(!ok){if(cb)cb(false);return}
-  var x=new XMLHttpRequest();
-  x.open('GET',BAL_API+'?t='+Date.now(),true);
-  x.setRequestHeader('Authorization','Bearer '+BAL_TOKEN);
-  x.setRequestHeader('Accept','application/vnd.github.v3+json');
-  x.onload=function(){
-   if(x.status!==200){if(cb)cb(false);return}
-   try{
-    var r=JSON.parse(x.responseText);_sha=r.sha;
-    var bd=JSON.parse(atob(r.content));
-    bd.coins=Math.max(0,(bd.coins||0)-amount);
-    bd.last_updated=new Date().toISOString();
-    if(!bd.transactions)bd.transactions=[];
-    bd.transactions.push({amount:-amount,desc:desc,time:new Date().toISOString()});
-    bd.transactions=bd.transactions.slice(-50);
-    bal=bd.coins;try{localStorage.setItem('mc',bal)}catch(e){}
-    doPut(bd,'消费: '+desc);
-    if(cb)cb(true);
-   }catch(e){if(cb)cb(false)}
-  };
-  x.send();
- });
-}
-
-function toast(m,d){d=d||3000;var e=document.querySelector('.toast');if(e)e.remove();var t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(10px)';setTimeout(function(){t.remove()},300)},d)}
-
 function updateUI(){
- var be=document.getElementById('bal');
- if(be)be.textContent=bal;
- var seance=document.getElementById('svc-seance');
- var archive=document.getElementById('svc-archive');
- var bs=document.getElementById('btn-seance');
- var ba=document.getElementById('btn-archive');
- if(bal>=20){seance.classList.remove('locked');bs.disabled=false}else{seance.classList.add('locked');bs.disabled=true}
- if(bal>=5){archive.classList.remove('locked');ba.disabled=false}else{archive.classList.add('locked');ba.disabled=true}
+ document.getElementById('uname').textContent=_username||'未登录';
+ if(_username){
+  document.getElementById('login-area').style.display='none';
+  document.getElementById('main-area').style.display='block';
+  document.getElementById('bal').textContent=_coins;
+  var s=document.getElementById('svc-seance');
+  var a=document.getElementById('svc-archive');
+  var bs=document.getElementById('btn-seance');
+  var ba=document.getElementById('btn-archive');
+  if(_coins>=20){s.classList.remove('locked');bs.disabled=false}else{s.classList.add('locked');bs.disabled=true}
+  if(_coins>=5){a.classList.remove('locked');ba.disabled=false}else{a.classList.add('locked');ba.disabled=true}
+ }else{
+  document.getElementById('login-area').style.display='block';
+  document.getElementById('main-area').style.display='none';
+ }
 }
 
-document.getElementById('btn-seance').onclick=function(){
- if(bal<20){toast('🧱 余额不足');return}
- var ex=document.querySelector('.modal-overlay');if(ex)ex.remove();
- var done=false;
- var ov=document.createElement('div');ov.className='modal-overlay';
- ov.innerHTML='<div class="modal-box"><div class="modal-close">✕</div><h3 style="text-align:center;margin-bottom:.8rem">🕯 档案馆通灵</h3><p style="font-size:.75rem;color:rgba(200,160,120,.3);text-align:center;margin-bottom:1rem">这里的光线很暗。你说的话，档案馆会听见。</p><textarea style="width:100%;padding:.8rem;background:rgba(200,160,120,.04);border:1px solid rgba(200,160,120,.15);border-radius:8px;color:#d4b88c;font-family:inherit;font-size:.85rem;resize:vertical;outline:none;margin-bottom:1rem" rows="4" class="stx" placeholder="你想对档案馆说什么..."></textarea><div class="sr" style="display:none;padding:1rem;background:rgba(200,160,120,.03);border-radius:8px;color:rgba(200,160,120,.7);font-size:.85rem;line-height:1.7;min-height:80px;max-height:250px;overflow-y:auto;margin-bottom:1rem;white-space:pre-wrap"></div><div style="display:flex;gap:.8rem"><button class="btn btn-primary" id="bsd" style="flex:1">🕯 发送低语</button><button class="btn" id="bcl" style="flex:1">关闭</button></div></div>';
- ov.querySelector('.modal-close').onclick=function(){ov.remove()};
- ov.querySelector('#bcl').onclick=function(){ov.remove()};
- ov.querySelector('#bsd').onclick=function(){
-  if(done)return;var inp=ov.querySelector('.stx');var t=inp.value.trim();if(!t){toast('请写下你想说的话...',2000);return}
-  done=true;inp.disabled=true;
-  spend(20,'档案馆通灵',function(ok){if(ok)updateUI()});
-  var rd=ov.querySelector('.sr');rd.style.display='block';rd.innerHTML='';
-  var reply=getSeanceReply(t);var i=0;var ch=reply.split('');
-  var ti=setInterval(function(){if(i<ch.length){rd.innerHTML+=ch[i]==='\n'?'<br>':ch[i];i++;rd.scrollTop=rd.scrollHeight}else{clearInterval(ti)}},30);
-  ov.querySelector('#bsd').remove();
+function showLogin(){
+ var la=document.getElementById('login-area');
+ la.innerHTML='<div class="login-card"><h2>🧱 档案币</h2><p>首次使用请注册用户名，已注册用户直接登录。<br><span style="font-size:.7rem;color:rgba(200,160,120,.2)">用户名唯一，不可重复注册</span></p><div class="input-row"><input id="name-input" placeholder="输入用户名" maxlength="20"><button id="btn-reg">注册</button><button id="btn-login" style="background:transparent;border-color:rgba(200,160,120,.1);color:rgba(200,160,120,.4)">登录</button></div><div class="err" id="login-err"></div></div>';
+ document.getElementById('btn-reg').onclick=function(){
+  var n=document.getElementById('name-input').value;
+  var err=document.getElementById('login-err');
+  err.textContent='';
+  var btn=this;btn.disabled=true;
+  loadUsers(function(e){
+   if(e){err.textContent='网络错误，请重试';btn.disabled=false;return}
+   register(n, function(e){
+    if(e){err.textContent=e;btn.disabled=false;return}
+    btn.disabled=false;
+    updateUI();
+    toast('✅ 注册成功！欢迎 '+_username);
+   });
+  });
  };
- document.body.appendChild(ov);
- setTimeout(function(){ov.querySelector('.stx').focus()},400);
-};
+ document.getElementById('btn-login').onclick=function(){
+  var n=document.getElementById('name-input').value;
+  var err=document.getElementById('login-err');
+  err.textContent='';
+  var btn=this;btn.disabled=true;
+  loadUsers(function(e){
+   if(e){err.textContent='网络错误，请重试';btn.disabled=false;return}
+   login(n, function(e){
+    if(e){err.textContent=e;btn.disabled=false;return}
+    btn.disabled=false;
+    updateUI();
+    toast('✅ 欢迎回来，'+_username);
+   });
+  });
+ };
+}
 
-document.getElementById('btn-archive').onclick=function(){
- if(bal<5){toast('🧱 余额不足');return}
- var arch=getArchive();
- spend(5,'解锁隐藏档案',function(ok){if(ok)updateUI()});
- var ex=document.querySelector('.modal-overlay');if(ex)ex.remove();
- var ov=document.createElement('div');ov.className='modal-overlay';
- ov.innerHTML='<div class="modal-box"><div class="modal-close">✕</div><div style="text-align:center;color:#ffd700;font-size:.8rem;font-weight:600;margin-bottom:1rem">🔓 已解锁</div><div style="text-align:center;margin-bottom:1rem"><span style="font-size:2.2rem">📁</span><div style="font-size:.95rem;color:#d4b88c;margin:.4rem 0">'+arch.t+'</div></div><div style="display:flex;justify-content:space-between;font-size:.7rem;color:rgba(200,160,120,.25);margin-bottom:1rem"><span>'+arch.g+'</span><span>'+arch.d+'</span></div><div style="color:rgba(200,160,120,.55);font-size:.85rem;line-height:1.8;white-space:pre-wrap">'+arch.x+'</div><div style="margin-top:1rem;padding:.7rem;background:rgba(255,180,100,.04);border:1px solid rgba(200,160,120,.08);border-radius:8px;font-size:.7rem;color:rgba(200,160,120,.25);text-align:center">⚠ 此档案的真实性未经档案馆核实</div><button class="btn btn-primary" style="width:100%;margin-top:1rem">我已阅读，关闭档案</button></div>';
- ov.querySelector('.modal-close').onclick=function(){ov.remove()};
- ov.querySelector('button.btn-primary').onclick=function(){ov.remove()};
- ov.addEventListener('click',function(e){if(e.target===ov)ov.remove()});
- document.body.appendChild(ov);
-};
+function setupServices(){
+ document.getElementById('btn-seance').onclick=function(){
+  if(_coins<20){toast('🧱 余额不足');return}
+  var ex=document.querySelector('.modal-overlay');if(ex)ex.remove();
+  var done=false;
+  var ov=document.createElement('div');ov.className='modal-overlay';
+  ov.innerHTML='<div class="modal-box"><div class="modal-close">✕</div><h3 style="text-align:center;margin-bottom:.8rem">🕯 档案馆通灵</h3><p style="font-size:.75rem;color:rgba(200,160,120,.3);text-align:center;margin-bottom:1rem">这里的光线很暗。你说的话，档案馆会听见。</p><textarea style="width:100%;padding:.8rem;background:rgba(200,160,120,.04);border:1px solid rgba(200,160,120,.15);border-radius:8px;color:#d4b88c;font-family:inherit;font-size:.85rem;resize:vertical;outline:none;margin-bottom:1rem" rows="4" class="stx" placeholder="你想对档案馆说什么..."></textarea><div class="sr" style="display:none;padding:1rem;background:rgba(200,160,120,.03);border-radius:8px;color:rgba(200,160,120,.7);font-size:.85rem;line-height:1.7;min-height:80px;max-height:250px;overflow-y:auto;margin-bottom:1rem;white-space:pre-wrap"></div><div style="display:flex;gap:.8rem"><button class="btn btn-primary" id="bsd" style="flex:1">🕯 发送低语</button><button class="btn" id="bcl" style="flex:1">关闭</button></div></div>';
+  ov.querySelector('.modal-close').onclick=function(){ov.remove()};
+  ov.querySelector('#bcl').onclick=function(){ov.remove()};
+  ov.querySelector('#bsd').onclick=function(){
+   if(done)return;var inp=ov.querySelector('.stx');var t=inp.value.trim();if(!t){toast('请写下你想说的话...',2000);return}
+   done=true;inp.disabled=true;
+   spend(20,'档案馆通灵',function(ok){if(ok)updateUI()});
+   var rd=ov.querySelector('.sr');rd.style.display='block';rd.innerHTML='';
+   var reply=getSeanceReply(t);var i=0;var ch=reply.split('');
+   var ti=setInterval(function(){if(i<ch.length){rd.innerHTML+=ch[i]==='\n'?'<br>':ch[i];i++;rd.scrollTop=rd.scrollHeight}else{clearInterval(ti)}},30);
+   ov.querySelector('#bsd').remove();
+  };
+  document.body.appendChild(ov);
+  setTimeout(function(){ov.querySelector('.stx').focus()},400);
+ };
+
+ document.getElementById('btn-archive').onclick=function(){
+  if(_coins<5){toast('🧱 余额不足');return}
+  var arch=getArchive();
+  spend(5,'解锁隐藏档案',function(ok){if(ok)updateUI()});
+  var ex=document.querySelector('.modal-overlay');if(ex)ex.remove();
+  var ov=document.createElement('div');ov.className='modal-overlay';
+  ov.innerHTML='<div class="modal-box"><div class="modal-close">✕</div><div style="text-align:center;color:#ffd700;font-size:.8rem;font-weight:600;margin-bottom:1rem">🔓 已解锁</div><div style="text-align:center;margin-bottom:1rem"><span style="font-size:2.2rem">📁</span><div style="font-size:.95rem;color:#d4b88c;margin:.4rem 0">'+arch.t+'</div></div><div style="display:flex;justify-content:space-between;font-size:.7rem;color:rgba(200,160,120,.25);margin-bottom:1rem"><span>'+arch.g+'</span><span>'+arch.d+'</span></div><div style="color:rgba(200,160,120,.55);font-size:.85rem;line-height:1.8;white-space:pre-wrap">'+arch.x+'</div><div style="margin-top:1rem;padding:.7rem;background:rgba(255,180,100,.04);border:1px solid rgba(200,160,120,.08);border-radius:8px;font-size:.7rem;color:rgba(200,160,120,.25);text-align:center">⚠ 此档案的真实性未经档案馆核实</div><button class="btn btn-primary" style="width:100%;margin-top:1rem">我已阅读，关闭档案</button></div>';
+  ov.querySelector('.modal-close').onclick=function(){ov.remove()};
+  ov.querySelector('button.btn-primary').onclick=function(){ov.remove()};
+  ov.addEventListener('click',function(e){if(e.target===ov)ov.remove()});
+  document.body.appendChild(ov);
+ };
+}
 
 // Init
-syncBal(function(ok,nb){
- if(ok&&nb!==undefined)bal=nb;
+var savedName=null;
+try{savedName=localStorage.getItem('ma_username')}catch(e){}
+
+loadUsers(function(err){
+ if(err){toast('⚠ 无法连接服务器');showLogin();updateUI();return}
+ if(savedName&&_users[savedName]){
+  _username=savedName;
+  _coins=_users[savedName].coins||0;
+ }
+ showLogin();
+ setupServices();
  updateUI();
+
+ // Auto refresh
+ setInterval(function(){
+  if(!_username)return;
+  loadUsers(function(err){
+   if(err||!_users[_username])return;
+   var nb=_users[_username].coins||0;
+   if(nb!==_coins){
+    var prev=_coins;
+    _coins=nb;
+    var be=document.getElementById('bal');
+    if(be){be.textContent=_coins;if(_coins>prev){be.classList.add('flash');setTimeout(function(){be.classList.remove('flash')},1500)}}
+    updateUI();
+   }
+  });
+ },15000);
 });
 
-setInterval(function(){
- syncBal(function(ok,nb){
-  if(ok&&nb!==undefined&&nb!==bal){
-   var prev=bal;
-   bal=nb;
-   var be=document.getElementById('bal');
-   if(be){be.textContent=bal;if(bal>prev){be.classList.add('flash');setTimeout(function(){be.classList.remove('flash')},1500)}}
-   updateUI();
-  }
- });
-},15000);
+// User badge click
+setTimeout(function(){
+ document.getElementById('user-badge').onclick=function(){
+  _username=null;_coins=0;
+  try{localStorage.removeItem('ma_username')}catch(e){}
+  showLogin();
+  updateUI();
+  toast('已退出，请重新登录或注册');
+ };
+},500);
 
 })();
 </script>
