@@ -117,7 +117,7 @@ function fUsers(cb){
 function sUsers(msg,cb){
  var ud={users:all,last_updated:new Date().toISOString()};
  var raw=JSON.stringify(ud,null,2);
- var b64=btoa(String.fromCharCode.apply(null,new TextEncoder().encode(raw)));
+ var b64=btoa(String.fromCharCode(...new TextEncoder().encode(raw)));
  ajax('PUT',A,{message:msg||'update',content:b64,sha:sh},function(e,d){
   if(e){cb(e);return}
   sh=d.content?d.content.sha:d.sha;cb(null);
