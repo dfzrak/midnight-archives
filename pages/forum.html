@@ -2912,45 +2912,22 @@
 
       // ===== Post expand/collapse (shared function) =====
       function wirePostExpand(post, postId) {
-        // 保底：直接 onclick 属性切换展开
+        post.setAttribute('data-expand-wired', 'true');
         post.onclick = function(e) {
           if (post.classList.contains('forum-post--archived') || post.classList.contains('forum-post--deleted')) return;
+          if (e.target.closest('.forum-post__collapse-btn')) { post.classList.remove('forum-post--expanded'); return; }
+          if (e.target.closest('.forum-reply-input') || e.target.closest('.forum-reply')) return;
+          var wasExpanded = post.classList.contains('forum-post--expanded');
           post.classList.toggle('forum-post--expanded');
-        };
-        post.addEventListener('click', function(e) {
-          try {
-            if (e.target.closest('.forum-post__collapse-btn')) return;
-            if (e.target.closest('.forum-reply-input')) return;
-            if (e.target.closest('.forum-reply')) return;
-
-            var isExpanded = post.classList.contains('forum-post--expanded');
-            if (isExpanded) {
-              post.classList.remove('forum-post--expanded');
-            } else {
-              post.classList.add('forum-post--expanded');
-
-              // Render any saved replies that haven't been shown yet
-              if (typeof renderSavedRepliesForPost === 'function') {
-                renderSavedRepliesForPost(post, postId);
-              }
-
-              var repliesSection = post.querySelector('.forum-post__replies-section');
-              if (repliesSection && !repliesSection.querySelector('.forum-reply-input')) {
-                var replyInput = createReplyInput(postId);
-                if (replyInput) {
-                  repliesSection.appendChild(replyInput);
-                  if (typeof wireReplyInput === 'function') {
-                    wireReplyInput(replyInput, repliesSection, post, postId);
-                  }
-                }
-              }
+          if (!wasExpanded) {
+            if (typeof renderSavedRepliesForPost === 'function') renderSavedRepliesForPost(post, postId);
+            var rs = post.querySelector('.forum-post__replies-section');
+            if (rs && !rs.querySelector('.forum-reply-input')) {
+              var ri = createReplyInput(postId);
+              if (ri) { rs.appendChild(ri); if (typeof wireReplyInput === 'function') wireReplyInput(ri, rs, post, postId); }
             }
-          } catch(err) {
-            console.warn('[展开] 出错:', err.message);
-            // 即使出错也尝试展开
-            post.classList.toggle('forum-post--expanded');
           }
-        });
+        };
 
         // Collapse button
         var collapseBtn = post.querySelector('.forum-post__collapse-btn');
