@@ -5,7 +5,7 @@ var HA=[{t:'档案 #0774 — 镜像',g:'未归档',x:'2019年3月，杭州某小
 var bal=0,revealed=[];
 // === 新架构：用 GitHub Contents API 替代 Gist ===
 var BAL_API='https://api.github.com/repos/dfzrak/midnight-archives/contents/data/balance.json';
-var BAL_TOKEN=window.__GITHUB_TOKEN__||'no_token';
+var BAL_TOKEN=(window.__GITHUB_TOKEN__!=='__GITHUB_TOKEN_PLACEHOLDER__'&&window.__GITHUB_TOKEN__)||(typeof SharedData!=='undefined'&&SharedData.getToken?SharedData.getToken():'no_token');
 function loadBal(){try{bal=parseInt(localStorage.getItem('mc')||'0',10);revealed=JSON.parse(localStorage.getItem('mr')||'[]');}catch(e){bal=0;revealed=[];}}
 loadBal();
 function gb(){return bal;}
