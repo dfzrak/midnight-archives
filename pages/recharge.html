@@ -40,13 +40,21 @@
   </div>
 
   <script>
+    // === 动态加载，绕过 CDN 缓存 ===
     (function() {
-      if (window.MidnightRecharge) {
-        MidnightRecharge.renderRecharge('recharge-root');
-      } else {
-        document.getElementById('recharge-root').innerHTML = 
-          '<p style="color:rgba(200,160,120,0.4);text-align:center;padding:4rem 0;">充值系统加载中...</p>';
-      }
+      var ts = '?v=5&t=' + Date.now();
+      var s = document.createElement('script');
+      s.src = '../ai/recharge.js' + ts;
+      s.onload = function() {
+        if (window.MidnightRecharge) {
+          MidnightRecharge.renderRecharge('recharge-root');
+        }
+      };
+      s.onerror = function() {
+        document.getElementById('recharge-root').innerHTML =
+          '<p style="color:rgba(200,160,120,0.4);text-align:center;padding:4rem 0;">⚠ 档案馆信号中断，请稍后刷新重试</p>';
+      };
+      document.head.appendChild(s);
     })();
   </script>
 </body>
