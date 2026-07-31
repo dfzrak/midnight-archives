@@ -9,7 +9,13 @@
       "st": "verified",
       "verified_by": "manual",
       "verified_at": "2026-08-01T01:20:00+08:00"
+    },
+    {
+      "oid": "MA-MS98PLT4",
+      "pk": "medium",
+      "tm": 1785520347077,
+      "st": "pending"
     }
   ],
-  "last_updated": "2026-07-31T17:48:12+08:00"
+  "last_updated": "2026-07-31T17:52:27.077Z"
 }
