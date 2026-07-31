@@ -2782,7 +2782,9 @@
           console.log('[论坛] 共享数据已连接，所有用户可互相看到帖子和回声');
         }
         // Always refresh data after init (local or remote), not only when online
+        console.log('[INIT] callback fired, isOnline=' + isOnline);
         userPosts = SharedData.getPosts();
+        console.log('[INIT] posts count:', userPosts.length);
         updateAllReplyCounts();
         renderUserPosts();
       });
@@ -2856,7 +2858,8 @@
 
       // ===== Render user posts (idempotent — safe to call multiple times) =====
       function renderUserPosts() {
-        if (!postList) return;
+        console.log('[RENDER] renderUserPosts called, posts:', SharedData.getPosts().length);
+        if (!postList) { console.log('[RENDER] no postList!'); return; }
         var posts = SharedData.getPosts();
         if (!posts || posts.length === 0) return;
         posts.forEach(function(up) {
