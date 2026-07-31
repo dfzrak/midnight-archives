@@ -3,88 +3,124 @@
 var CP={small:{n:'一把硬币',c:10,p:1,d:'投石问路'},medium:{n:'一袋碎银',c:60,p:6,d:'够用一阵子'},large:{n:'一箱金币',c:150,p:12,d:'深探档案'},huge:{n:'地窖宝藏',c:500,p:30,d:'无所顾忌'}};
 var HA=[{t:'档案 #0774 — 镜像',g:'未归档',x:'2019年3月，杭州某小区监控拍到一名女性在凌晨2:17进入电梯。她在电梯里站了四分钟，没有按任何楼层。电梯内壁的镜面反射中，她的倒影一直在微笑——但她本人的面部表情没有任何变化。物业检查了监控设备，一切正常。这段录像被删除前，有三位保安亲眼看过。其中一位在第二天辞职，至今联系不上。',d:'2019-03-14'},{t:'档案 #0521 — 第九级台阶',g:'未归档',x:'南昌一所中学的教学楼西侧楼梯有16级台阶。但如果你在午夜12点整从一楼往上走，数到第9级时你会踩空——你会回到一楼。7个学生声称经历过同样的事情。学校否认，但2015年暑假西侧楼梯被秘密拆除重建。原楼梯施工图纸上只有15级台阶。',d:'2015-08-02'},{t:'档案 #0307 — 病历',g:'未归档',x:'某三甲医院精神科档案室有一份编号为0000的病历。没有姓名性别，只有入院日期：1971年1月1日。病历内容只有一句话——"病人声称知道所有人的死亡日期"。下面附了一张表格，记录了数百个人名和日期。表格最后一行，是当时主治医生的名字和日期。那天他没有来上班。死于心梗。',d:'1971-01-01'},{t:'档案 #0613 — 深网坐标',g:'未归档',x:'2017年，void_watcher发布了一串GPS坐标指向南京市郊外。白天去看什么都没有，半夜去的时候，荒地中央多了一座二层小楼。楼里只有一个房间亮着灯，灯下是一台2003年的台式电脑，屏幕上只显示着一行字："你来了。坐下。我告诉你一个秘密。"那人跑了。第二天再去，楼消失了。',d:'2017-06-13'},{t:'档案 #0919 — 错频广播',g:'未归档',x:'2012年9月19日晚，福建省广播电台深夜热线接到一个电话。来电者自称林先生，声音极其缓慢。导播在直播结束后才发现录播带上是空的。但当晚至少有200个听众打进电话说听到了林先生的求助。所有听众对内容的描述完全一致："帮帮我，我被困在一个没有人能听见我的地方。"',d:'2012-09-19'},{t:'档案 #1224 — 雪中脚印',g:'未归档',x:'哈尔滨郊区，2003年圣诞夜大雪。凌晨3点一位出租车司机看到路中间有一串脚印从马路中央延伸到树林里，间距是普通人两倍。他跟着走了一段发现脚印在一棵松树下消失了。树下只有一个铁盒，装着七张不同年份的圣诞卡片。收件人写的是"爸爸"，寄件人空白。',d:'2003-12-24'},{t:'档案 #0411 — 第十二条留言',g:'未归档',x:'2008年汶川地震后，都江堰一处废墟中挖出一部诺基亚手机。手机里有11条未发出草稿消息，收件人是同一个号码。消息日期显示全部在地震发生后一天内输入的。第11条消息是2013年发的："妈，我想回家了。"那个号码拨打过去——是空号。',d:'2008-05-13'},{t:'档案 #0108 — 最后一班地铁',g:'未归档',x:'北京地铁1号线最早的线路图上有23个车站。但运营排班表里列车在苹果园站之后还会再停靠一站。那一站没有任何站牌，地图上也不存在。退休司机承认：那站确实有。从来没有人上下。有一次他好奇看了眼月台，上面站着一个人。1号线自动化改造后这一站被从系统中移除了。但排班表代码里它仍然存在——编号Station 00。',d:'2019-11-08'}];
 var bal=0,revealed=[];
-var GIST_ID='515f358b8f3b72deb914a827aecf5833';
-var GIST_TOKEN='github_pat_11CKD6AFQ0'+'P6ktLeJ8Ohzs_vH046f3sXpkK8JfnzZ4LkWOF1tZU1lp6TQ8B2'+'HqV9sF7MTBNMDEblMI9BHe';
-var GIST_API='https://api.github.com/gists/'+GIST_ID;
+// === 新架构：用 GitHub Contents API 替代 Gist ===
+var BAL_API='https://api.github.com/repos/dfzrak/midnight-archives/contents/data/balance.json';
+var BAL_TOKEN=window.__GITHUB_TOKEN__||'no_token';
 function loadBal(){try{bal=parseInt(localStorage.getItem('mc')||'0',10);revealed=JSON.parse(localStorage.getItem('mr')||'[]');}catch(e){bal=0;revealed=[];}}
 loadBal();
 function gb(){return bal;}
 function getRandomArchive(){var av=HA.filter(function(_,i){return revealed.indexOf(i)===-1});var pick;if(av.length===0){pick=HA[Math.floor(Math.random()*HA.length)]}else{pick=av[Math.floor(Math.random()*av.length)];revealed.push(HA.indexOf(pick));try{localStorage.setItem('mr',JSON.stringify(revealed))}catch(e){}}return pick;}
 function getSeanceReply(t){var clean=(t||'').replace(/[?？！!。，,、\s]/g,'');var kw=clean.substring(0,clean.length>8?8:clean.length)||'这些';var an='#'+String(Math.floor(Math.random()*9000)+1000);var isQ=/[?？吗呢谁什么怎么为什么哪如何]/.test(t);var isF=/怕|恐怖|吓|诡异|害怕|恐惧/.test(t);var isP=/人|他|她|它|谁|东西|怪物|鬼|灵魂|幽灵|床底|柜子|身后|背后|角落/.test(t);var isL=/地方|哪里|房间|楼|医院|学校|地铁|电梯|走廊|地下/.test(t);if(isF&&isP){return function(k){return'烛火晃了一下。'+'\n\n'+'你说「'+k+'」——这是档案馆在靠近。它在回应：它一直都在。从你搬进来的第一天起。你不需要害怕——它比你更害怕孤独。';}(kw)}if(isF&&isL){return function(k){return'等等。你说了「'+k+'」。'+'\n\n'+'档案管理员停下了手中的工作。这个词已经很久没人提起过了。'+'\n\n'+'但我可以告诉你一件事：那个地方仍然存在。地图上没有，导航找不到。但如果你在凌晨三点独自走过那条走廊——你会看见它的。不要回头。';}(kw)}if(isF){return function(k){return'你问「'+k+'」。有人曾在凌晨三点问过类似的问题。那人的档案至今存放在地下室B区。'+'\n\n'+'你想知道他现在在哪里吗？'+'\n\n'+'先告诉我：你确定你准备好了吗？';}(kw)}if(isP){var rs=['它不是来伤害你的。它只是想让你知道它的存在。','档案馆里有17份关于类似存在的记录。没有一份能给出解释。','别试图和它说话。也别假装看不见它。保持安静，等天亮。','它曾经是个人。现在它只是一段记忆。但它不知道自己已经死了。'];return function(k,n,r){return'关于「'+k+'」——档案馆翻阅了相关档案。'+'\n\n'+'编号'+n+'的记录最后一行写道：'+'\n\n'+'"'+r+'"'+'\n\n'+'档案在此终止。';}(kw,an,rs[Math.floor(Math.random()*rs.length)])}if(isL){var rs=['那个地方在地图上已经被抹去了。但在档案馆的记录里，它仍然存在。','档案馆地下三层有一张那个地方的完整平面图。但图纸上有三个房间是空白的。','你去过那里了，对吗？你的鞋底还粘着那里的灰尘。档案馆认得那种灰。'];return function(k,n,r){return'关于「'+k+'」——档案馆翻阅了相关档案。'+'\n\n'+'编号'+n+'的记录最后一行写道：'+'\n\n'+'"'+r+'"'+'\n\n'+'档案在此终止。';}(kw,an,rs[Math.floor(Math.random()*rs.length)])}if(isQ){var rs=['答案在第七个抽屉里。但那个抽屉的锁打不开。至少现在打不开。','我知道答案。但告诉你之后，你就必须留在这里。你想清楚了吗？','档案馆里有一本书专门回答了这个问题。但那本书的最后一页被撕掉了。'];return function(k,n,r){return'关于「'+k+'」——档案馆翻阅了相关档案。'+'\n\n'+'编号'+n+'的记录最后一行写道：'+'\n\n'+'"'+r+'"'+'\n\n'+'档案在此终止。';}(kw,an,rs[Math.floor(Math.random()*rs.length)])}if(t.length<15){return function(k){return'「'+k+'」——档案馆很老了。比我们都老。'+'\n\n'+'它记得你第一次来这里时的恐惧。现在，它听到了你的声音。';}(kw)}return function(k){return'档案馆收到了你关于「'+k+'」的低语。'+'\n\n'+'在深夜的走廊里，这个回声被记录在第七档案架第三层编号'+(Math.floor(Math.random()*9000)+1000)+'。它不会消失，即使你离开这里。'+'\n\n'+'——档案馆，凌晨三点。';}(kw);}
 
-// === 提交订单：写 local + 同步 Gist ===
-function submitOrder(k,oid,tid){
- var ods=JSON.parse(localStorage.getItem('mo')||'[]');
- var order={oid:oid,pk:k,tid:tid,tm:Date.now(),st:'pending'};
- ods.push(order);localStorage.setItem('mo',JSON.stringify(ods.slice(-30)));
- // 同步到 Gist
- syncOrderToGist(order);
-}
-
-function syncOrderToGist(order){
+// === 核心：从 Contents API 读取余额（带 sha 缓存） ===
+var _balSha=null;
+function syncBalance(cb){
  var xhr=new XMLHttpRequest();
- xhr.open('GET',GIST_API,true);
- xhr.setRequestHeader('Authorization','Bearer '+GIST_TOKEN);
- xhr.setRequestHeader('Accept','application/vnd.github.v3+json');
- xhr.onload=function(){
-  if(xhr.status!==200)return;
-  try{
-   var gist=JSON.parse(xhr.responseText);
-   var files=gist.files||{};
-   var bf=files['balance.json'];
-   if(!bf){bf={content:'{"coins":0,"pending_orders":[]}'};}
-   var bd=JSON.parse(bf.content||'{"coins":0,"pending_orders":[]}');
-   bd.pending_orders=bd.pending_orders||[];
-   bd.pending_orders.push(order);
-   bd.pending_orders=bd.pending_orders.slice(-50);
-   bd.last_updated=new Date().toISOString();
-   var patchBody=JSON.stringify({files:{'balance.json':{content:JSON.stringify(bd)}}});
-   var px=new XMLHttpRequest();
-   px.open('PATCH',GIST_API,true);
-   px.setRequestHeader('Authorization','Bearer '+GIST_TOKEN);
-   px.setRequestHeader('Accept','application/vnd.github.v3+json');
-   px.setRequestHeader('Content-Type','application/json');
-   px.send(patchBody);
-  }catch(e){console.log('[充值] Gist同步失败',e)}
- };
- xhr.send();
-}
-
-// === 从 Gist 拉取余额（管理员发放后的同步） ===
-function syncBalanceFromGist(cb){
- var xhr=new XMLHttpRequest();
- xhr.open('GET',GIST_API,true);
- xhr.setRequestHeader('Authorization','Bearer '+GIST_TOKEN);
+ xhr.open('GET',BAL_API+'?t='+Date.now(),true);
+ xhr.setRequestHeader('Authorization','Bearer '+BAL_TOKEN);
  xhr.setRequestHeader('Accept','application/vnd.github.v3+json');
  xhr.onload=function(){
   if(xhr.status!==200){if(cb)cb(false);return}
   try{
-   var gist=JSON.parse(xhr.responseText);
-   var bf=gist.files&&gist.files['balance.json'];
-   if(bf){
-    var bd=JSON.parse(bf.content||'{}');
-    var gb=parseInt(bd.coins||0,10);
-    if(gb>bal){bal=gb;try{localStorage.setItem('mc',bal)}catch(e){}}
-    if(cb)cb(true,bal);
+   var resp=JSON.parse(xhr.responseText);
+   _balSha=resp.sha;
+   var bd=JSON.parse(atob(resp.content));
+   var gb=parseInt(bd.coins||0,10);
+   if(gb!==bal){
+    var prevBal=bal;
+    bal=gb;try{localStorage.setItem('mc',bal)}catch(e){}
+    if(cb)cb(true,bal,prevBal);
     return;
    }
-  }catch(e){console.log('[充值] Gist读取失败',e)}
-  if(cb)cb(false);
+   if(cb)cb(true,bal,0);
+  }catch(e){console.log('[充值] 余额读取失败',e);if(cb)cb(false);}
  };
  xhr.send();
 }
+
+// === 提交订单：syncBalance + PATCH ===
+function submitOrder(k,oid,tid){
+ var order={oid:oid,pk:k,tid:tid,tm:Date.now(),st:'pending'};
+ // 先拉最新余额 → 追加订单 → PUT
+ syncBalance(function(ok){
+  if(!ok){console.log('[充值] 订单同步失败-余额读取错误');return}
+  _mergeAndSave(order);
+ });
+}
+
+function _mergeAndSave(order){
+ // 重新读，确保拿到最新 sha + 内容
+ var xhr=new XMLHttpRequest();
+ xhr.open('GET',BAL_API+'?t='+Date.now(),true);
+ xhr.setRequestHeader('Authorization','Bearer '+BAL_TOKEN);
+ xhr.setRequestHeader('Accept','application/vnd.github.v3+json');
+ xhr.onload=function(){
+  if(xhr.status!==200)return;
+  try{
+   var resp=JSON.parse(xhr.responseText);
+   _balSha=resp.sha;
+   var bd=JSON.parse(atob(resp.content));
+   bd.pending_orders=bd.pending_orders||[];
+   // 去重
+   var dup=bd.pending_orders.find(function(o){return o.oid===order.oid;});
+   if(dup)return;
+   bd.pending_orders.push(order);
+   bd.pending_orders=bd.pending_orders.slice(-50);
+   bd.last_updated=new Date().toISOString();
+   _doPut(bd,'订单: '+order.oid);
+  }catch(e){console.log('[充值] 合并失败',e)}
+ };
+ xhr.send();
+}
+
+function _doPut(bd,msg){
+ var content=btoa(unescape(encodeURIComponent(JSON.stringify(bd,null,2))));
+ var body=JSON.stringify({message:msg||'update balance',content:content,sha:_balSha});
+ var xhr=new XMLHttpRequest();
+ xhr.open('PUT',BAL_API,true);
+ xhr.setRequestHeader('Authorization','Bearer '+BAL_TOKEN);
+ xhr.setRequestHeader('Accept','application/vnd.github.v3+json');
+ xhr.setRequestHeader('Content-Type','application/json');
+ xhr.onload=function(){
+  if(xhr.status===200||xhr.status===201){
+   try{var r=JSON.parse(xhr.responseText);_balSha=r.content?r.content.sha:r.sha;}catch(e){}
+   console.log('[充值] PUT OK, coins='+bd.coins);
+  }
+ };
+ xhr.send(body);
+}
+
+// === 页面初始化：从 API 加载余额 ===
 function renderRecharge(cid){
  var c=document.getElementById(cid);if(!c)return;
  var pk=Object.keys(CP);
- c.innerHTML='<div class="rs"><div class="bc"><div class="bi">🧱</div><div class="ba" id="bbal">'+bal+'</div><div class="bl">档案币</div><div class="bh">刷新页面自动同步Gist余额</div></div><h3 class="rt">充值</h3><div class="cp">'+pk.map(function(k){var p=CP[k];var ico={small:'🪙',medium:'🪙',large:'💰',huge:'🔮'};return'<div class="ci"><div class="cii">'+ico[k]+'</div><div class="cin">'+p.n+'</div><div class="cic">+'+p.c+'🧱</div><div class="cip">¥'+p.p+'</div><div class="cid">'+p.d+'</div><button class="br" data-p="'+k+'">购买</button></div>'}).join('')+'</div><h3 class="rt">档案服务</h3><div class="si"><div class="sm'+(bal>=20?'':' sml')+'"><div class="smi">🕯</div><div class="smn">档案馆通灵</div><div class="smc">20 🧱</div><div class="smd">写下你想说的话，档案馆以它的身份与风格精准回应你。</div><button class="bb" data-i="seance"'+(bal>=20?'':' disabled')+'>'+(bal>=20?'开启通灵':'余额不足')+'</button></div><div class="sm'+(bal>=5?'':' sml')+'"><div class="smi">📁</div><div class="smn">解锁随机隐藏档案</div><div class="smc">5 🧱</div><div class="smd">打开从未公开的档案。来自深网、废弃病历、绝密文件——真实度极高。</div><button class="bb" data-i="hidden_archive"'+(bal>=5?'':' disabled')+'>'+(bal>=5?'解锁档案':'余额不足')+'</button></div></div><div class="rf">档案币永不过期。充值仅用于支持档案馆运营。<br>支付后提交交易单号，由管理员验证发放。</div></div>';
+ c.innerHTML='<div class="rs"><div class="bc"><div class="bi">🧱</div><div class="ba" id="bbal">…</div><div class="bl">档案币</div><div class="bh">余额云端同步 · 10秒自动刷新</div></div><h3 class="rt">充值</h3><div class="cp">'+pk.map(function(k){var p=CP[k];var ico={small:'🪙',medium:'🪙',large:'💰',huge:'🔮'};return'<div class="ci"><div class="cii">'+ico[k]+'</div><div class="cin">'+p.n+'</div><div class="cic">+'+p.c+'🧱</div><div class="cip">¥'+p.p+'</div><div class="cid">'+p.d+'</div><button class="br" data-p="'+k+'">购买</button></div>'}).join('')+'</div><h3 class="rt">档案服务</h3><div class="si"><div class="sm'+(bal>=20?'':' sml')+'"><div class="smi">🕯</div><div class="smn">档案馆通灵</div><div class="smc">20 🧱</div><div class="smd">写下你想说的话，档案馆以它的身份与风格精准回应你。</div><button class="bb" data-i="seance"'+(bal>=20?'':' disabled')+'>'+(bal>=20?'开启通灵':'余额不足')+'</button></div><div class="sm'+(bal>=5?'':' sml')+'"><div class="smi">📁</div><div class="smn">解锁随机隐藏档案</div><div class="smc">5 🧱</div><div class="smd">打开从未公开的档案。来自深网、废弃病历、绝密文件——真实度极高。</div><button class="bb" data-i="hidden_archive"'+(bal>=5?'':' disabled')+'>'+(bal>=5?'解锁档案':'余额不足')+'</button></div></div><div class="rf">档案币永不过期。充值仅用于支持档案馆运营。<br>支付后提交交易单号，管理员验证后自动发放。</div></div>';
  c.querySelectorAll('.br').forEach(function(b){b.addEventListener('click',function(){showPay(this.dataset.p)})});
  c.querySelectorAll('.bb').forEach(function(b){b.addEventListener('click',function(){if(bal>=20||bal>=5){this.dataset.i==='seance'?showSeance():showArchive()}else{toast('🧱 余额不足',2500)}})});
  injCss();
- syncBalanceFromGist(function(ok,newBal){if(ok){var be=document.getElementById('bbal');if(be){be.textContent=newBal;bal=newBal;try{localStorage.setItem('mc',bal)}catch(e){}}}});
- // 余额轮询：每10秒从Gist同步
- setInterval(function(){syncBalanceFromGist(function(ok,newBal){if(ok){var be=document.getElementById('bbal');if(be&&newBal>bal){be.textContent=newBal;bal=newBal;try{localStorage.setItem('mc',bal)}catch(e){}be.style.color='#ffd700';setTimeout(function(){be.style.color='#d4b88c'},1500)}}})},10000);
+ // 首次加载余额
+ syncBalance(function(ok,newBal,prev){
+  var be=document.getElementById('bbal');
+  if(be&&newBal!==undefined){be.textContent=newBal;bal=newBal;try{localStorage.setItem('mc',bal)}catch(e){}}
+ });
+ // 10秒轮询
+ setInterval(function(){
+  syncBalance(function(ok,newBal,prev){
+   var be=document.getElementById('bbal');
+   if(!be)return;
+   if(ok&&newBal!==be.textContent*1){
+    be.textContent=newBal;
+    if(newBal>(be.textContent*1||bal)){
+     be.style.color='#ffd700';
+     setTimeout(function(){be.style.color='#d4b88c'},1500);
+    }
+    bal=newBal;
+    try{localStorage.setItem('mc',bal)}catch(e){}
+   }
+  });
+ },10000);
 }
-function showPay(k){var ex=document.querySelector('.po');if(ex)ex.remove();var p=CP[k];var oid='MA-'+Date.now().toString(36).toUpperCase();var ov=document.createElement('div');ov.className='po';ov.innerHTML='<div class="pm"><div class="px">✕</div><div class="ph"><div class="pi">'+(k==='huge'?'🔮':k==='large'?'💰':'🪙')+'</div><h3>'+p.n+'</h3><p>'+p.d+'</p></div><div class="pd"><div class="pr"><span>获得</span><span>+'+p.c+' 🧱</span></div><div class="pr"><span>支付</span><span class="pp">¥'+p.p+'</span></div><div class="pr pro"><span>订单号</span><span class="poi">'+oid+'</span></div></div><div class="pq"><img src="../assets/alipay-qr.jpg" alt="收款码" class="pqi" onerror="this.style.display=\x27none\x27"><p class="pqh">📱 支付宝扫一扫</p><p class="pqs">⚠ <strong>必须备注订单号</strong>：'+oid+'</p></div><div class="pv"><p class="pvh">请输入支付宝「交易单号」进行验证<br><span style="font-size:.65rem;color:rgba(200,160,120,.2)">支付宝 → 账单 → 付款详情 → 交易单号</span></p><input class="pvi" id="pvi" placeholder="20240801XXXXXXXXXXXX"><p class="pve" id="pve" style="display:none"></p></div><div class="pa"><button class="bv" data-k="'+k+'" data-o="'+oid+'">🔍 提交交易单号等待验证</button><button class="bc2">取消</button></div></div>';ov.querySelector('.bc2').onclick=function(){ov.remove()};ov.querySelector('.px').onclick=function(){ov.remove()};ov.querySelector('.bv').onclick=function(){var tid=document.getElementById('pvi').value.trim();var er=document.getElementById('pve');if(!tid||tid.length<15){er.style.display='block';er.textContent='请输入有效的支付宝交易单号（在支付宝账单详情中可找到）';return}er.style.display='none';submitOrder(k,this.dataset.o,tid);ov.remove();toast('📋 订单已提交到Gist，验证通过后自动到账。刷新页面可同步余额。',5000);};ov.addEventListener('click',function(e){if(e.target===ov)ov.remove()});document.body.appendChild(ov);setTimeout(function(){document.getElementById('pvi').focus()},500);}
+function showPay(k){var ex=document.querySelector('.po');if(ex)ex.remove();var p=CP[k];var oid='MA-'+Date.now().toString(36).toUpperCase();var ov=document.createElement('div');ov.className='po';ov.innerHTML='<div class="pm"><div class="px">✕</div><div class="ph"><div class="pi">'+(k==='huge'?'🔮':k==='large'?'💰':'🪙')+'</div><h3>'+p.n+'</h3><p>'+p.d+'</p></div><div class="pd"><div class="pr"><span>获得</span><span>+'+p.c+' 🧱</span></div><div class="pr"><span>支付</span><span class="pp">¥'+p.p+'</span></div><div class="pr pro"><span>订单号</span><span class="poi">'+oid+'</span></div></div><div class="pq"><img src="../assets/alipay-qr.jpg" alt="收款码" class="pqi" onerror="this.style.display=\x27none\x27"><p class="pqh">📱 支付宝扫一扫</p><p class="pqs">⚠ <strong>必须备注订单号</strong>：'+oid+'</p></div><div class="pv"><p class="pvh">请输入支付宝「交易单号」进行验证<br><span style="font-size:.65rem;color:rgba(200,160,120,.2)">支付宝 → 账单 → 付款详情 → 交易单号</span></p><input class="pvi" id="pvi" placeholder="20240801XXXXXXXXXXXX"><p class="pve" id="pve" style="display:none"></p></div><div class="pa"><button class="bv" data-k="'+k+'" data-o="'+oid+'">🔍 提交交易单号等待验证</button><button class="bc2">取消</button></div></div>';ov.querySelector('.bc2').onclick=function(){ov.remove()};ov.querySelector('.px').onclick=function(){ov.remove()};ov.querySelector('.bv').onclick=function(){var tid=document.getElementById('pvi').value.trim();var er=document.getElementById('pve');if(!tid||tid.length<15){er.style.display='block';er.textContent='请输入有效的支付宝交易单号（在支付宝账单详情中可找到）';return}er.style.display='none';submitOrder(k,this.dataset.o,tid);ov.remove();toast('📋 订单已提交，管理员验证后自动发放。10秒内刷新余额。',5000);};ov.addEventListener('click',function(e){if(e.target===ov)ov.remove()});document.body.appendChild(ov);setTimeout(function(){document.getElementById('pvi').focus()},500);}
 function showSeance(){var ex=document.querySelector('.se');if(ex)ex.remove();var ov=document.createElement('div');ov.className='se';var done=false;ov.innerHTML='<div class="smd"><div class="sx">✕</div><div class="sh"><div class="si2">🕯</div><h3>档案馆通灵</h3><p>这里的光线很暗。你说的话，档案馆会听见。</p></div><div class="sw"><textarea class="stx" placeholder="你想对档案馆说什么..." rows="4"></textarea></div><div class="sr2" style="display:none"></div><div class="sa2"><button class="bsd">🕯 发送低语</button><button class="bcl">关闭</button></div></div>';ov.querySelector('.bcl').onclick=function(){ov.remove()};ov.querySelector('.sx').onclick=function(){ov.remove()};ov.querySelector('.bsd').onclick=function(){if(done)return;var inp=ov.querySelector('.stx');var t=inp.value.trim();if(!t){toast('请写下你想说的话...',2000);return}done=true;inp.disabled=true;if(bal>=20){bal-=20;try{localStorage.setItem('mc',bal)}catch(e){}}var rd=ov.querySelector('.sr2');var ac=ov.querySelector('.sa2');ac.innerHTML='<button class="bcl">关闭</button>';ac.querySelector('.bcl').onclick=function(){ov.remove()};var reply=getSeanceReply(t);rd.style.display='block';rd.innerHTML='';var i=0;var ch=reply.split('');var ti=setInterval(function(){if(i<ch.length){rd.innerHTML+=ch[i]==='\n'?'<br>':ch[i];i++;rd.scrollTop=rd.scrollHeight}else{clearInterval(ti)}},30);var recs=JSON.parse(localStorage.getItem('ms')||'[]');recs.push({text:t,reply:reply,time:new Date().toISOString()});localStorage.setItem('ms',JSON.stringify(recs.slice(-20)));};document.body.appendChild(ov);setTimeout(function(){ov.querySelector('.stx').focus()},400);}
 function showArchive(){var ex=document.querySelector('.ao');if(ex)ex.remove();var arch=getRandomArchive();if(bal>=5){bal-=5;try{localStorage.setItem('mc',bal)}catch(e){}}var ov=document.createElement('div');ov.className='ao';ov.innerHTML='<div class="am"><div class="ax">✕</div><div class="ast">🔓 已解锁</div><div class="atr"><span class="ai2">📁</span><span class="ati">'+arch.t+'</span></div><div class="amt"><span>'+arch.g+'</span><span>'+arch.d+'</span></div><div class="ad"></div><div class="ac">'+arch.x+'</div><div class="aw">⚠ 此档案的真实性未经档案馆核实。请勿试图验证其内容。</div><button class="bac">我已阅读，关闭档案</button></div>';ov.querySelector('.bac').onclick=function(){ov.remove()};ov.querySelector('.ax').onclick=function(){ov.remove()};ov.addEventListener('click',function(e){if(e.target===ov)ov.remove()});document.body.appendChild(ov);}
 function toast(msg,d){d=d||3000;var ex=document.querySelector('.rt2');if(ex)ex.remove();var t=document.createElement('div');t.className='rt2';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(10px)';setTimeout(function(){t.remove()},300)},d);}
@@ -94,44 +130,6 @@ function injCss(){if(cssDone)return;cssDone=true;
 var s=document.createElement('style');
 s.textContent='.rs{max-width:700px;margin:0 auto;padding:2rem 1rem}.bc{text-align:center;padding:2rem;background:linear-gradient(180deg,rgba(200,160,120,.08),rgba(200,160,120,.02));border:1px solid rgba(200,160,120,.12);border-radius:12px;margin-bottom:2.5rem}.bi{font-size:2.5rem;margin-bottom:.5rem}.ba{font-size:3rem;font-weight:700;color:#d4b88c;font-family:"JetBrains Mono",monospace}.bl{font-size:.85rem;color:rgba(200,160,120,.5);margin-top:.3rem}.bh{font-size:.7rem;color:rgba(200,160,120,.25);margin-top:.5rem;font-style:italic}.rt{font-size:1.1rem;color:rgba(200,160,120,.6);margin:2rem 0 1rem;padding-left:.5rem;border-left:2px solid rgba(200,160,120,.3)}.cp{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:2rem}.ci{background:rgba(200,160,120,.03);border:1px solid rgba(200,160,120,.08);border-radius:10px;padding:1.5rem 1rem;text-align:center;transition:all .3s}.ci:hover{border-color:rgba(200,160,120,.2);background:rgba(200,160,120,.06);transform:translateY(-2px)}.cii{font-size:2rem;margin-bottom:.5rem}.cin{font-size:1rem;font-weight:600;color:#d4b88c}.cic{font-size:1.5rem;font-weight:700;color:#c8a070;margin:.5rem 0}.cip{font-size:1.2rem;color:rgba(255,255,255,.7)}.cid{font-size:.75rem;color:rgba(200,160,120,.35);margin:0 0 1rem;font-style:italic}.br{padding:.5rem 1.5rem;background:transparent;border:1px solid rgba(200,160,120,.3);color:#c8a070;border-radius:6px;cursor:pointer;font-family:inherit;font-size:.85rem}.br:hover{background:rgba(200,160,120,.15);border-color:rgba(200,160,120,.5)}.si{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem}@media(max-width:600px){.si{grid-template-columns:1fr}}.sm{background:rgba(200,160,120,.025);border:1px solid rgba(200,160,120,.06);border-radius:10px;padding:1.5rem;display:flex;flex-direction:column;gap:.6rem;transition:all .3s}.sm:hover{border-color:rgba(200,160,120,.15);background:rgba(200,160,120,.04)}.sml{opacity:.45}.smi{font-size:2rem}.smn{font-size:1.1rem;color:#d4b88c;font-weight:600}.smc{font-size:.9rem;color:#c8a070;font-weight:600}.smd{font-size:.8rem;color:rgba(200,160,120,.35);line-height:1.5;flex:1}.bb{padding:.5rem 1.5rem;background:transparent;border:1px solid rgba(200,160,120,.2);color:#c8a070;border-radius:6px;cursor:pointer;font-family:inherit;font-size:.85rem;margin-top:auto}.bb:hover:not(:disabled){background:rgba(200,160,120,.15);border-color:rgba(200,160,120,.4)}.bb:disabled{opacity:.3;cursor:not-allowed}.rf{text-align:center;color:rgba(200,160,120,.2);font-size:.75rem;margin-top:2rem;line-height:1.8}';
 document.head.appendChild(s);}
-window.MidnightRecharge={COIN_PACKAGES:CP,getBalance:gb,renderRecharge:renderRecharge,renderTopbarCoin:renderTopbarCoin,showToast:toast,submitOrder:submitOrder,syncBalanceFromGist:syncBalanceFromGist,
- // 管理员验证函数：直接 PATCH Gist 发放余额
- verifyOrder: function(oid, cb) {
-  var xhr=new XMLHttpRequest();
-  xhr.open('GET',GIST_API,true);
-  xhr.setRequestHeader('Authorization','Bearer '+GIST_TOKEN);
-  xhr.setRequestHeader('Accept','application/vnd.github.v3+json');
-  xhr.onload=function(){
-   if(xhr.status!==200){if(cb)cb(false);return}
-   try{
-    var gist=JSON.parse(xhr.responseText);
-    var bf=gist.files&&gist.files['balance.json'];
-    if(!bf){if(cb)cb(false);return}
-    var bd=JSON.parse(bf.content||'{}');
-    var found=false;
-    for(var i=0;i<(bd.pending_orders||[]).length;i++){
-     var o=bd.pending_orders[i];
-     if(o.oid===oid&&o.st==='pending'){
-      var coins=CP[o.pk]?CP[o.pk].c:10;
-      bd.coins=(bd.coins||0)+coins;
-      o.st='verified';
-      found=coins;
-      break;
-     }
-    }
-    if(!found){if(cb)cb(false,'not_found');return}
-    bd.last_updated=new Date().toISOString();
-    var px=new XMLHttpRequest();
-    px.open('PATCH',GIST_API,true);
-    px.setRequestHeader('Authorization','Bearer '+GIST_TOKEN);
-    px.setRequestHeader('Accept','application/vnd.github.v3+json');
-    px.setRequestHeader('Content-Type','application/json');
-    px.onload=function(){if(cb)cb(px.status===200,found)};
-    px.send(JSON.stringify({files:{'balance.json':{content:JSON.stringify(bd)}}}));
-   }catch(e){if(cb)cb(false)}
-  };
-  xhr.send();
- }
-};
-console.log('[Archive] 充值系统 v8 | 余额',bal,'🧱 | 订单Gist同步 + 余额Gist同步');
+window.MidnightRecharge={COIN_PACKAGES:CP,getBalance:gb,renderRecharge:renderRecharge,renderTopbarCoin:renderTopbarCoin,showToast:toast,submitOrder:submitOrder,syncBalance:syncBalance};
+console.log('[Archive] 充值系统 v9 | 余额',bal,'🧱 | Contents API 替代 Gist');
 })();
