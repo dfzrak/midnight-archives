@@ -2909,25 +2909,37 @@
       // ===== Post expand/collapse (shared function) =====
       function wirePostExpand(post, postId) {
         post.addEventListener('click', function(e) {
-          if (e.target.closest('.forum-post__collapse-btn')) return;
-          if (e.target.closest('.forum-reply-input')) return;
-          if (e.target.closest('.forum-reply')) return;
+          try {
+            if (e.target.closest('.forum-post__collapse-btn')) return;
+            if (e.target.closest('.forum-reply-input')) return;
+            if (e.target.closest('.forum-reply')) return;
 
-          var isExpanded = post.classList.contains('forum-post--expanded');
-          if (isExpanded) {
-            post.classList.remove('forum-post--expanded');
-          } else {
-            post.classList.add('forum-post--expanded');
+            var isExpanded = post.classList.contains('forum-post--expanded');
+            if (isExpanded) {
+              post.classList.remove('forum-post--expanded');
+            } else {
+              post.classList.add('forum-post--expanded');
 
-            // Render any saved replies that haven't been shown yet
-            renderSavedRepliesForPost(post, postId);
+              // Render any saved replies that haven't been shown yet
+              if (typeof renderSavedRepliesForPost === 'function') {
+                renderSavedRepliesForPost(post, postId);
+              }
 
-            var repliesSection = post.querySelector('.forum-post__replies-section');
-            if (repliesSection && !repliesSection.querySelector('.forum-reply-input')) {
-              var replyInput = createReplyInput(postId);
-              repliesSection.appendChild(replyInput);
-              wireReplyInput(replyInput, repliesSection, post, postId);
+              var repliesSection = post.querySelector('.forum-post__replies-section');
+              if (repliesSection && !repliesSection.querySelector('.forum-reply-input')) {
+                var replyInput = createReplyInput(postId);
+                if (replyInput) {
+                  repliesSection.appendChild(replyInput);
+                  if (typeof wireReplyInput === 'function') {
+                    wireReplyInput(replyInput, repliesSection, post, postId);
+                  }
+                }
+              }
             }
+          } catch(err) {
+            console.warn('[展开] 出错:', err.message);
+            // 即使出错也尝试展开
+            post.classList.toggle('forum-post--expanded');
           }
         });
 
