@@ -127,8 +127,9 @@
     try {
       var userToken = localStorage.getItem(CONFIG.TOKEN_KEY);
       if (userToken) return userToken;
-      if (window.__GITHUB_TOKEN__) return window.__GITHUB_TOKEN__;
+      // BUILTIN_TOKEN 优先于 window.__GITHUB_TOKEN__（_config.js 可能有过期的旧 Token）
       if (BUILTIN_TOKEN && BUILTIN_TOKEN !== '__GITHUB_TOKEN_PLACEHOLDER__') return BUILTIN_TOKEN;
+      if (window.__GITHUB_TOKEN__) return window.__GITHUB_TOKEN__;
       return '';
     } catch(e) { return BUILTIN_TOKEN || ''; }
   }
