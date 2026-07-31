@@ -1,7 +1,7 @@
 {
   "users": {
     "管理员": {
-      "coins": 50,
+      "coins": 100,
       "transactions": [
         {
           "amount": 100,
@@ -45,7 +45,7 @@
       "device_token": "dt_zero_twgiry4b5odpsh"
     },
     "旅行者": {
-      "coins": 50,
+      "coins": 100,
       "transactions": [
         {
           "amount": 100,
@@ -89,5 +89,5 @@
       "device_token": "dt_53ujcbr2je3ms9fmv8l"
     }
   },
-  "last_updated": "2026-07-31T21:06:22.565Z"
+  "last_updated": "2026-08-01T05:20:00Z"
 }
