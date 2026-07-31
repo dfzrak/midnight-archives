@@ -1,0 +1,15 @@
+{
+  "coins": 10,
+  "pending_orders": [
+    {
+      "oid": "MA-MS978MHE",
+      "pk": "small",
+      "tid": "2026080123001431861427306829",
+      "tm": 1785517932443,
+      "st": "verified",
+      "verified_by": "manual",
+      "verified_at": "2026-08-01T01:20:00+08:00"
+    }
+  ],
+  "last_updated": "2026-08-01T01:20:00+08:00"
+}
