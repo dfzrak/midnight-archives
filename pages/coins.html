@@ -179,7 +179,7 @@ function register(name, cb){
   if(err){cb('注册失败，请重试');return}
   _username=name;
   _coins=0;
-  try{localStorage.setItem('ma_username',name)}catch(e){}
+  try{localStorage.setItem('midnight_archives_username',name)}catch(e){}
   cb(null);
  });
 }
@@ -189,7 +189,7 @@ function login(name,cb){
  if(!_users[name]){cb('用户名不存在，请先注册');return}
  _username=name;
  _coins=_users[name].coins||0;
- try{localStorage.setItem('ma_username',name)}catch(e){}
+ try{localStorage.setItem('midnight_archives_username',name)}catch(e){}
  cb(null);
 }
 
@@ -318,7 +318,7 @@ function setupServices(){
 
 // Init
 var savedName=null;
-try{savedName=localStorage.getItem('ma_username')}catch(e){}
+try{savedName=localStorage.getItem('midnight_archives_username')}catch(e){}
 
 loadUsers(function(err){
  if(err){toast('⚠ 无法连接服务器');showLogin();updateUI();return}
@@ -351,7 +351,7 @@ loadUsers(function(err){
 setTimeout(function(){
  document.getElementById('user-badge').onclick=function(){
   _username=null;_coins=0;
-  try{localStorage.removeItem('ma_username')}catch(e){}
+  try{localStorage.removeItem('midnight_archives_username')}catch(e){}
   showLogin();
   updateUI();
   toast('已退出，请重新登录或注册');
