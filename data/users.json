@@ -1,7 +1,7 @@
 {
   "users": {
     "管理员": {
-      "coins": 90,
+      "coins": 70,
       "transactions": [
         {
           "amount": 100,
@@ -17,6 +17,11 @@
           "amount": -5,
           "desc": "解锁档案",
           "time": "2026-07-31T20:44:48.083Z"
+        },
+        {
+          "amount": -20,
+          "desc": "通灵",
+          "time": "2026-07-31T20:45:01.990Z"
         }
       ],
       "registered_at": "2026-08-01T04:35:00Z",
@@ -41,5 +46,5 @@
       "device_token": "dt_traveler_1bedrd381lfv"
     }
   },
-  "last_updated": "2026-07-31T20:44:48.083Z"
+  "last_updated": "2026-07-31T20:45:01.990Z"
 }
