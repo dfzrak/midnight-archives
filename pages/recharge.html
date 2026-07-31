@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>档案币充值 — 午夜档案馆</title>
+  <link rel="stylesheet" href="../colors_and_type.css">
+  <script src="../shared_data.js?v=4"></script>
+  <script src="../ai/recharge.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      background: #050508;
+      color: var(--brand-foreground);
+      font-family: var(--font-sans);
+    }
+    .page-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+    }
+    .back-link {
+      display: inline-block;
+      color: rgba(200,160,120,0.4);
+      font-size: 0.8rem;
+      text-decoration: none;
+      margin-bottom: 2rem;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: rgba(200,160,120,0.7); }
+    #recharge-root { min-height: 400px; }
+  </style>
+</head>
+<body>
+  <div class="page-container">
+    <a href="../index.html" class="back-link">← 返回档案馆</a>
+    <div id="recharge-root"></div>
+  </div>
+
+  <script>
+    (function() {
+      if (window.MidnightRecharge) {
+        MidnightRecharge.renderRecharge('recharge-root');
+      } else {
+        document.getElementById('recharge-root').innerHTML = 
+          '<p style="color:rgba(200,160,120,0.4);text-align:center;padding:4rem 0;">充值系统加载中...</p>';
+      }
+    })();
+  </script>
+</body>
+</html>
