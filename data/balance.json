@@ -1,7 +1,5 @@
 {
   "coins": 0,
-  "pending_orders": [],
-  "verified_orders": [],
-  "fake_orders": [],
-  "last_updated": "2026-08-01T02:40:00Z"
+  "transactions": [],
+  "last_updated": "2026-08-01T19:35:00Z"
 }
