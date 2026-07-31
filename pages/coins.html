@@ -45,6 +45,14 @@ body{min-height:100vh;background:var(--bg);color:var(--t);font-family:"Noto Seri
 .mx:hover{color:var(--t);background:rgba(200,160,120,.08)}
 input[type=text]{padding:.55rem .7rem;background:rgba(200,160,120,.05);border:1px solid var(--bd);border-radius:6px;color:var(--t);font-family:inherit;font-size:.85rem;outline:none;width:100%}
 input[type=text]:focus{border-color:rgba(200,160,120,.35)}
+
+@keyframes seanceFlicker{0%,100%{opacity:1;filter:brightness(1)}30%{opacity:.7;filter:brightness(1.3)}60%{opacity:.9;filter:brightness(.8)}80%{opacity:1;filter:brightness(1.1)}}
+@keyframes seanceAppear{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes sealBreak{0%{opacity:0;transform:scale(0) rotate(-20deg)}60%{opacity:1;transform:scale(1.15) rotate(3deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+@keyframes coinDrop{0%{opacity:0;transform:translateY(-60px) scale(.5)}40%{opacity:1;transform:translateY(2px) scale(1.05)}60%{transform:translateY(-3px) scale(.98)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes dustFloat{0%{opacity:0;transform:translateY(0) rotate(0)}50%{opacity:.6}100%{opacity:0;transform:translateY(-40px) rotate(45deg)}}
+.seance-box .seance-response::-webkit-scrollbar,.archive-box .archive-content::-webkit-scrollbar{width:3px}
+.seance-box .seance-response::-webkit-scrollbar-thumb,.archive-box .archive-content::-webkit-scrollbar-thumb{background:rgba(200,160,120,.08);border-radius:3px}
 </style>
 </head>
 <body>
@@ -131,16 +139,34 @@ function getRep(t){
 }
 
 function spend(am,desc,cb){
+ _lastSpend=Date.now();
+ // Optimistic UI update: deduct immediately, sync to server
+ coin=Math.max(0,coin-am);
+ updateBalanceDOM();
+ updSvc();
+ 
  fUsers(function(e){
-  if(e){cb(false);return}
-  if(!all[me]){cb(false);return}
+  if(e){coin+=am;updateBalanceDOM();updSvc();cb(false);return}
+  if(!all[me]){coin+=am;updateBalanceDOM();updSvc();cb(false);return}
   all[me].coins=Math.max(0,(all[me].coins||0)-am);
   if(!all[me].transactions)all[me].transactions=[];
   all[me].transactions.push({amount:-am,desc:desc,time:new Date().toISOString()});
   all[me].transactions=all[me].transactions.slice(-30);
-  coin=all[me].coins;
-  sUsers(me+'消费',function(e){cb(!e)});
+  // Sync back server value in case server had different balance
+  var serverCoin=all[me].coins;
+  sUsers(me+'消费',function(e2){
+   if(e2){coin=serverCoin;updateBalanceDOM();updSvc();}
+   cb(!e2);
+  });
  });
+}
+
+function updateBalanceDOM(){
+ var be=document.getElementById('bal');
+ if(!be)return;
+ be.textContent=coin;
+ be.classList.add('flash');
+ setTimeout(function(){be.classList.remove('flash')},1500);
 }
 
 function genDeviceToken(){return 'dt_'+Math.random().toString(36).substring(2,16)+Date.now().toString(36);}
@@ -207,35 +233,38 @@ function bindSvc(){
  var b0=document.getElementById('b0');
  if(b0)b0.onclick=function(){
   if(coin<20){toast('🧱 余额不足');return}
-  var ov=document.createElement('div');ov.className='mo';
-  ov.innerHTML='<div class="mb"><div class="mx">✕</div><h3 style="text-align:center;margin-bottom:.6rem">🕯 档案馆通灵</h3><p style="font-size:.7rem;color:var(--m);text-align:center;margin-bottom:.8rem">这里的光线很暗。你说的话，档案馆会听见。</p><textarea style="width:100%;padding:.7rem;background:rgba(200,160,120,.04);border:1px solid rgba(200,160,120,.12);border-radius:8px;color:var(--t);font-family:inherit;font-size:.82rem;resize:vertical;outline:none;margin-bottom:.8rem;min-height:80px" class="stx" placeholder="你想对档案馆说什么..."></textarea><div class="sr" style="display:none;padding:.8rem;background:rgba(200,160,120,.03);border-radius:8px;color:rgba(200,160,120,.65);font-size:.82rem;line-height:1.7;min-height:60px;max-height:200px;overflow-y:auto;margin-bottom:.8rem;white-space:pre-wrap"></div><div style="display:flex;gap:.6rem"><button class="btn btn-p" style="flex:1" id="bsd">🕯 发送</button><button class="btn" style="flex:1" id="bcl">关闭</button></div></div>';
+  spend(20,'通灵',function(ok){
+   if(!ok){toast('交易失败，请重试');return}
+   // Immersive overlay
+   var ov=document.createElement('div');ov.className='mo';
+   ov.innerHTML='<div class="mb seance-box" style="text-align:center;padding:2.5rem 2rem;background:#0a0a12;border:1px solid rgba(200,160,120,.08);border-radius:16px;position:relative;overflow:hidden"><div class="seance-bg" style="position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at center,rgba(180,130,80,.03) 0%,transparent 70%);pointer-events:none"></div><div class="mx" style="position:absolute;top:.8rem;right:.8rem;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(200,160,120,.3);font-size:1.2rem;border-radius:50%;z-index:10">✕</div><div class="seance-candle" style="font-size:2.5rem;margin-bottom:1rem;animation:seanceFlicker 2s infinite">🕯</div><h3 class="seance-title" style="color:#c8a070;font-size:.9rem;letter-spacing:.2em;margin-bottom:1.5rem;text-transform:uppercase;opacity:0;animation:seanceAppear .8s .3s forwards">档案馆正在聆听</h3><div class="seance-response" style="min-height:80px;max-height:180px;overflow-y:auto;color:rgba(200,160,120,.55);font-size:.82rem;line-height:1.9;text-align:left;white-space:pre-wrap;opacity:0;animation:seanceAppear .8s .6s forwards;padding:0 1rem"></div><div class="seance-footer" style="margin-top:1.5rem;opacity:0;animation:seanceAppear .8s 1.5s forwards"><button class="btn btn-p seance-close-btn" style="font-size:.78rem;padding:.4rem 1.8rem">关闭档案</button></div></div>';
   ov.querySelector('.mx').onclick=function(){ov.remove()};
-  ov.querySelector('#bcl').onclick=function(){ov.remove()};
-  var done=false;
-  ov.querySelector('#bsd').onclick=function(){
-   if(done)return;var t=ov.querySelector('.stx').value.trim();if(!t){toast('请写下你想说的话...');return}
-   done=true;ov.querySelector('.stx').disabled=true;
-   spend(20,'通灵',function(ok){if(ok){coin-=20;updSvc();document.getElementById('bal').textContent=coin}});
-   var rd=ov.querySelector('.sr');rd.style.display='block';var reply=getRep(t);
-   var i=0,ch=reply.split('');
-   var ti=setInterval(function(){if(i<ch.length){rd.innerHTML+=ch[i]==='\n'?'<br>':ch[i];i++;rd.scrollTop=rd.scrollHeight}else clearInterval(ti)},25);
-   ov.querySelector('#bsd').remove();
-  };
+  ov.querySelector('.seance-close-btn').onclick=function(){ov.remove()};
+  ov.addEventListener('click',function(e){if(e.target===ov)ov.remove()});
   document.body.appendChild(ov);
-  setTimeout(function(){ov.querySelector('.stx').focus()},300);
- };
+  var respEl=ov.querySelector('.seance-response');
+  var reply=getRep('');
+  var i=0,chars=reply.split('');
+  var ti=setInterval(function(){
+   if(i<chars.length){respEl.textContent+=chars[i]==='\n'?'\n':chars[i];i++;respEl.scrollTop=respEl.scrollHeight}else clearInterval(ti);
+  },30);
+  return;
+ });
+};};
  var b1=document.getElementById('b1');
  if(b1)b1.onclick=function(){
   if(coin<5){toast('🧱 余额不足');return}
   var arch=getArc();
-  spend(5,'解锁档案',function(ok){if(ok){coin-=5;updSvc();document.getElementById('bal').textContent=coin}});
-  var ov=document.createElement('div');ov.className='mo';
-  ov.innerHTML='<div class="mb"><div class="mx">✕</div><div style="text-align:center;color:#ffd700;font-size:.75rem;font-weight:600;margin-bottom:.8rem">🔓 已解锁</div><div style="text-align:center;margin-bottom:.8rem"><span style="font-size:2rem">📁</span><div style="font-size:.9rem;color:var(--t);margin:.3rem 0">'+arch.t+'</div></div><div style="display:flex;justify-content:space-between;font-size:.65rem;color:rgba(200,160,120,.2);margin-bottom:.8rem"><span>'+arch.g+'</span><span>'+arch.d+'</span></div><div style="color:rgba(200,160,120,.5);font-size:.8rem;line-height:1.7;white-space:pre-wrap">'+arch.x+'</div><div style="margin-top:.8rem;padding:.6rem;background:rgba(255,180,100,.03);border:1px solid rgba(200,160,120,.06);border-radius:6px;font-size:.65rem;color:rgba(200,160,120,.2);text-align:center">⚠ 此档案真实性未经核实</div><button class="btn btn-p" style="width:100%;margin-top:.8rem">我已阅读，关闭</button></div>';
+  spend(5,'解锁档案',function(ok){
+   if(!ok){toast('交易失败，请重试');return}
+   var ov=document.createElement('div');ov.className='mo';
+   ov.innerHTML='<div class="mb archive-box" style="text-align:center;padding:2.5rem 2rem;background:#0a0a12;border:1px solid rgba(200,160,120,.08);border-radius:16px;position:relative;overflow:hidden;max-width:520px;width:92%"><div class="archive-bg" style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg,rgba(80,180,120,.02) 0%,transparent 50%);pointer-events:none"></div><div class="mx" style="position:absolute;top:.8rem;right:.8rem;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(200,160,120,.3);font-size:1.2rem;border-radius:50%;z-index:10">✕</div><div class="archive-seal" style="font-size:2.5rem;margin-bottom:.8rem;animation:sealBreak .6s .2s ease-out forwards;opacity:0;transform:scale(0)">📁</div><div class="archive-stamp" style="color:#ffd700;font-size:.65rem;letter-spacing:.15em;margin-bottom:1rem;opacity:0;animation:seanceAppear .6s .4s forwards">🔓 档案已解锁</div><h3 class="archive-title" style="font-size:.95rem;color:#c8a070;margin-bottom:.4rem;opacity:0;animation:seanceAppear .6s .6s forwards">'+arch.t+'</h3><div style="display:flex;justify-content:center;gap:1.5rem;font-size:.6rem;color:rgba(200,160,120,.15);margin-bottom:1rem;opacity:0;animation:seanceAppear .6s .8s forwards"><span>'+arch.g+'</span><span>'+arch.d+'</span></div><div class="archive-content" style="color:rgba(200,160,120,.5);font-size:.8rem;line-height:1.8;text-align:left;white-space:pre-wrap;opacity:0;animation:seanceAppear .6s 1s forwards;padding:0 .5rem;max-height:220px;overflow-y:auto">'+arch.x+'</div><div style="margin-top:1rem;padding:.5rem;background:rgba(255,180,100,.015);border:1px solid rgba(200,160,120,.04);border-radius:6px;font-size:.6rem;color:rgba(200,160,120,.15);text-align:center;opacity:0;animation:seanceAppear .6s 1.2s forwards">⚠ 此档案真实性未经核实</div><button class="btn btn-p archive-close-btn" style="margin-top:1rem;font-size:.78rem;padding:.4rem 1.8rem;opacity:0;animation:seanceAppear .6s 1.4s forwards">我已阅读，关闭</button></div>';
   ov.querySelector('.mx').onclick=function(){ov.remove()};
-  ov.querySelector('button.btn-p').onclick=function(){ov.remove()};
+  ov.querySelector('.archive-close-btn').onclick=function(){ov.remove()};
   ov.addEventListener('click',function(e){if(e.target===ov)ov.remove()});
   document.body.appendChild(ov);
- };
+  });
+};};
 }
 
 // ======== INIT ========
@@ -282,16 +311,19 @@ fUsers(function(e){
  }
 });
 
-// Auto refresh
+// Auto refresh — sync from server
+var _lastSpend=0;
 setInterval(function(){
  if(!me)return;
+ // Don't poll if a spend happened in last 3 seconds (avoid race)
+ if(Date.now()-_lastSpend<3000)return;
  fUsers(function(e){
   if(e||!all[me])return;
   var nb=all[me].coins||0;
   if(nb!==coin){
    var prev=coin;coin=nb;
-   var be=document.getElementById('bal');
-   if(be){be.textContent=coin;if(coin>prev){be.classList.add('flash');setTimeout(function(){be.classList.remove('flash')},1500)}}
+   updateBalanceDOM();
+   if(coin>prev){var be=document.getElementById('bal');if(be){be.classList.add('flash');setTimeout(function(){be.classList.remove('flash')},1500)}}
    updSvc();
   }
  });
