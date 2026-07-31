@@ -299,8 +299,8 @@
         if (!resp.ok) throw new Error('HTTP ' + resp.status);
         return resp.json();
       })
-      .then(function(gist) {
-        var file = gist.files && gist.files[CONFIG.GIST_FILE];
+      .then(function(apiResp) {
+        var file = gist.files && gist.files[CONFIG.DATA_FILE];
         if (!file || !file.content) throw new Error('Gist 文件不存在');
         var remote;
         try {
@@ -308,6 +308,7 @@
         } catch(parseErr) {
           throw new Error('JSON 解析失败');
         }
+        _remoteSha = apiResp.sha;
         if (remote.posts && Array.isArray(remote.posts)) {
           currentData.posts = remote.posts.map(validatePost).filter(Boolean).slice(0, CONFIG.MAX_POSTS);
         }
@@ -367,18 +368,16 @@
         if (callback) callback(false);
       }, 15000);
       fetch(CONFIG.API_URL, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: {
-          'Authorization': 'token ' + token,
+          'Authorization': 'Bearer ' + token,
           'Content-Type': 'application/json',
           'Accept': 'application/vnd.github.v3+json'
         },
         body: JSON.stringify({
-          files: {
-            'forum-data.json': {
-              content: payloadStr
-            }
-          }
+          message: '论坛数据同步',
+          content: btoa(String.fromCharCode.apply(null, new TextEncoder().encode(payloadStr))),
+          sha: _remoteSha
         })
       })
       .then(function(resp) {
