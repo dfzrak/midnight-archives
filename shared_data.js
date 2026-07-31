@@ -11,10 +11,10 @@
 
   // ===== 配置 =====
   var CONFIG = {
-    GIST_ID: '515f358b8f3b72deb914a827aecf5833',
-    GIST_FILE: 'forum-data.json',
+    DATA_FILE: 'data/forum-posts.json',
+    API_URL: 'https://api.github.com/repos/dfzrak/midnight-archives/contents/data/forum-posts.json',
     TOKEN_KEY: 'midnight_archives_gh_token',
-    API_URL: 'https://api.github.com/gists/515f358b8f3b72deb914a827aecf5833',
+    RAW_URL: 'https://raw.githubusercontent.com/dfzrak/midnight-archives/main/data/forum-posts.json',
     SYNC_INTERVAL: 30000,
     LOCAL_POSTS_KEY: 'midnight_archives_posts',
     LOCAL_REPLIES_KEY: 'midnight_archives_replies',
@@ -293,18 +293,18 @@
         if (_syncRetries >= CONFIG.MAX_SYNC_RETRIES) tripCircuitBreaker();
         if (callback) callback(false);
       }, 10000);
-      fetch(CONFIG.API_URL)
+fetch(CONFIG.API_URL + '?t=' + Date.now(), {headers: {'Authorization': 'Bearer ' + BUILTIN_TOKEN, 'Accept': 'application/vnd.github.v3+json'}})
       .then(function(resp) {
         clearTimeout(timeoutId);
         if (!resp.ok) throw new Error('HTTP ' + resp.status);
         return resp.json();
       })
       .then(function(apiResp) {
-        var file = gist.files && gist.files[CONFIG.DATA_FILE];
-        if (!file || !file.content) throw new Error('Gist 文件不存在');
+        if (!apiResp.content) throw new Error('文件不存在');
+        if (!apiResp.content) throw new Error('文件不存在');
         var remote;
         try {
-          remote = JSON.parse(file.content.replace(/^\uFEFF/, ''));
+          rawStr = new TextDecoder().decode(Uint8Array.from(atob(apiResp.content.replace(/\n/g,'')), function(c){return c.charCodeAt(0)}));
         } catch(parseErr) {
           throw new Error('JSON 解析失败');
         }
