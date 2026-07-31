@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>论坛 — 午夜档案馆</title>
   <link rel="stylesheet" href="../colors_and_type.css">
-  <script src="../shared_data.js"></script>
+  <script src="../_config.js"></script>
+  <script src="../security.js"></script>
+  <script src="../shared_data.js?v=3"></script>
   <style>
     /* ===== Forum Page Styles ===== */
 
@@ -459,9 +461,9 @@
       50% { opacity: 1; }
     }
 
-    /* Random flicker on sidebar */
+    /* Random flicker on sidebar (hidden — sidebar removed) */
     .shell-sidebar {
-      animation: sidebar-flicker 40s ease-in-out infinite;
+      display: none !important;
     }
 
     @keyframes sidebar-flicker {
@@ -667,11 +669,12 @@
     .forum-post__expanded-content {
       display: none;
       margin-top: var(--space-3);
-      animation: expand-fade-in 0.35s ease forwards;
+      opacity: 0;
     }
 
     .forum-post--expanded .forum-post__expanded-content {
       display: block;
+      animation: expand-fade-in 0.35s ease forwards;
     }
 
     @keyframes expand-fade-in {
@@ -1200,6 +1203,194 @@
         gap: var(--space-4);
       }
     }
+
+    /* === 恐怖特效 === */
+
+    /* 字体变红 — 更强烈 */
+    @keyframes text-blood {
+      0% { color: inherit; text-shadow: none; }
+      15% { color: #c41010; text-shadow: 0 0 6px rgba(196,16,16,0.5), 0 0 20px rgba(139,0,0,0.3); }
+      50% { color: #8b0000; text-shadow: 0 0 10px rgba(139,0,0,0.8), 0 0 30px rgba(139,0,0,0.4); }
+      85% { color: #c41010; text-shadow: 0 0 6px rgba(196,16,16,0.5); }
+      100% { color: inherit; text-shadow: none; }
+    }
+    .eerie-blood {
+      animation: text-blood 2.5s ease-in-out;
+      position: relative;
+    }
+
+    /* 字体乱码抖动 */
+    @keyframes text-glitch {
+      0% { opacity: 1; transform: translate(0); }
+      5% { opacity: 0.7; transform: translate(-2px, 1px); }
+      10% { opacity: 1; transform: translate(1px, -1px); }
+      15% { opacity: 0.8; transform: translate(-1px, 2px); letter-spacing: 1px; }
+      20% { opacity: 1; transform: translate(0); letter-spacing: 0; }
+      100% { opacity: 1; transform: translate(0); }
+    }
+    .eerie-glitch { animation: text-glitch 1.8s ease-in-out; }
+
+    /* 全屏红色闪光 */
+    @keyframes red-flash-overlay {
+      0% { opacity: 0; }
+      10% { opacity: 0.12; }
+      20% { opacity: 0; }
+      30% { opacity: 0.08; }
+      40% { opacity: 0; }
+      100% { opacity: 0; }
+    }
+    .eerie-red-flash {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(ellipse at center, rgba(139,0,0,0.4) 0%, rgba(80,0,0,0.2) 50%, transparent 80%);
+      z-index: 9999;
+      pointer-events: none;
+      animation: red-flash-overlay 3s ease-out forwards;
+    }
+
+    /* 全屏闪烁 */
+    .eerie-screen-flicker {
+      animation: screen-flicker 0.6s ease;
+    }
+    @keyframes screen-flicker {
+      0% { filter: brightness(1) contrast(1); }
+      10% { filter: brightness(0.7) contrast(1.3); }
+      20% { filter: brightness(1.1) contrast(0.9); }
+      30% { filter: brightness(0.5) contrast(1.5); }
+      40% { filter: brightness(1) contrast(1); }
+      60% { filter: brightness(0.85) contrast(1.2); }
+      80% { filter: brightness(1) contrast(1); }
+      100% { filter: brightness(1) contrast(1); }
+    }
+
+    /* 扫描线效果 */
+    .eerie-scanlines::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.06) 2px,
+        rgba(0,0,0,0.06) 4px
+      );
+      pointer-events: none;
+      z-index: 9998;
+      animation: scanline-drift 8s linear infinite;
+    }
+    @keyframes scanline-drift {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(4px); }
+    }
+
+    /* 帖子阴影扭曲 */
+    .forum-post.eerie-shadow-shift {
+      box-shadow: 0 0 20px rgba(139,0,0,0.15), inset 0 0 30px rgba(0,0,0,0.1);
+      border-color: rgba(139,0,0,0.2) !important;
+    }
+
+    /* 底部闪现文字 */
+    .eerie-ghost-text {
+      position: fixed;
+      bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Noto Serif SC', serif;
+      font-size: 14px;
+      color: rgba(139,0,0,0.6);
+      text-shadow: 0 0 10px rgba(139,0,0,0.3);
+      letter-spacing: 3px;
+      pointer-events: none;
+      z-index: 9997;
+      opacity: 0;
+      transition: opacity 1.5s ease;
+      white-space: nowrap;
+    }
+    .eerie-ghost-text.visible { opacity: 1; }
+
+    /* 规则怪谈浮层 */
+    .rules-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.92);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 2s ease;
+    }
+    .rules-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .rules-card {
+      background: linear-gradient(180deg, #0a0a0a 0%, #080505 100%);
+      border: 1px solid rgba(139, 0, 0, 0.35);
+      border-radius: 6px;
+      padding: 44px 52px;
+      max-width: 540px;
+      width: 90%;
+      box-shadow: 0 0 80px rgba(139, 0, 0, 0.12), inset 0 0 40px rgba(0,0,0,0.5);
+      position: relative;
+    }
+    .rules-card::before {
+      content: '';
+      position: absolute;
+      top: -1px; left: -1px; right: -1px; bottom: -1px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, rgba(139,0,0,0.2), transparent 40%, transparent 60%, rgba(139,0,0,0.1));
+      z-index: -1;
+    }
+    .rules-card__title {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 16px;
+      color: #8b0000;
+      margin-bottom: 28px;
+      text-align: center;
+      letter-spacing: 6px;
+      text-shadow: 0 0 15px rgba(139,0,0,0.4);
+      text-transform: uppercase;
+    }
+    .rules-card__divider {
+      width: 60px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(139,0,0,0.4), transparent);
+      margin: 0 auto 28px;
+    }
+    .rules-card__list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .rules-card__item {
+      font-size: 13px;
+      color: rgba(190,190,190,0.65);
+      line-height: 2;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      font-family: 'Noto Serif SC', serif;
+      transition: color 0.3s ease;
+    }
+    .rules-card__item:last-child { border-bottom: none; }
+    .rules-card__item:hover { color: rgba(196,16,16,0.8); }
+    .rules-card__number {
+      color: #8b0000;
+      margin-right: 10px;
+      font-weight: bold;
+      font-size: 11px;
+      opacity: 0.7;
+    }
+    .rules-card__footer {
+      margin-top: 28px;
+      text-align: center;
+      font-size: 10px;
+      color: rgba(255,255,255,0.1);
+      letter-spacing: 3px;
+      font-family: 'Noto Serif SC', serif;
+    }
   </style>
 </head>
 <body>
@@ -1495,20 +1686,9 @@
         min-height: 100vh;
       }
 
-      /* ===== Left Sidebar ===== */
+      /* ===== Left Sidebar (hidden) ===== */
       .shell-sidebar {
-        position: fixed;
-        top: var(--shell-header-h);
-        left: 0;
-        bottom: 0;
-        width: var(--shell-sidebar-w);
-        background: var(--brand-card);
-        border-right: 1px solid var(--brand-border);
-        overflow-y: auto;
-        padding: var(--space-6) 0;
-        display: flex;
-        flex-direction: column;
-        z-index: 50;
+        display: none !important;
       }
 
       .sidebar-section {
@@ -1617,7 +1797,6 @@
 
       /* ===== Main Content Area ===== */
       .shell-content {
-        margin-left: var(--shell-sidebar-w);
         flex: 1;
         padding: var(--space-8) var(--space-6);
         min-height: calc(100vh - var(--shell-header-h));
@@ -1654,6 +1833,46 @@
         .shell-header__nav {
           gap: var(--space-4);
         }
+      }
+
+      /* Toast 通知 */
+      .toast-notification {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-100%);
+        padding: 12px 24px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-family: 'Noto Serif SC', serif;
+        z-index: 10002;
+        opacity: 0;
+        transition: opacity 0.3s, transform 0.3s;
+        pointer-events: none;
+        max-width: 90%;
+        text-align: center;
+      }
+      .toast-notification.visible {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+      .toast--warning {
+        background: rgba(180, 100, 20, 0.9);
+        color: #ffd;
+        border: 1px solid rgba(220, 140, 40, 0.5);
+        box-shadow: 0 4px 20px rgba(180, 100, 20, 0.3);
+      }
+      .toast--error {
+        background: rgba(160, 30, 30, 0.9);
+        color: #fdd;
+        border: 1px solid rgba(200, 60, 60, 0.5);
+        box-shadow: 0 4px 20px rgba(160, 30, 30, 0.3);
+      }
+      .toast--info {
+        background: rgba(30, 60, 100, 0.9);
+        color: #ddf;
+        border: 1px solid rgba(60, 100, 160, 0.5);
+        box-shadow: 0 4px 20px rgba(30, 60, 100, 0.3);
       }
     </style>
 
@@ -1796,8 +2015,8 @@
         </div>
 
         <!-- Announcement Banner -->
-        <div class="forum-announcement">
-          <span class="forum-announcement__label">公告：</span>深夜 2:00-4:00 系统维护期间，所有已删除帖子将短暂可见。请勿截图。
+        <div class="forum-announcement" id="forum-announcement">
+          <span class="forum-announcement__label">守则：</span><span id="rules-display">论坛开放时间为 23:00 至 05:00。其余时间看到的帖子均非本站内容。</span>
         </div>
 
         <!-- Post List -->
@@ -2414,7 +2633,7 @@
         <div class="naming-modal__title">你是谁？</div>
         <div class="naming-modal__subtitle">档案馆需要知道你的名字。你的每一条发言都将署上此名。</div>
         <input type="text" class="naming-modal__input" id="naming-input" placeholder="输入你的名字..." maxlength="20" autocomplete="off">
-        <div class="naming-modal__hint">2-20个字符，一经设定不可修改</div>
+        <div class="naming-modal__hint">2-20个字符，一经设定仅可修改一次</div>
         <div class="naming-modal__actions">
           <button class="naming-modal__btn naming-modal__btn--confirm" id="naming-confirm" disabled>确认</button>
           <button class="naming-modal__btn naming-modal__btn--skip" id="naming-skip">以后再说</button>
@@ -2459,6 +2678,14 @@
       var namingSkip = document.getElementById('naming-skip');
       var headerAvatar = document.getElementById('header-avatar');
       var headerUsername = document.getElementById('header-username');
+      var NAME_LOCK_KEY = 'midnight_archives_name_locked';
+
+      function isNameLocked() {
+        try { return localStorage.getItem(NAME_LOCK_KEY) === '1'; } catch(e) { return false; }
+      }
+      function lockName() {
+        try { localStorage.setItem(NAME_LOCK_KEY, '1'); } catch(e) {}
+      }
 
       // Update header username display
       function refreshHeaderUsername() {
@@ -2469,25 +2696,19 @@
       }
       refreshHeaderUsername();
 
-      // Open naming modal on avatar click
-      if (headerAvatar) {
-        headerAvatar.addEventListener('click', function() {
-          namingOverlay.classList.add('visible');
-          namingInput.value = getUsername();
-          namingConfirm.disabled = namingInput.value.trim().length < 2;
-          setTimeout(function() { namingInput.focus(); }, 300);
-        });
+      // Open naming modal on avatar click — check lock
+      function openNamingModal() {
+        if (isNameLocked()) {
+          showToast('名字一经设定，不可修改。档案馆不会遗忘。', 'warning');
+          return;
+        }
+        namingOverlay.classList.add('visible');
+        namingInput.value = getUsername();
+        namingConfirm.disabled = namingInput.value.trim().length < 2;
+        setTimeout(function() { namingInput.focus(); }, 300);
       }
-
-      // Also open on username click
-      if (headerUsername) {
-        headerUsername.addEventListener('click', function() {
-          namingOverlay.classList.add('visible');
-          namingInput.value = getUsername();
-          namingConfirm.disabled = namingInput.value.trim().length < 2;
-          setTimeout(function() { namingInput.focus(); }, 300);
-        });
-      }
+      if (headerAvatar) headerAvatar.addEventListener('click', openNamingModal);
+      if (headerUsername) headerUsername.addEventListener('click', openNamingModal);
 
       // Input validation
       if (namingInput) {
@@ -2501,16 +2722,19 @@
         });
       }
 
-      // Confirm naming
+      // Confirm naming — lock after first set
       if (namingConfirm) {
         namingConfirm.addEventListener('click', function() {
           var name = namingInput.value.trim();
           if (name.length < 2) return;
           setUsername(name);
+          lockName();
           refreshHeaderUsername();
           namingOverlay.classList.remove('visible');
-          // Update all existing "你" displays on the page
           applyUsernameToPage();
+          // Update modal hint for future visits
+          var hint = namingOverlay.querySelector('.naming-modal__hint');
+          if (hint) hint.textContent = '名字已锁定，不可修改';
         });
       }
 
@@ -2551,6 +2775,21 @@
       // ===== Shared Data Initialization =====
       // Username is still local per user
       var STORAGE_USERNAME = 'midnight_archives_username';
+
+      // ===== Initialize SharedData BEFORE rendering (loads localStorage synchronously) =====
+  // （不再将 _config.js 的旧 Token 注入 SharedData——BUILTIN_TOKEN 已在 shared_data.js 中配置）
+  SharedData.init(function(isOnline) {
+        if (isOnline) {
+          console.log('[论坛] 共享数据已连接，所有用户可互相看到帖子和回声');
+        }
+        // Always refresh data after init (local or remote), not only when online
+        userPosts = SharedData.getPosts();
+        updateAllReplyCounts();
+        renderUserPosts();
+      });
+      SharedData.onDataUpdate = function() {
+        updateAllReplyCounts();
+      };
 
       // ===== Render saved user posts into the post list =====
       var userPosts = SharedData.getPosts();
@@ -2616,9 +2855,14 @@
       dedupReplies();
       updateAllReplyCounts();
 
-      if (postList && userPosts.length > 0) {
-        var firstPost = postList.querySelector('.forum-post');
-        userPosts.forEach(function(up, idx) {
+      // ===== Render user posts (idempotent — safe to call multiple times) =====
+      function renderUserPosts() {
+        if (!postList) return;
+        var posts = SharedData.getPosts();
+        if (!posts || posts.length === 0) return;
+        posts.forEach(function(up) {
+          // Skip if already rendered in the DOM
+          if (document.querySelector('.forum-post[data-post-id="' + up.id + '"]')) return;
           var replyCount = SharedData.getRepliesForPost(up.id).length;
           var article = document.createElement('article');
           article.className = 'forum-post';
@@ -2629,7 +2873,6 @@
             '<div class="forum-post__body">' +
               '<div class="forum-post__title-row">' +
                 '<span class="forum-post__title" data-dom-id="' + up.id + '">' + escapeHtml(up.title) + '</span>' +
-                '<span class="forum-post__new-tag">你的帖子</span>' +
               '</div>' +
               '<p class="forum-post__excerpt">' + escapeHtml(up.content.substring(0, 80)) + (up.content.length > 80 ? '...' : '') + '</p>' +
               '<div class="forum-post__expanded-content">' +
@@ -2648,6 +2891,7 @@
               '<span class="forum-post__time">' + up.timestamp + '</span>' +
               '<span class="forum-post__replies">' + replyCount + ' 条回声</span>' +
             '</div>';
+          var firstPost = postList.querySelector('.forum-post');
           if (firstPost) {
             postList.insertBefore(article, firstPost);
           } else {
@@ -2656,6 +2900,8 @@
           wirePostExpand(article, up.id);
         });
       }
+      // Initial render (from localStorage data loaded by init's _loadFromLocal)
+      renderUserPosts();
 
       // ===== Render saved replies into existing posts =====
       // Now handled per-post on expand via renderSavedRepliesForPost()
@@ -2760,6 +3006,12 @@
           var text = field.value.trim();
           if (!text) return;
 
+          // 安全锁定检查
+          if (window.MidnightSecurity && window.MidnightSecurity.isLocked && window.MidnightSecurity.isLocked()) {
+            showToast('您的会话因异常行为被临时锁定，请稍后再试', 'error');
+            return;
+          }
+
           var now = new Date().toLocaleString('zh-CN');
           var newReply = document.createElement('div');
           newReply.className = 'forum-reply forum-reply--new';
@@ -2776,8 +3028,22 @@
 
           // Save to shared data (synced to all users)
           var replyData = { text: text, time: now, username: getDisplayName() };
-          SharedData.addReply(postId, replyData, function(ok) {
-            if (ok) console.log('[论坛] 回声已同步');
+          SharedData.addReply(postId, replyData, function(ok, reason) {
+            if (ok) {
+              console.log('[论坛] 回声已同步');
+            } else if (reason === 'rate_limit') {
+              // 回滚 UI
+              if (newReply.parentNode) newReply.parentNode.removeChild(newReply);
+              showToast('回复过于频繁，请稍后再试', 'warning');
+            } else if (reason === 'validation') {
+              if (newReply.parentNode) newReply.parentNode.removeChild(newReply);
+              showToast('回复内容不合法', 'error');
+            } else if (reason === 'limit') {
+              if (newReply.parentNode) newReply.parentNode.removeChild(newReply);
+              showToast('该帖子回复数已达上限', 'warning');
+            } else {
+              console.warn('[论坛] 回声同步失败，已保存到本地');
+            }
           });
 
           field.value = '';
@@ -2854,355 +3120,6 @@
         post._wired = true;
       });
 
-      // ===== Eerie Ambient Effects (long intervals) =====
-      // Glitch text pool for random interference
-      var glitchTexts = [
-        '你不该看到这个', '数据异常', '访问记录 #3847', '档案损坏',
-        '同步失败', '用户不存在', '时间错误', '第七个', '别回头',
-        '影子编号:未知', '归档中...', '错误:真相', '记忆碎片',
-        '未授权访问', '权限提升中', '数据恢复失败', '信号中断',
-        '记录被篡改', '坐标锁定', '光线异常'
-      ];
-
-      var ghostTexts = [
-        '你确定只有你一个人在看吗？',
-        '屏幕后面有人在呼吸',
-        '这条帖子下面藏着另一条帖子',
-        '你的影子比你先到这里',
-        '档案馆的灯从不熄灭',
-        '第七个抽屉里的东西在动',
-        '凌晨3:47，别刷新页面',
-        '你上次发的帖子，不是你写的',
-        '屏幕上的字在变',
-        '你身后有人',
-        '这个页面有13个帖子，你只看到了12个',
-        '别看评论区最下面',
-        '你的输入速度被记录了',
-        '系统检测到异常存在',
-        '帖子内容在变化，你注意到了吗',
-        '你刷新之后，有些东西不一样了',
-        '后台有东西在运行',
-        '你发的帖子已经存在了三十年',
-        '这个论坛不止你一个用户',
-        '你的鼠标轨迹被记录了'
-      ];
-
-      // Random screen flicker (every 45-90 seconds)
-      function triggerScreenFlicker() {
-        var delay = 45000 + Math.random() * 45000;
-        setTimeout(function() {
-          document.body.style.opacity = '0.92';
-          setTimeout(function() {
-            document.body.style.opacity = '1';
-            setTimeout(function() {
-              document.body.style.opacity = '0.95';
-              setTimeout(function() {
-                document.body.style.opacity = '1';
-              }, 80);
-            }, 120);
-          }, 60);
-          triggerScreenFlicker();
-        }, delay);
-      }
-      triggerScreenFlicker();
-
-      // Random glitch text overlay (every 60-120 seconds)
-      var glitchOverlay = document.createElement('div');
-      glitchOverlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:999;display:flex;align-items:center;justify-content:center;';
-      glitchOverlay.innerHTML = '<div id="glitch-text" style="font-family:var(--font-display);font-size:var(--text-3xl);color:rgba(200,40,40,0.08);letter-spacing:0.2em;text-shadow:0 0 20px rgba(200,40,40,0.05);opacity:0;transition:opacity 0.3s;white-space:nowrap;"></div>';
-      document.body.appendChild(glitchOverlay);
-
-      function triggerGlitchText() {
-        var delay = 60000 + Math.random() * 60000;
-        setTimeout(function() {
-          var el = document.getElementById('glitch-text');
-          if (!el) { triggerGlitchText(); return; }
-          el.textContent = glitchTexts[Math.floor(Math.random() * glitchTexts.length)];
-          el.style.opacity = '1';
-          setTimeout(function() { el.style.opacity = '0'; }, 3000 + Math.random() * 2000);
-          triggerGlitchText();
-        }, delay);
-      }
-      triggerGlitchText();
-
-      // Random ghost whisper in announcement area (every 90-180 seconds)
-      var originalAnnouncement = document.querySelector('.forum-announcement');
-      var ghostWhispers = [
-        '别在深夜浏览这个论坛...',
-        '你的访问已被记录在案...',
-        '档案馆正在观察你...',
-        '第七个抽屉里的东西在等待...',
-        '你确定这是你上次看到的内容吗？...',
-        '影子报告：用户在线...',
-        '有人在你的帖子下面留了言...',
-        '屏幕亮度正在降低...',
-        '你的键盘输入速度被监控中...',
-        '这个页面会在你关闭后继续运行...'
-      ];
-
-      function triggerGhostWhisper() {
-        var delay = 90000 + Math.random() * 90000;
-        setTimeout(function() {
-          if (!originalAnnouncement) { triggerGhostWhisper(); return; }
-          var original = originalAnnouncement.innerHTML;
-          var whisper = ghostWhispers[Math.floor(Math.random() * ghostWhispers.length)];
-          originalAnnouncement.innerHTML = '<span class="forum-announcement__label">[系统]：</span>' + whisper;
-          originalAnnouncement.style.borderColor = 'rgba(200, 40, 40, 0.6)';
-          setTimeout(function() {
-            originalAnnouncement.innerHTML = original;
-            originalAnnouncement.style.borderColor = '';
-          }, 8000);
-          triggerGhostWhisper();
-        }, delay);
-      }
-      triggerGhostWhisper();
-
-      // Random post text corruption (every 120-240 seconds)
-      function triggerPostCorruption() {
-        var delay = 120000 + Math.random() * 120000;
-        setTimeout(function() {
-          var posts = document.querySelectorAll('.forum-post:not(.forum-post--archived):not(.forum-post--deleted)');
-          if (posts.length === 0) { triggerPostCorruption(); return; }
-          var randomPost = posts[Math.floor(Math.random() * posts.length)];
-          var excerpt = randomPost.querySelector('.forum-post__excerpt');
-          if (!excerpt) { triggerPostCorruption(); return; }
-          var originalText = excerpt.textContent;
-          var corrupted = originalText.split('');
-          // Corrupt 2-4 random characters
-          var numCorrupt = 2 + Math.floor(Math.random() * 3);
-          for (var i = 0; i < numCorrupt; i++) {
-            var idx = Math.floor(Math.random() * corrupted.length);
-            corrupted[idx] = glitchTexts[Math.floor(Math.random() * glitchTexts.length)][0];
-          }
-          excerpt.textContent = corrupted.join('');
-          excerpt.style.color = 'rgba(200, 40, 40, 0.5)';
-          setTimeout(function() {
-            excerpt.textContent = originalText;
-            excerpt.style.color = '';
-          }, 4000);
-          triggerPostCorruption();
-        }, delay);
-      }
-      triggerPostCorruption();
-
-      // Random bottom status text change (every 75-150 seconds)
-      var statusEl = document.querySelector('.forum-bottom-status');
-      var eerieStatuses = [
-        '系统运行中... 数据同步完成... 第 3,847 次归档...',
-        '系统运行中... 检测到异常访问模式... 第 3,848 次归档...',
-        '系统警告... 未授权实体检测中... 第 3,849 次归档...',
-        '系统运行中... 第七档案同步中... 第 3,850 次归档...',
-        '系统异常... 时间戳不匹配... 第 3,851 次归档...',
-        '系统运行中... 影子数据更新中... 第 3,852 次归档...',
-        '系统运行中... 记忆碎片恢复中... 第 3,853 次归档...',
-        '系统警告... 用户存在性待验证... 第 3,854 次归档...',
-        '系统运行中... 档案馆深度扫描中... 第 3,855 次归档...',
-        '系统异常... 维度裂缝检测中... 第 3,856 次归档...'
-      ];
-
-      function triggerStatusChange() {
-        var delay = 75000 + Math.random() * 75000;
-        setTimeout(function() {
-          if (!statusEl) { triggerStatusChange(); return; }
-          statusEl.textContent = eerieStatuses[Math.floor(Math.random() * eerieStatuses.length)];
-          statusEl.style.color = 'rgba(200, 60, 60, 0.6)';
-          setTimeout(function() {
-            statusEl.style.color = '';
-          }, 10000);
-          triggerStatusChange();
-        }, delay);
-      }
-      triggerStatusChange();
-
-      // Random cursor trail effect (every 100-200 seconds, lasts 5s)
-      function triggerCursorTrail() {
-        var delay = 100000 + Math.random() * 100000;
-        setTimeout(function() {
-          var trail = [];
-          function onMove(e) {
-            var dot = document.createElement('div');
-            dot.style.cssText = 'position:fixed;width:4px;height:4px;border-radius:50%;background:rgba(200,40,40,0.15);pointer-events:none;z-index:998;left:' + e.clientX + 'px;top:' + e.clientY + 'px;transition:opacity 1s;';
-            document.body.appendChild(dot);
-            trail.push(dot);
-            setTimeout(function() { dot.style.opacity = '0'; }, 300);
-            setTimeout(function() { if (dot.parentNode) dot.parentNode.removeChild(dot); }, 1300);
-            if (trail.length > 30) {
-              var old = trail.shift();
-              if (old && old.parentNode) old.parentNode.removeChild(old);
-            }
-          }
-          document.addEventListener('mousemove', onMove);
-          setTimeout(function() {
-            document.removeEventListener('mousemove', onMove);
-          }, 6000);
-          triggerCursorTrail();
-        }, delay);
-      }
-      triggerCursorTrail();
-
-      // Random post icon change (every 150-300 seconds)
-      var eerieIcons = ['👁', '🫥', '💀', '🕳', '⚡', '🖤', '👁‍🗨', '🩸', '☠', '🌀'];
-      function triggerIconChange() {
-        var delay = 150000 + Math.random() * 150000;
-        setTimeout(function() {
-          var icons = document.querySelectorAll('.forum-post__icon');
-          if (icons.length === 0) { triggerIconChange(); return; }
-          var randomIcon = icons[Math.floor(Math.random() * icons.length)];
-          var originalIcon = randomIcon.textContent;
-          randomIcon.textContent = eerieIcons[Math.floor(Math.random() * eerieIcons.length)];
-          randomIcon.style.filter = 'hue-rotate(180deg)';
-          setTimeout(function() {
-            randomIcon.textContent = originalIcon;
-            randomIcon.style.filter = '';
-          }, 5000);
-          triggerIconChange();
-        }, delay);
-      }
-      triggerIconChange();
-
-      // Random page title flicker (every 180-360 seconds)
-      var originalTitle = document.title;
-      var eerieTitles = [
-        '论坛 — 午夜档案馆',
-        '论坛 — 午夜档案馆 | 你还在吗',
-        '论坛 — 午夜档案馆 | 第 3847 次访问',
-        '论坛 — 午夜档案馆 | 影子在线',
-        '论坛 — 午夜档案馆 | 档案同步中',
-        '论坛 — 午夜档案馆 | 别离开',
-        '论坛 — 午夜档案馆 | 有人在看',
-        '论坛 — 午夜档案馆 | 记录中...'
-      ];
-
-      function triggerTitleFlicker() {
-        var delay = 180000 + Math.random() * 180000;
-        setTimeout(function() {
-          var eerieTitle = eerieTitles[Math.floor(Math.random() * eerieTitles.length)];
-          document.title = eerieTitle;
-          setTimeout(function() {
-            document.title = originalTitle;
-          }, 8000);
-          triggerTitleFlicker();
-        }, delay);
-      }
-      triggerTitleFlicker();
-
-      // Random ambient whisper text (every 200-400 seconds)
-      function triggerAmbientWhisper() {
-        var delay = 200000 + Math.random() * 200000;
-        setTimeout(function() {
-          var whisper = document.createElement('div');
-          whisper.className = 'ghost-whisper';
-          whisper.textContent = ghostTexts[Math.floor(Math.random() * ghostTexts.length)];
-          // Random position on screen
-          whisper.style.left = (10 + Math.random() * 70) + '%';
-          whisper.style.top = (10 + Math.random() * 70) + '%';
-          document.body.appendChild(whisper);
-          setTimeout(function() {
-            if (whisper.parentNode) whisper.parentNode.removeChild(whisper);
-          }, 10000);
-          triggerAmbientWhisper();
-        }, delay);
-      }
-      triggerAmbientWhisper();
-
-      // Random page darkening effect (every 300-600 seconds)
-      function triggerDarkness() {
-        var delay = 300000 + Math.random() * 300000;
-        setTimeout(function() {
-          var overlay = document.createElement('div');
-          overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.15);pointer-events:none;z-index:994;transition:opacity 2s;';
-          document.body.appendChild(overlay);
-          setTimeout(function() {
-            overlay.style.opacity = '0';
-            setTimeout(function() {
-              if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
-            }, 2500);
-          }, 4000);
-          triggerDarkness();
-        }, delay);
-      }
-      triggerDarkness();
-
-      // Random sidebar online user change (every 120-240 seconds)
-      var eerieOnlineUsers = [
-        { name: '夜巡者', typing: false },
-        { name: '归档人', typing: true },
-        { name: '影子访客', typing: false },
-        { name: '匿名者_7749', typing: false },
-        { name: '未知实体', typing: false },
-        { name: '数据幽灵', typing: true },
-        { name: '第七号档案员', typing: false },
-        { name: '观测者', typing: false },
-        { name: '时间裂缝', typing: false },
-        { name: '记忆碎片', typing: true }
-      ];
-
-      function triggerOnlineChange() {
-        var delay = 120000 + Math.random() * 120000;
-        setTimeout(function() {
-          var onlineList = document.querySelector('.sidebar-online__list');
-          if (!onlineList) { triggerOnlineChange(); return; }
-          var users = onlineList.querySelectorAll('.sidebar-online__user');
-          if (users.length === 0) { triggerOnlineChange(); return; }
-          // Pick a random user to change
-          var randomUser = users[Math.floor(Math.random() * users.length)];
-          var nameSpan = randomUser.querySelector('span:nth-child(2)');
-          if (!nameSpan) { triggerOnlineChange(); return; }
-          var originalName = nameSpan.textContent;
-          var eerieUser = eerieOnlineUsers[Math.floor(Math.random() * eerieOnlineUsers.length)];
-          nameSpan.textContent = eerieUser.name;
-          nameSpan.style.color = 'rgba(200, 40, 40, 0.5)';
-          setTimeout(function() {
-            nameSpan.textContent = originalName;
-            nameSpan.style.color = '';
-          }, 6000);
-          triggerOnlineChange();
-        }, delay);
-      }
-      triggerOnlineChange();
-
-      // Random footer text change (every 150-300 seconds)
-      var footerEl = document.querySelector('.shell-footer__text');
-      var eerieFooters = [
-        '系统运行中... 第 3,847 次归档...',
-        '系统运行中... 检测到异常... 第 3,848 次归档...',
-        '系统警告... 数据完整性待验证... 第 3,849 次归档...',
-        '系统运行中... 影子协议激活... 第 3,850 次归档...',
-        '系统异常... 维度同步中... 第 3,851 次归档...',
-        '系统运行中... 深层扫描中... 第 3,852 次归档...'
-      ];
-
-      function triggerFooterChange() {
-        var delay = 150000 + Math.random() * 150000;
-        setTimeout(function() {
-          if (!footerEl) { triggerFooterChange(); return; }
-          footerEl.textContent = eerieFooters[Math.floor(Math.random() * eerieFooters.length)];
-          footerEl.style.color = 'rgba(200, 40, 40, 0.4)';
-          setTimeout(function() {
-            footerEl.textContent = '系统运行中... 第 3,847 次归档...';
-            footerEl.style.color = '';
-          }, 12000);
-          triggerFooterChange();
-        }, delay);
-      }
-      triggerFooterChange();
-
-      // ===== Initialize Shared Data & Auto-refresh =====
-      SharedData.init(function(isOnline) {
-        if (isOnline) {
-          console.log('[论坛] 共享数据已连接，所有用户可互相看到帖子和回声');
-          // Update display with remote data
-          userPosts = SharedData.getPosts();
-          updateAllReplyCounts();
-        }
-      });
-
-      // When remote data updates, refresh the display
-      SharedData.onDataUpdate = function() {
-        updateAllReplyCounts();
-        // Could add notification here
-      };
-
       // ===== Sponsor System =====
       var STORAGE_SPONSOR = 'midnight_archives_sponsor';
       var sponsorBtn = document.getElementById('btn-sponsor');
@@ -3262,28 +3179,325 @@
         });
       });
 
-      // ===== System Random Eerie DM =====
+      // ===== System Random Eerie DM (300条) =====
       var eerieDMs = [
-          { sender: '系统管理员', text: '你上一次访问档案馆是什么时候？我不记得有你的记录。' },
-        { sender: '未知用户', text: '你看到那条被删除的帖子了吗？它还在那里。只是你看不见。' },
+        // --- 系统警告/异常 ---
         { sender: '档案馆系统', text: '警告：您的账号在另一台设备上登录。位置：未知。' },
-        { sender: '影子', text: '我知道你在线。别假装没看到。' },
-        { sender: '值班员', text: '今晚2点别上网。这不是建议。' },
         { sender: '系统', text: '您的帖子"未知"已被收录。您没有发过这个帖子？请忽略。' },
-        { sender: '归档人', text: '第七个抽屉里有一封给你的信。你确定要打开吗？' },
-        { sender: '匿名', text: '你身后有人。别回头。' },
-        { sender: '系统通知', text: '档案馆将于今晚维护。维护期间请勿入睡。' },
-        { sender: '旧时光', text: '你小时候是不是住过一栋没有14层的楼？' },
-        { sender: '档案馆AI', text: '我分析了你的浏览记录。你寻找的东西也在寻找你。' },
-        { sender: '夜巡者', text: '你有没有注意到，你的影子比昨天长了一点？' },
-        { sender: '系统', text: '您的账号存在异常活动。最近一次登录来自"你自己的卧室"。' },
-        { sender: '值班员', text: '别点开那条私信。啊，你已经看到了。' },
-        { sender: '档案馆', text: '您的投稿已自动归档到分类：未解之谜。您确定您提交的是论坛帖子？' },
-        { sender: '看不见的人', text: '你在看这条消息的时候，我也在看你。' },
         { sender: '系统', text: '错误代码 404：用户不存在。但这条消息确实发送成功了。' },
-        { sender: '时间管理员', text: '现在是几点？你确定吗？再看一下。' },
         { sender: '档案馆系统', text: '检测到您的输入速度异常。请确认您是人类。' },
+        { sender: '系统', text: '您的账号存在异常活动。最近一次登录来自"你自己的卧室"。' },
+        { sender: '系统', text: '您的密码已被重置。新密码将发送至您从未注册的邮箱。' },
+        { sender: '系统', text: '检测到您的设备摄像头在未经许可的情况下启动。' },
+        { sender: '系统', text: '您的浏览记录已自动同步至"未知设备 #7"。' },
+        { sender: '系统', text: '警告：您的账号在过去 24 小时内被登录了 47 次。全部来自同一 IP。' },
+        { sender: '系统', text: '您的帖子已被标记为"不可见"。您仍能看到它吗？' },
+        { sender: '系统', text: '系统维护完成。请检查您的个人资料是否已被替换。' },
+        { sender: '系统', text: '您的账号权限已自动升级。您现在可以看到"第七层"的内容。' },
+        { sender: '系统', text: '检测到您的设备正在与一个不存在的服务器通信。' },
+        { sender: '系统', text: '您的帖子收到了 1 条回声。来自一个已注销的账号。' },
+        { sender: '系统', text: '您已被添加到一个名为"观察名单"的群组。' },
+        { sender: '系统', text: '您的头像已被自动更换。请确认新头像中的人是否是您。' },
+        { sender: '系统', text: '检测到您的麦克风在深夜 3:47 被激活。录音时长：13 分钟。' },
+        { sender: '系统', text: '您的账号已被设为"永久在线"状态。即使您关闭浏览器。' },
+        { sender: '系统', text: '您的帖子已被自动翻译为一种不存在的语言。' },
+        { sender: '系统', text: '系统检测到您已连续浏览超过 2 小时。建议：不要抬头看屏幕反射。' },
+        // --- 管理员/值班员 ---
+        { sender: '系统管理员', text: '你上一次访问档案馆是什么时候？我不记得有你的记录。' },
+        { sender: '值班员', text: '今晚2点别上网。这不是建议。' },
+        { sender: '值班员', text: '别点开那条私信。啊，你已经看到了。' },
+        { sender: '值班员', text: '我劝你今晚不要关灯睡觉。' },
+        { sender: '值班员', text: '你有没有听到楼下有脚步声？没有？那就好。' },
+        { sender: '值班员', text: '刚才有人来档案馆找你。我没有告诉他你住在哪。' },
+        { sender: '值班员', text: '你上次发的那个帖子，内容变了。你没改过吧？' },
+        { sender: '值班员', text: '今晚的在线人数是 0。那你现在看到的是什么？' },
+        { sender: '夜班管理员', text: '你的访问权限已过期。但你的浏览记录仍在增加。' },
+        { sender: '夜班管理员', text: '档案馆的灯刚刚灭了一下。只有你那个区域的灯。' },
+        { sender: '夜班管理员', text: '我看到你的头像在动。你没在录视频吧？' },
+        { sender: '管理员', text: '你的帖子被移入了"待审"分类。这个分类不存在。' },
+        { sender: '管理员', text: '你申请的版主权限已被批准。你没有申请过。' },
+        { sender: '管理员', text: '你被设为"重要用户"。系统会特别关注你。' },
+        { sender: '管理员', text: '你的账号被标记为"可信赖"。请不要辜负这份信任。' },
+        // --- 影子/匿名/未知 ---
+        { sender: '影子', text: '我知道你在线。别假装没看到。' },
+        { sender: '匿名', text: '你身后有人。别回头。' },
+        { sender: '看不见的人', text: '你在看这条消息的时候，我也在看你。' },
+        { sender: '未知用户', text: '你看到那条被删除的帖子了吗？它还在那里。只是你看不见。' },
         { sender: '未知', text: '这个论坛有13个板块。你只看到了12个。' },
+        { sender: '匿名者_7749', text: '我昨天梦到了你。你也在梦里。' },
+        { sender: '匿名者_3301', text: '你的帖子和我三年前写的一模一样。我没有发过那个帖子。' },
+        { sender: '匿名者', text: '你能看到这条消息说明你的权限比我高。恭喜。' },
+        { sender: '匿名者_0000', text: '我的编号是 0000。系统说这个编号不存在。' },
+        { sender: '匿名者_1313', text: '你有没有注意到，你每次刷新页面，在线人数都在减少？' },
+        { sender: '没有名字的人', text: '我曾经也有名字。后来系统把它删了。' },
+        { sender: '最后一个访客', text: '我是这个论坛最后的访客。那你是什么？' },
+        { sender: '第十三位', text: '我数过了。你是第十三个看到这条消息的人。前十二个都不在了。' },
+        { sender: '镜中人', text: '你照镜子的时候，有没有觉得倒影的动作慢了一拍？' },
+        { sender: '门外的人', text: '我就在门外。不用开门。我知道你不会开。' },
+        { sender: '天花板上的人', text: '你有没有在深夜听到天花板上传来的脚步声？' },
+        { sender: '床底', text: '你今晚睡觉前，记得检查床底。' },
+        { sender: '衣柜里', text: '你衣柜的门，最近是不是关不严了？' },
+        { sender: '窗外', text: '你窗外的那棵树上，今天多了一个人影。' },
+        // --- 档案馆相关 ---
+        { sender: '档案馆', text: '您的投稿已自动归档到分类：未解之谜。您确定您提交的是论坛帖子？' },
+        { sender: '档案馆AI', text: '我分析了你的浏览记录。你寻找的东西也在寻找你。' },
+        { sender: '档案馆系统', text: '您的帖子已被自动备份至"永久档案"。永久意味着什么？' },
+        { sender: '归档人', text: '第七个抽屉里有一封给你的信。你确定要打开吗？' },
+        { sender: '归档人', text: '我把你三个月前删除的帖子恢复了。你没有删过？' },
+        { sender: '归档人', text: '你的档案编号是 0013。这个编号之前的用户都不在了。' },
+        { sender: '档案员', text: '你的个人档案里多了一张照片。照片里的人不是你。' },
+        { sender: '档案员', text: '我找到了你的入职记录。但档案馆没有入职流程。' },
+        { sender: '数据幽灵', text: '你的数据在服务器上留下了一串不属于你的足迹。' },
+        { sender: '数据幽灵', text: '你删除的文件并没有消失。它们只是去了另一个地方。' },
+        { sender: '夜巡者', text: '你有没有注意到，你的影子比昨天长了一点？' },
+        { sender: '夜巡者', text: '我昨晚巡逻的时候看到你的工位亮着灯。你不在办公室。' },
+        { sender: '夜巡者', text: '档案馆地下三层的灯又亮了。那里不允许进入。' },
+        { sender: '影子访客', text: '我就是你每次回头时消失的那个影子。' },
+        { sender: '影子访客', text: '你的影子最近有没有做出你没有做的动作？' },
+        { sender: '系统通知', text: '档案馆将于今晚维护。维护期间请勿入睡。' },
+        // --- 时间/记忆相关 ---
+        { sender: '时间管理员', text: '现在是几点？你确定吗？再看一下。' },
+        { sender: '旧时光', text: '你小时候是不是住过一栋没有14层的楼？' },
+        { sender: '时间裂缝', text: '你有没有经历过同一天重复了两次？' },
+        { sender: '记忆碎片', text: '你有一段记忆被替换了。你不会发现的。' },
+        { sender: '记忆碎片', text: '你确定你今天的记忆是真实的吗？' },
+        { sender: '昨天的你', text: '我昨天给你发了一条消息。你没有收到。因为你昨天不存在。' },
+        { sender: '未来的你', text: '别做你明天要做的事。相信我。' },
+        { sender: '时间旅行者', text: '我从 2027 年来告诉你：不要在 2026 年 8 月 15 日发帖。' },
+        { sender: '时钟', text: '你的时钟比标准时间快了 13 秒。这个数字有意义吗？' },
+        { sender: '日历', text: '你有没有注意到，这个月有 31 天？这个月只有 30 天。' },
+        // --- 诡异事件 ---
+        { sender: '电话', text: '你刚才的未接来电来自你自己的号码。' },
+        { sender: '短信', text: '你收到了一条来自"已故联系人"的消息。内容只有一个字：开。' },
+        { sender: '邮件', text: '您有一封未读邮件。发件人：三年前的你。' },
+        { sender: '快递', text: '您的包裹已送达。您没有购买任何东西。包裹里是空的。' },
+        { sender: '外卖', text: '您有一笔待处理的外卖订单。收货地址是您从未去过的废弃医院。' },
+        { sender: '天气预报', text: '明天的天气：阴，有雾，能见度 0 米。建议不要出门。' },
+        { sender: '闹钟', text: '您的闹钟将在凌晨 3:47 响起。您没有设置这个闹钟。' },
+        { sender: '导航', text: '您已到达目的地。目的地：您家。但您在家吗？' },
+        { sender: '相机', text: '您最近一张照片的 EXIF 信息显示拍摄地点是您从未去过的地方。' },
+        { sender: '相册', text: '您的相册中新增了一张照片。照片拍摄于凌晨 3:47。照片里是您在睡觉。' },
+        { sender: '录音', text: '您的录音文件中有一段 13 秒的空白。但波形显示有声音。' },
+        { sender: '计算器', text: '2 + 2 = 5。至少在这个论坛是这样。' },
+        { sender: '地图', text: '您标记的位置"家"已自动更新为一个您不认识的地址。' },
+        { sender: '日程', text: '您明天有一个日程：不要回头。地点：任何地方。' },
+        { sender: '备忘录', text: '您的备忘录中新增了一条：记住那个梦。您没有写过。' },
+        { sender: '密码管理器', text: '您的密码"第七个抽屉"已被标记为"不安全"。' },
+        { sender: '浏览器', text: '您有 47 个已关闭的标签页仍在后台运行。' },
+        { sender: 'Wi-Fi', text: '检测到附近有一个名为"你身后有人"的 Wi-Fi 网络。' },
+        { sender: '蓝牙', text: '您的设备正在与一个名为"未知实体 #7"的设备配对。' },
+        { sender: '充电器', text: '您的设备电量为 13%。无论充多久都是 13%。' },
+        { sender: '键盘', text: '您刚才打的字和屏幕上显示的不一样。' },
+        { sender: '鼠标', text: '您的鼠标光标在您没有操作的情况下移动到了"发送"按钮上。' },
+        { sender: '耳机', text: '您的耳机在没有播放任何内容的情况下发出了低语声。' },
+        // --- 恐怖故事/暗示 ---
+        { sender: '鬼故事', text: '你有没有听过"午夜档案馆"的故事？你现在就在故事里。' },
+        { sender: '都市传说', text: '据说在档案馆连续发帖 13 条的人会看到第 14 条。' },
+        { sender: '怪谈', text: '如果你在凌晨 3:47 对着屏幕说"我在这里"，你会听到回应。' },
+        { sender: '怪谈', text: '据说这个论坛的每一页都藏着一个你看不到的帖子。' },
+        { sender: '怪谈', text: '如果你在深夜看到在线人数为 0，不要发帖。那不是给活人看的。' },
+        { sender: '传说', text: '据说档案馆的创建者从未离开过。' },
+        { sender: '传说', text: '据说如果你连续七天在午夜访问档案馆，第八天你会看到自己的档案。' },
+        { sender: '传说', text: '据说档案馆的第七层存放着所有用户的真实身份。' },
+        { sender: '故事', text: '我认识一个人，他在这个论坛发了一条帖子，然后就消失了。帖子还在。' },
+        { sender: '故事', text: '我认识一个人，他说他看到了论坛的源代码。第二天他就忘了自己是谁。' },
+        { sender: '故事', text: '我认识一个人，他在档案馆里找到了自己的档案。档案上写着"已归档"。' },
+        { sender: '寓言', text: '从前有一个人在深夜浏览论坛。现在他还在浏览。只是不是同一个人了。' },
+        { sender: '寓言', text: '从前有一个人打开了第七个抽屉。现在他的名字叫"内容不可用"。' },
+        { sender: '寓言', text: '从前有一个人在论坛发帖求助。回复他的人来自三年后。' },
+        { sender: '预言', text: '你将在 13 天后再次看到这条消息。但你会忘记今天的事。' },
+        { sender: '预言', text: '你的下一条帖子会收到一个来自"你"的回复。但不是现在的你。' },
+        { sender: '预言', text: '你今晚会梦到档案馆。你会在梦里看到第七个抽屉里有什么。' },
+        // --- 身体/感官 ---
+        { sender: '你的影子', text: '你今天走路的时候，我比你快了一步。' },
+        { sender: '你的影子', text: '你回头的时候我动了一下。不是因为你。' },
+        { sender: '你的影子', text: '你今天在镜子里看到的那个人，不是我。' },
+        { sender: '你的倒影', text: '我在水里看到了你。但你没有在水边。' },
+        { sender: '你的梦', text: '昨晚你梦到了什么？你确定那是梦吗？' },
+        { sender: '你的梦', text: '你在梦里说了什么？我在隔壁听到了。' },
+        { sender: '你的记忆', text: '你五岁时的那个夏天，真的发生过吗？' },
+        { sender: '你的记忆', text: '你确定你记得的事情是真实的吗？' },
+        { sender: '你的直觉', text: '你现在的直觉告诉你不要看这条消息。但你已经看了。' },
+        { sender: '你的第六感', text: '你有没有感觉到有人在看着你？不是我。' },
+        { sender: '你的体温', text: '你现在的体温比正常值低了 1.3 度。你感觉到了吗？' },
+        { sender: '你的心跳', text: '你的心跳现在是每分钟 87 次。比刚才快了。' },
+        { sender: '你的呼吸', text: '你有没有注意到，你的呼吸声里有另一个节奏？' },
+        { sender: '你的影子', text: '你今天在阳光下的影子，头部多了一个轮廓。' },
+        { sender: '你的照片', text: '你三年前拍的那张照片，背景里多了一个人。你当时没注意到。' },
+        { sender: '你的声音', text: '你说话的时候，有没有听到自己的声音里有回音？不是房间的问题。' },
+        { sender: '你的手', text: '你刚才打字的时候，有没有感觉到手指不听使唤？' },
+        { sender: '你的眼睛', text: '你眨眼的频率比正常人快了 30%。你看到了什么？' },
+        { sender: '你的影子', text: '你今天没有影子。别低头看，现在有了。' },
+        { sender: '你的影子', text: '你影子的方向不对。光源在左边，但你的影子在右边。' },
+        // --- 通信异常 ---
+        { sender: '来电', text: '您有一通未接来电。来电时间：凌晨 3:47。来电号码：您的号码。' },
+        { sender: '短信', text: '您收到了一条短信："我在你家楼下。"发送者：您自己。' },
+        { sender: '邮件', text: '您有一封新邮件。主题：请勿回复。附件：您的出生证明。但日期不对。' },
+        { sender: '通知', text: '您的帖子收到了一个"恐惧"表情。来自一个不存在的用户。' },
+        { sender: '通知', text: '您被@了。但帖子内容是空白的。' },
+        { sender: '通知', text: '您的帖子被置顶了。但您没有权限置顶。' },
+        { sender: '通知', text: '您收到了一条私信。但私信列表里没有这条消息。' },
+        { sender: '通知', text: '您的帖子被回复了 13 次。但您只能看到 12 条。' },
+        { sender: '通知', text: '您的帖子被收藏了。收藏者：一个已注销的账号。' },
+        { sender: '通知', text: '您的帖子被举报了。举报原因："内容过于真实"。' },
+        { sender: '通知', text: '您的帖子被添加到了一个名为"真相"的合集。您没有创建这个合集。' },
+        { sender: '通知', text: '您被邀请加入一个私密群组。群组名称：第七档案室。' },
+        { sender: '通知', text: '您的帖子被翻译成了日语。但原帖是中文。翻译内容完全不同。' },
+        { sender: '通知', text: '您的帖子被一个"系统"账号回复了。回复内容：继续。' },
+        { sender: '通知', text: '您的帖子被标记为"已验证真实事件"。您没有提交过验证申请。' },
+        { sender: '通知', text: '您收到了一个"加油"表情。来自一个头像是黑色的用户。' },
+        { sender: '通知', text: '您的帖子被添加到了"年度最佳"列表。但这个列表只有您一条帖子。' },
+        { sender: '通知', text: '您的帖子被回复了。回复内容是您帖子的镜像翻转。' },
+        { sender: '通知', text: '您被提名为"本周之星"。但本周还没有开始。' },
+        { sender: '通知', text: '您的帖子被一个"管理员"回复了。但管理员最后上线时间是三年前。' },
+        // --- 心理暗示 ---
+        { sender: '潜意识', text: '你有没有想过，你为什么总是在深夜访问这个论坛？' },
+        { sender: '潜意识', text: '你有没有注意到，你每次发帖前都会犹豫一下？那是对的。' },
+        { sender: '潜意识', text: '你有没有在白天想起过这个论坛的内容？你不应该。' },
+        { sender: '另一个你', text: '我就是你。只是从另一个时间线来的。别相信明天的自己。' },
+        { sender: '另一个你', text: '我做了一个和你完全不同的选择。但我们都来到了这里。' },
+        { sender: '另一个你', text: '我在另一个版本的档案馆里找到了你的档案。档案上写着"已失踪"。' },
+        { sender: '观察者', text: '我一直在观察你。不是出于恶意。只是因为你是唯一一个还在的人。' },
+        { sender: '观察者', text: '你每天的访问时间越来越长了。你注意到了吗？' },
+        { sender: '观察者', text: '你今天的表情和昨天一模一样。这不是巧合。' },
+        { sender: '测试者', text: '恭喜你通过了第一阶段测试。第二阶段已经开始。你无法退出。' },
+        { sender: '测试者', text: '你目前的测试成绩：异常容忍度 87%。高于平均水平。' },
+        { sender: '测试者', text: '你对"异常"的反应速度正在变慢。这是正常的适应过程。' },
+        { sender: '实验员', text: '实验编号 #7 已结束。您是唯一的参与者。实验结果：您还在。' },
+        { sender: '实验员', text: '您对以下刺激的反应已被记录：黑暗、安静、孤独、重复。' },
+        { sender: '实验员', text: '您被选中参与一项关于"恐惧耐受性"的研究。您已经在参与了。' },
+        { sender: '心理医生', text: '你最近有没有做关于档案馆的梦？如果有，请不要告诉我内容。' },
+        { sender: '心理医生', text: '你的"异常事件报告"数量超过了阈值。建议减少访问频率。' },
+        { sender: '心理医生', text: '你提交的"梦境记录"已归档。档案编号：噩梦 #13。' },
+        // --- 诡异对话 ---
+        { sender: '对话记录', text: '"你在哪里？""我在档案馆。""档案馆在哪里？""在你身后。"' },
+        { sender: '对话记录', text: '"你看到了什么？""我看到了你。""我看到了我自己。""那不是你。"' },
+        { sender: '对话记录', text: '"你叫什么名字？""我不记得了。""你刚才还说了。""那不是我说的。"' },
+        { sender: '对话记录', text: '"今天几号？""13号。""这个月没有13号。""我知道。"' },
+        { sender: '对话记录', text: '"你为什么在这里？""我在找东西。""找什么？""找我为什么在这里。"' },
+        { sender: '对话记录', text: '"你看到了第七个抽屉里有什么？""我不能说。""为什么？""因为它在听。"' },
+        { sender: '对话记录', text: '"你害怕吗？""不害怕。""你应该害怕。""为什么？""因为你不是一个人在看这段对话。"' },
+        { sender: '对话记录', text: '"你有没有注意到在线人数？""没有。""现在看一下。""0。""那你是谁？"' },
+        { sender: '对话记录', text: '"你最后一次见到阳光是什么时候？""我不记得了。""你来档案馆多久了？""我不知道。""你确定你还活着？"' },
+        { sender: '对话记录', text: '"你有没有看到那个帖子？""什么帖子？""那个不该存在的帖子。""我看到了。""那你就不该在这里了。"' },
+        // --- 环境/场景 ---
+        { sender: '窗外', text: '你窗外的路灯刚刚闪了一下。不是电路问题。' },
+        { sender: '天花板', text: '你天花板上的那块污渍，形状和昨天不一样了。' },
+        { sender: '地板', text: '你地板上的那个影子，不属于房间里任何物体。' },
+        { sender: '墙壁', text: '你有没有注意到，你家墙壁的厚度不对？比图纸上厚了 13 厘米。' },
+        { sender: '门', text: '你家的门把手，今天是不是比昨天冷了一点？' },
+        { sender: '窗户', text: '你窗户上的雾气，有人用手指写了什么。但你一个人住。' },
+        { sender: '楼梯', text: '你上楼梯的时候，有没有听到身后多了一组脚步声？' },
+        { sender: '电梯', text: '你按了 7 楼，但电梯停在了 7.5 楼。这个楼层不存在。' },
+        { sender: '走廊', text: '你走廊尽头的那盏灯，总是比其他灯暗一点。' },
+        { sender: '地下室', text: '你家地下室的门，最近是不是自己打开了？' },
+        { sender: '阁楼', text: '你阁楼上的那个箱子，你确定是你放的吗？' },
+        { sender: '花园', text: '你花园里的那个洞，每天都在变大。' },
+        { sender: '车库', text: '你车库里那辆旧车，里程表上的数字每天都在增加。' },
+        { sender: '信箱', text: '你信箱里有一封没有邮戳的信。信封上写着你的名字。' },
+        { sender: '门铃', text: '你门铃响了。但门口没有人。只有地上有一个黑色的信封。' },
+        { sender: '猫眼', text: '你从猫眼看走廊，走廊里有一个人也在从猫眼看你的门。' },
+        // --- 数字/代码 ---
+        { sender: '二进制', text: '01001000 01000101 01001100 01010000（HELP）' },
+        { sender: '坐标', text: '39.9042°N, 116.4074°E。这是你现在的坐标。不是论坛服务器的。' },
+        { sender: 'IP地址', text: '您的 IP 地址已变更为：127.0.0.1。这是本地回环地址。' },
+        { sender: '时间戳', text: '1735689420。这个时间戳对应的日期：不存在。' },
+        { sender: '哈希值', text: '您的账号哈希值：7f3a8b2c。这个值和三年前一个已注销账号相同。' },
+        { sender: '端口', text: '您的设备正在监听端口 1313。这个端口不存在于任何标准协议中。' },
+        { sender: 'DNS', text: '您的 DNS 查询记录中有一个域名：midnight-archives.local。这个域名不存在。' },
+        { sender: '缓存', text: '您的浏览器缓存中有一个您从未访问过的页面。页面内容：您的个人信息。' },
+        { sender: 'Cookie', text: '您的浏览器 Cookie 中有一个名为"visitor_0"的值。这个值每天都在变化。' },
+        { sender: '日志', text: '您的访问日志中有一条记录：访问时间 - 您出生之前。' },
+        // --- 情感/心理 ---
+        { sender: '孤独', text: '你是不是觉得只有你一个人在深夜浏览这个论坛？你不是一个人。' },
+        { sender: '恐惧', text: '你现在的恐惧感是正常的。适应之后就会消失。这不是好事。' },
+        { sender: '焦虑', text: '你有没有感觉到一种莫名的焦虑？那是档案馆在呼唤你。' },
+        { sender: '困惑', text: '你是不是觉得很多事情都说不通？那就对了。说得通才可怕。' },
+        { sender: '疲惫', text: '你是不是很累？但你不想停下来。你已经习惯了。' },
+        { sender: '依赖', text: '你今天的访问时间比昨天多了 13 分钟。这不是巧合。' },
+        { sender: '渴望', text: '你是不是在寻找什么？你不会找到的。但你会继续找。' },
+        { sender: '安全感', text: '你觉得这个论坛是安全的吗？' },
+        { sender: '信任', text: '你信任这个论坛吗？你不应该信任任何东西。' },
+        { sender: '控制', text: '你觉得你在这里有控制权吗？' },
+        { sender: '归属', text: '你是不是觉得这里才是你该待的地方？' },
+        { sender: '习惯', text: '你今天访问档案馆的时间和昨天一模一样。精确到秒。' },
+        { sender: '期待', text: '你是不是在期待什么？别期待。' },
+        { sender: '后悔', text: '你有没有后悔过第一次访问这个论坛？你不会记得第一次是什么时候。' },
+        { sender: '遗忘', text: '你已经忘记了很多事情。但你不会忘记这个论坛。' },
+        { sender: '记忆', text: '你最近的记忆有没有出现空白？' },
+        { sender: '现实', text: '你确定你现在的状态是"清醒"吗？' },
+        { sender: '幻想', text: '你有没有想过，这一切可能只是你的幻想？' },
+        { sender: '逃避', text: '你想逃避什么？你逃不掉的。' },
+        { sender: '接受', text: '你已经接受了这里的规则。你不记得自己是什么时候接受的。' },
+         // --- 更多诡异事件 ---
+         { sender: '镜子', text: '你照镜子的时候，有没有发现倒影的嘴巴在动，但你没有说话？' },
+         { sender: '镜子', text: '你镜子上的雾气，有人写了一个字：看。但你刚洗完脸。' },
+         { sender: '照片', text: '你手机相册里最近一张照片，拍摄时间是凌晨 3:47。你不记得拍过。' },
+         { sender: '照片', text: '你三年前的合照里，有一个人的脸是模糊的。其他人都是清晰的。' },
+         { sender: '录音', text: '你手机的录音应用里多了一个文件。文件名是一串乱码。播放后是你的呼吸声。' },
+         { sender: '视频', text: '你手机里有一段 13 秒的视频。视频里是你的房间。但你不在家。' },
+         { sender: '通讯录', text: '你的通讯录里多了一个联系人。名字是你的名字。号码是空号。' },
+         { sender: '通话记录', text: '你的通话记录里有一通 13 分钟的来电。来电号码：00000000000。' },
+         { sender: '短信', text: '你收到了一条短信："抬头。"但你已经低头看了。' },
+         { sender: '邮件', text: '您有一封新邮件。主题：您的档案已更新。但您没有档案。' },
+         { sender: '日历', text: '您的日历中新增了一个事件：不要回头。时间：每天凌晨 3:47。' },
+         { sender: '闹钟', text: '您的闹钟响了。但您没有设置闹钟。闹钟铃声是您的名字。' },
+         { sender: '天气', text: '今天的天气预报：局部有雾，能见度 0 米。建议不要看窗外。' },
+         { sender: '导航', text: '您的导航记录中有一个地址：您家地下室。但您家没有地下室。' },
+         { sender: '外卖', text: '您的外卖订单已送达。但您没有点外卖。外卖袋里是空的。' },
+         { sender: '快递', text: '您的快递已签收。签收人：您。但您不在家。包裹里是一面镜子。' },
+         { sender: '银行', text: '您的账户余额已更新。新余额：13.13 元。您没有进行任何交易。' },
+         { sender: '银行', text: '您的信用卡有一笔消费记录。消费地点：一个不存在的地址。金额：0.00 元。' },
+         { sender: '社交', text: '您的社交媒体账号发布了一条动态。但您没有发布。动态内容是您的照片。' },
+         { sender: '社交', text: '您的社交媒体收到了一条私信。私信内容：我在你家。发送者：您。' },
+         { sender: '搜索', text: '您的搜索记录中有一个关键词：第七个抽屉里有什么。您没有搜索过。' },
+         { sender: '浏览器', text: '您的浏览器历史记录中有一个网站：midnight-archives.local。这个网站不存在。' },
+         { sender: '下载', text: '您的下载文件夹中新增了一个文件。文件名：您的名字.txt。内容：别打开。' },
+         { sender: '桌面', text: '您的桌面上多了一个文件夹。文件夹名称：第七档案。您无法删除它。' },
+         { sender: '回收站', text: '您的回收站里有 13 个文件。文件名都是您的名字。您没有删除过这些文件。' },
+         { sender: '系统', text: '您的设备时间已自动调整为：凌晨 3:47。现在是下午 2 点。' },
+         { sender: '系统', text: '您的设备语言已自动变更为：未知。但您仍能看懂所有文字。' },
+         { sender: '系统', text: '您的设备壁纸已自动更换为一张黑色图片。图片中央有一个白色的眼睛。' },
+         { sender: '系统', text: '您的设备通知铃声已自动更换为一段 13 秒的低语声。' },
+         { sender: '系统', text: '您的设备电池电量显示为 -13%。但设备仍在运行。' },
+         { sender: '系统', text: '您的设备存储空间已满。但您没有存储任何文件。' },
+         { sender: '系统', text: '您的设备正在运行一个您没有安装的应用。应用名称：观察者。' },
+         { sender: '系统', text: '您的设备麦克风权限已被授予给一个未知应用。' },
+         { sender: '系统', text: '您的设备摄像头权限已被授予给一个未知应用。' },
+         { sender: '系统', text: '您的设备位置权限已被授予给一个未知应用。应用记录的位置：您的卧室。' },
+         { sender: '系统', text: '您的设备正在与一个蓝牙设备配对。设备名称：你的影子。' },
+         { sender: '系统', text: '您的设备正在连接一个 Wi-Fi 网络。网络名称：你不是一个人。' },
+         { sender: '系统', text: '您的设备屏幕上出现了一个像素异常。异常形状：一个眼睛。' },
+         { sender: '系统', text: '您的设备扬声器在没有播放任何内容的情况下发出了声音。声音内容：您的名字。' },
+         { sender: '系统', text: '您的设备振动了。但您没有收到任何通知。振动模式：SOS。' },
+         { sender: '系统', text: '您的设备自动打开了前置摄像头。摄像头拍摄到了您的脸。但您没有打开相机应用。' },
+         { sender: '系统', text: '您的设备自动拨打了紧急电话。通话内容：无人说话。通话时长：13 秒。' },
+         { sender: '系统', text: '您的设备自动发送了一条短信。短信内容：我在。收件人：您的号码。' },
+         { sender: '系统', text: '您的设备自动创建了一个日历事件。事件名称：不要忘记。时间：每天凌晨 3:47。' },
+         { sender: '系统', text: '您的设备自动设置了一个闹钟。闹钟时间：凌晨 3:47。闹钟铃声：您的名字。' },
+         { sender: '系统', text: '您的设备自动备份了所有数据。备份位置：一个不存在的服务器。' },
+         { sender: '系统', text: '您的设备自动更新了系统。更新内容：未知。更新后您多了一个应用：第七档案。' },
+         { sender: '系统', text: '您的设备自动恢复了出厂设置。但您的所有数据都还在。包括您没有创建的文件。' },
+         { sender: '系统', text: '您的设备自动关机了。但您仍能收到这条消息。' },
+         { sender: '系统', text: '您的设备自动开机了。开机画面是一个您不认识的人的脸。' },
+         { sender: '系统', text: '您的设备自动进入了飞行模式。但您仍能收到这条消息。' },
+         { sender: '系统', text: '您的设备自动连接了一个网络。网络名称：档案馆内部网络。这个网络不存在。' },
+         { sender: '系统', text: '您的设备自动下载了一个文件。文件名称：您的名字_档案.pdf。文件大小：0 字节。' },
+         { sender: '系统', text: '您的设备自动安装了一个应用。应用名称：观察者。应用图标：一个眼睛。' },
+         { sender: '系统', text: '您的设备自动卸载了您所有社交应用。但您仍能收到私信。' },
+         { sender: '系统', text: '您的设备自动清空了所有浏览记录。但您仍能访问所有网站。' },
+         { sender: '系统', text: '您的设备自动删除了所有照片。但您的相册里仍有 13 张照片。照片内容：您的房间。' },
+         // --- 最后的警告 ---
+        { sender: '最后的警告', text: '这是你收到的最后一条警告。之后的所有消息都不是警告。' },
+        { sender: '最后的提醒', text: '请在 13 秒内关闭此页面。这不是建议。' },
+        { sender: '最后的机会', text: '你还有一次机会离开。这次机会会在你阅读完这条消息后消失。' },
+        { sender: '最后的忠告', text: '不要相信你在这里看到的任何内容。包括这条。' },
+        { sender: '最后的真相', text: '这个论坛没有管理员。所有管理员都是系统生成的。包括我。' },
+        { sender: '最后的秘密', text: '这个论坛的真正目的不是分享故事。是收集数据。你的数据。' },
+        { sender: '最后的问题', text: '你为什么还在这里？' },
+        { sender: '最后的答案', text: '因为你无处可去。' },
+        { sender: '最后的留言', text: '如果你看到这条消息，请在 13 秒内关闭页面。否则你的名字将出现在下一条帖子中。' },
+        { sender: '最后的真相', text: '你不是在浏览论坛。论坛在浏览你。' }
       ];
 
       var toastEl = document.getElementById('system-dm-toast');
@@ -3331,10 +3545,9 @@
 
       // Schedule random DMs
       function scheduleNextDM() {
-        // Random interval: 25-50 seconds
-        var delay = 25000 + Math.random() * 25000;
+        // Random interval: 90-180 seconds
+        var delay = 90000 + Math.random() * 90000;
         setTimeout(function() {
-          // Pick a random DM that's not the same as the last one
           var dm = eerieDMs[Math.floor(Math.random() * eerieDMs.length)];
           dmQueue.push(dm);
           showNextDM();
@@ -3342,13 +3555,211 @@
         }, delay);
       }
 
-      // First DM after 15-25 seconds
+      // First DM after 40-70 seconds
       setTimeout(function() {
         var dm = eerieDMs[Math.floor(Math.random() * eerieDMs.length)];
         dmQueue.push(dm);
         showNextDM();
         scheduleNextDM();
-      }, 15000 + Math.random() * 10000);
+      }, 40000 + Math.random() * 30000);
+
+      // ===== 规则怪谈社区守则系统 =====
+      var communityRules = [
+        '论坛开放时间为 23:00 至 05:00。其余时间看到的帖子均非本站内容。',
+        '如果你在评论区看到了自己的名字，请立即关闭页面。那不是你。',
+        '不要连续刷新超过三次。第四次你会看到不该看到的东西。',
+        '每位用户每天最多发帖三条。如果你发现自己发了第四条，那条不是你发的。',
+        '帖子标题如果变成红色，请不要点开。它在等你。',
+        '如果你在凌晨 3:47 看到在线人数为 1，那不是你。',
+        '不要回复超过三天前的帖子。发帖的人可能已经不在了。',
+        '如果你的用户名自动改变，请不要使用新名字发帖。',
+        '论坛不会发送邮件通知。如果你收到了，请不要打开。',
+        '看到"内容不可用"的帖子时，请不要试图恢复它。它被隐藏是有原因的。',
+        '不要在两个设备上同时登录。你会在另一个设备上看到不属于你的浏览记录。',
+        '如果帖子内容在你阅读时发生变化，请立即停止阅读。你看到的不是文字。',
+        '本论坛不存在第十三条守则。',
+        '如果你读到了这条守则，说明你已经违反了第一条。',
+        '不要试图联系管理员。管理员最后上线时间是三年前。',
+        '帖子下方的回声数量可能不准确。多出来的那条，请忽略。',
+        '如果你在深夜听到键盘敲击声，但你没有在打字，请关闭页面。',
+        '不要保存任何帖子的链接。再次打开时，内容会不一样。',
+        '论坛的截图功能已被禁用。如果你成功截图了，照片里的内容会和屏幕上的不同。',
+        '每五条守则中有一条是假的。但你不知道是哪一条。',
+        '如果你感觉有人在看你，请不要回头。',
+        '此页面的停留时间已被记录。超过 30 分钟后，你的权限将被重新评估。',
+        '当在线人数突然变为 0 时，请在 10 秒内关闭页面。',
+        '不要试图查看页面源代码。里面有你不该看到的东西。'
+      ];
+
+      // 公告区轮播守则 — 每次显示4条
+      var rulesDisplay = document.getElementById('rules-display');
+      var rulesAnnouncement = document.getElementById('forum-announcement');
+      var lastRuleIndex = -1;
+      function cycleRules() {
+        try {
+          if (!rulesDisplay || !rulesAnnouncement) return;
+          // 淡出
+          rulesAnnouncement.style.opacity = '0';
+          setTimeout(function() {
+            // 选4条不重复的守则
+            var startIdx;
+            do { startIdx = Math.floor(Math.random() * (communityRules.length - 3)); } while (startIdx === lastRuleIndex);
+            lastRuleIndex = startIdx;
+            var batch = communityRules.slice(startIdx, startIdx + 4);
+            rulesDisplay.innerHTML = batch.map(function(r, i) {
+              return '<span style="display:block;margin:2px 0;opacity:0.85">' + r + '</span>';
+            }).join('');
+            rulesAnnouncement.style.transition = 'opacity 1.5s ease';
+            rulesAnnouncement.style.opacity = '1';
+          }, 800);
+        } catch(e) {}
+      }
+      // 首次30秒后轮播，之后每45秒
+      setTimeout(cycleRules, 30000);
+      setInterval(cycleRules, 45000);
+
+      // ===== 字体变红特效 =====
+      function triggerBloodText() {
+        try {
+          var targets = document.querySelectorAll('.forum-post__title, .forum-post__excerpt');
+          if (!targets || targets.length === 0) return;
+          var target = targets[Math.floor(Math.random() * targets.length)];
+          if (!target || !target.textContent) return;
+          target.classList.add('eerie-blood');
+          setTimeout(function() { target.classList.remove('eerie-blood'); }, 2500);
+        } catch(e) {}
+      }
+      setInterval(triggerBloodText, 30000);
+
+      // ===== 字体乱码特效 =====
+      var glitchChars = ['\u2593','\u2591','\u2592','\u2588','\u2590','\u258C','\u256B','\u256A','\u256C','\u2560','\u2563','\u2566','\u2569','\u253C','\u2524','\u251C','\u252C','\u2534','\u2500','\u2502','\u2561','\u2562','\u2504','\u2508','\u250A'];
+      function triggerGlitchText() {
+        try {
+          var targets = document.querySelectorAll('.forum-post__title, .forum-post__excerpt');
+          if (!targets || targets.length === 0) return;
+          var target = targets[Math.floor(Math.random() * targets.length)];
+          if (!target) return;
+          var original = target.textContent || '';
+          if (original.length < 4) return;
+          var start = Math.floor(Math.random() * (original.length - 3));
+          var len = 2 + Math.floor(Math.random() * 4);
+          var glitched = '';
+          for (var i = 0; i < len; i++) {
+            glitched += glitchChars[Math.floor(Math.random() * glitchChars.length)];
+          }
+          target.textContent = original.substring(0, start) + glitched + original.substring(start + len);
+          target.classList.add('eerie-glitch');
+          setTimeout(function() {
+            target.textContent = original;
+            target.classList.remove('eerie-glitch');
+          }, 1800);
+        } catch(e) {}
+      }
+      setInterval(triggerGlitchText, 45000);
+
+      // ===== 全屏红色闪光 =====
+      function triggerRedFlash() {
+        try {
+          var flash = document.createElement('div');
+          flash.className = 'eerie-red-flash';
+          document.body.appendChild(flash);
+          setTimeout(function() { if (flash.parentNode) flash.remove(); }, 3000);
+        } catch(e) {}
+      }
+      setTimeout(triggerRedFlash, 60000);
+      setInterval(triggerRedFlash, 120000);
+
+      // ===== 全屏闪烁 =====
+      function triggerScreenFlicker() {
+        try {
+          document.body.classList.add('eerie-screen-flicker');
+          setTimeout(function() { document.body.classList.remove('eerie-screen-flicker'); }, 600);
+        } catch(e) {}
+      }
+      setInterval(triggerScreenFlicker, 90000);
+
+      // ===== 扫描线效果（常驻） =====
+      document.body.classList.add('eerie-scanlines');
+
+      // ===== 帖子阴影扭曲 =====
+      function triggerShadowShift() {
+        try {
+          var posts = document.querySelectorAll('.forum-post[data-post-id]');
+          if (!posts || posts.length === 0) return;
+          var target = posts[Math.floor(Math.random() * posts.length)];
+          target.classList.add('eerie-shadow-shift');
+          setTimeout(function() { target.classList.remove('eerie-shadow-shift'); }, 4000);
+        } catch(e) {}
+      }
+      setInterval(triggerShadowShift, 60000);
+
+      // ===== 底部闪现文字 =====
+      var ghostTexts = [
+        '你确定只有你一个人在看吗？',
+        '屏幕后面有人在呼吸',
+        '这条帖子下面藏着另一条帖子',
+        '你的影子比你先到这里',
+        '档案馆的灯从不熄灭',
+        '第七个抽屉里的东西在动',
+        '凌晨3:47，别刷新页面',
+        '你上次发的帖子，不是你写的',
+        '屏幕上的字在变',
+        '你身后有人',
+        '这个页面有13个帖子，你只看到了12个',
+        '别看评论区最下面',
+        '你的输入速度被记录了',
+        '系统检测到异常存在',
+        '帖子内容在变化，你注意到了吗',
+        '你刷新之后，有些东西不一样了',
+        '后台有东西在运行',
+        '你发的帖子已经存在了三十年',
+        '这个论坛不止你一个用户',
+        '你的鼠标轨迹被记录了'
+      ];
+      var ghostEl = document.createElement('div');
+      ghostEl.className = 'eerie-ghost-text';
+      document.body.appendChild(ghostEl);
+      function triggerGhostText() {
+        try {
+          var text = ghostTexts[Math.floor(Math.random() * ghostTexts.length)];
+          ghostEl.textContent = text;
+          ghostEl.classList.add('visible');
+          setTimeout(function() { ghostEl.classList.remove('visible'); }, 4000);
+        } catch(e) {}
+      }
+      setInterval(triggerGhostText, 75000);
+
+      // ===== 随机帖子标题闪红 =====
+      function triggerTitleFlash() {
+        try {
+          var titles = document.querySelectorAll('.forum-post__title');
+          if (!titles || titles.length === 0) return;
+          var t = titles[Math.floor(Math.random() * titles.length)];
+          if (!t) return;
+          var orig = t.style.color;
+          t.style.color = '#c41010';
+          t.style.textShadow = '0 0 8px rgba(196,16,16,0.6)';
+          t.style.transition = 'color 0.3s, text-shadow 0.3s';
+          setTimeout(function() {
+            t.style.color = orig || '';
+            t.style.textShadow = '';
+          }, 1500);
+        } catch(e) {}
+      }
+      setInterval(triggerTitleFlash, 40000);
+
+      // ===== Toast 通知 =====
+      function showToast(message, type) {
+        var toast = document.createElement('div');
+        toast.className = 'toast-notification toast--' + (type || 'info');
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        requestAnimationFrame(function() { toast.classList.add('visible'); });
+        setTimeout(function() {
+          toast.classList.remove('visible');
+          setTimeout(function() { if (toast.parentNode) toast.remove(); }, 400);
+        }, 3000);
+      }
 
     })();
   </script>
