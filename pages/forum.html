@@ -1672,7 +1672,7 @@
             <span class="forum-topbar__subtitle">每一条帖子，都是一个未完的故事</span>
           </div>
           <div class="forum-topbar__actions">
-            
+            <span id="topbar-coin-spot"></span>
             <button class="forum-topbar__btn-new-post" data-dom-id="btn-new-post" onclick="window.location.href='submit.html'">
               <span>+</span> 发帖
             </button>
@@ -2234,16 +2234,495 @@
       </div>
     </div>
 
-    
-  <script>
-    // 初始化充值系统顶部显示
-    if (window.MidnightRecharge) {
-      MidnightRecharge.renderTopbarCoin('topbar-coin-spot');
-      document.getElementById('topbar-coin-spot').addEventListener('click', function() {
-        alert('充值页面 — 即将跳转');
-        // 可跳转到独立充值页或内嵌渲染
+    <script>
+    (function() {
+      'use strict';
+
+      // --- Escape HTML utility (must be defined before use) ---
+      function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      // ===== Username System =====
+      var STORAGE_USERNAME = 'midnight_archives_username';
+
+      function getUsername() {
+        try { return localStorage.getItem(STORAGE_USERNAME) || ''; }
+        catch(e) { return ''; }
+      }
+
+      function setUsername(name) {
+        try { localStorage.setItem(STORAGE_USERNAME, name); }
+        catch(e) {}
+      }
+
+      function getDisplayName() {
+        return getUsername() || '匿名者';
+      }
+
+      // Naming modal elements
+      var namingOverlay = document.getElementById('naming-overlay');
+      var namingInput = document.getElementById('naming-input');
+      var namingConfirm = document.getElementById('naming-confirm');
+      var namingSkip = document.getElementById('naming-skip');
+      var headerAvatar = document.getElementById('header-avatar');
+      var headerUsername = document.getElementById('header-username');
+      var NAME_LOCK_KEY = 'midnight_archives_name_locked';
+
+      function isNameLocked() {
+        try { return localStorage.getItem(NAME_LOCK_KEY) === '1'; } catch(e) { return false; }
+      }
+      function lockName() {
+        try { localStorage.setItem(NAME_LOCK_KEY, '1'); } catch(e) {}
+      }
+
+      // Update header username display
+      function refreshHeaderUsername() {
+        var name = getUsername();
+        if (headerUsername) {
+          headerUsername.textContent = name || '匿名者';
+        }
+      }
+      refreshHeaderUsername();
+
+      // Open naming modal on avatar click — check lock
+      function openNamingModal() {
+        if (isNameLocked()) {
+          showToast('名字一经设定，不可修改。档案馆不会遗忘。', 'warning');
+          return;
+        }
+        namingOverlay.classList.add('visible');
+        namingInput.value = getUsername();
+        namingConfirm.disabled = namingInput.value.trim().length < 2;
+        setTimeout(function() { namingInput.focus(); }, 300);
+      }
+      if (headerAvatar) headerAvatar.addEventListener('click', openNamingModal);
+      if (headerUsername) headerUsername.addEventListener('click', openNamingModal);
+
+      // Input validation
+      if (namingInput) {
+        namingInput.addEventListener('input', function() {
+          namingConfirm.disabled = namingInput.value.trim().length < 2;
+        });
+        namingInput.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' && !namingConfirm.disabled) {
+            namingConfirm.click();
+          }
+        });
+      }
+
+      // Confirm naming — lock after first set
+      if (namingConfirm) {
+        namingConfirm.addEventListener('click', function() {
+          var name = namingInput.value.trim();
+          if (name.length < 2) return;
+          setUsername(name);
+          lockName();
+          refreshHeaderUsername();
+          namingOverlay.classList.remove('visible');
+          applyUsernameToPage();
+          // Update modal hint for future visits
+          var hint = namingOverlay.querySelector('.naming-modal__hint');
+          if (hint) hint.textContent = '名字已锁定，不可修改';
+        });
+      }
+
+      // Skip naming
+      if (namingSkip) {
+        namingSkip.addEventListener('click', function() {
+          namingOverlay.classList.remove('visible');
+        });
+      }
+
+      // Apply username to all existing posts and replies on the page
+      function applyUsernameToPage() {
+        var name = getDisplayName();
+        document.querySelectorAll('.forum-post__user').forEach(function(el) {
+          if (el.textContent.trim() === '你' || el.textContent.trim() === '匿名者') {
+            el.textContent = name;
+          }
+        });
+        document.querySelectorAll('.forum-reply__username').forEach(function(el) {
+          if (el.textContent.trim() === '你' || el.textContent.trim() === '匿名者') {
+            el.textContent = name;
+          }
+        });
+        document.querySelectorAll('.forum-reply-input__avatar').forEach(function(el) {
+          el.textContent = name.charAt(0);
+        });
+      }
+      applyUsernameToPage();
+
+      // Show naming modal on first visit if no username set
+      if (!getUsername()) {
+        setTimeout(function() {
+          namingOverlay.classList.add('visible');
+          setTimeout(function() { namingInput.focus(); }, 300);
+        }, 2000);
+      }
+
+      // ===== Shared Data Initialization =====
+      // Username is still local per user
+      var STORAGE_USERNAME = 'midnight_archives_username';
+
+      // ===== Initialize SharedData BEFORE rendering (loads localStorage synchronously) =====
+  // （不再将 _config.js 的旧 Token 注入 SharedData——BUILTIN_TOKEN 已在 shared_data.js 中配置）
+  SharedData.init(function(isOnline) {
+        if (isOnline) {
+          console.log('[论坛] 共享数据已连接，所有用户可互相看到帖子和回声');
+        }
+        // Always refresh data after init (local or remote), not only when online
+        console.log('[INIT] callback fired, isOnline=' + isOnline);
+        userPosts = SharedData.getPosts();
+        console.log('[INIT] posts count:', userPosts.length);
+        updateAllReplyCounts();
+        renderUserPosts();
       });
-    }
+      SharedData.onDataUpdate = function() {
+        updateAllReplyCounts();
+      };
+
+      // ===== Render saved user posts into the post list =====
+      var userPosts = SharedData.getPosts();
+      var savedRepliesForPosts = SharedData.getReplies();
+      var postList = document.querySelector('.forum-post-list');
+      var categoryIcons = {whispers:'🫧',urban:'🏙',mystery:'❓',archives:'📁',other:'📋'};
+
+      // ===== Update reply counts for ALL posts (static + user) =====
+      // Original static reply counts for built-in posts (never changes)
+      var STATIC_REPLY_COUNTS = {
+        'post-1': 3,
+        'post-2': 5,
+        'post-3': 8,
+        'post-4': 11,
+        'post-5': 4,
+        'post-6': 0,
+        'post-7': 17,
+        'post-8': 7,
+        'post-9': 22
+      };
+
+      function updateAllReplyCounts() {
+        var allReplies = SharedData.getReplies();
+        document.querySelectorAll('.forum-post[data-post-id]').forEach(function(post) {
+          var postId = post.getAttribute('data-post-id');
+          var userReplyCount = (allReplies[postId] || []).length;
+          var metaReplies = post.querySelector('.forum-post__replies');
+          if (!metaReplies) return;
+
+          var isUserPost = post.hasAttribute('data-user-post');
+          var staticCount = 0;
+
+          if (isUserPost) {
+            staticCount = 0;
+          } else {
+            staticCount = STATIC_REPLY_COUNTS[postId] || 0;
+          }
+
+          var total = staticCount + userReplyCount;
+          metaReplies.textContent = total + ' 条回声';
+        });
+      }
+
+      // Dedup replies (in-memory via SharedData)
+      function dedupReplies() {
+        var allReplies = SharedData.getReplies();
+        var changed = false;
+        Object.keys(allReplies).forEach(function(postId) {
+          var replies = allReplies[postId];
+          if (!Array.isArray(replies)) return;
+          var seen = {};
+          var deduped = [];
+          replies.forEach(function(r) {
+            var key = (r.time || '') + '|' + (r.text || '');
+            if (!seen[key]) {
+              seen[key] = true;
+              deduped.push(r);
+            } else { changed = true; }
+          });
+          allReplies[postId] = deduped;
+        });
+      }
+      dedupReplies();
+      updateAllReplyCounts();
+
+      // ===== Render user posts (idempotent — safe to call multiple times) =====
+      function renderUserPosts() {
+        console.log('[RENDER] renderUserPosts called, posts:', SharedData.getPosts().length);
+        if (!postList) { console.log('[RENDER] no postList!'); return; }
+        var posts = SharedData.getPosts();
+        if (!posts || posts.length === 0) return;
+        posts.forEach(function(up) {
+          // Skip if already rendered in the DOM
+          if (document.querySelector('.forum-post[data-post-id="' + up.id + '"]')) return;
+          var replyCount = SharedData.getRepliesForPost(up.id).length;
+          var article = document.createElement('article');
+          article.className = 'forum-post';
+          article.setAttribute('data-post-id', up.id);
+          article.setAttribute('data-user-post', 'true');
+          article.innerHTML =
+            '<div class="forum-post__icon">' + (categoryIcons[up.category] || '📋') + '</div>' +
+            '<div class="forum-post__body">' +
+              '<div class="forum-post__title-row">' +
+                '<span class="forum-post__title" data-dom-id="' + up.id + '">' + escapeHtml(up.title) + '</span>' +
+              '</div>' +
+              '<p class="forum-post__excerpt">' + escapeHtml(up.content.substring(0, 80)) + (up.content.length > 80 ? '...' : '') + '</p>' +
+              '<div class="forum-post__expanded-content">' +
+                '<div class="forum-post__full-text">' + escapeHtml(up.content) + '</div>' +
+                '<span class="forum-post__collapse-btn">▲ 收起</span>' +
+                '<div class="forum-post__replies-section">' +
+                  '<div class="forum-post__replies-title">回声</div>' +
+                '</div>' +
+              '</div>' +
+              '<div class="forum-post__footer">' +
+                '<span class="forum-post__tag">' + escapeHtml(up.categoryLabel) + '</span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="forum-post__meta">' +
+              '<span class="forum-post__user">' + escapeHtml(up.username || getDisplayName()) + '</span>' +
+              '<span class="forum-post__time">' + up.timestamp + '</span>' +
+              '<span class="forum-post__replies">' + replyCount + ' 条回声</span>' +
+            '</div>';
+          var firstPost = postList.querySelector('.forum-post');
+          if (firstPost) {
+            postList.insertBefore(article, firstPost);
+          } else {
+            postList.appendChild(article);
+          }
+          try {
+            wirePostExpand(article, up.id);
+            console.log('[渲染] 帖子已绑定点击: ' + up.id + ' title=' + up.title);
+          } catch(e) {
+            console.error('[渲染] 绑定失败: ' + up.id, e);
+          }
+        });
+      }
+      // Initial render (from localStorage data loaded by init's _loadFromLocal)
+      renderUserPosts();
+
+      // ===== Render saved replies into existing posts =====
+      // Now handled per-post on expand via renderSavedRepliesForPost()
+
+      // ===== Post expand/collapse (shared function) =====
+      function wirePostExpand(post, postId) {
+        post.setAttribute('data-expand-wired', 'true');
+        post.onclick = function(e) {
+          if (post.classList.contains('forum-post--archived') || post.classList.contains('forum-post--deleted')) return;
+          if (e.target.closest('.forum-post__collapse-btn')) { post.classList.remove('forum-post--expanded'); return; }
+          if (e.target.closest('.forum-reply-input') || e.target.closest('.forum-reply')) return;
+          var wasExpanded = post.classList.contains('forum-post--expanded');
+          post.classList.toggle('forum-post--expanded');
+          if (!wasExpanded) {
+            if (typeof renderSavedRepliesForPost === 'function') renderSavedRepliesForPost(post, postId);
+            var rs = post.querySelector('.forum-post__replies-section');
+            if (rs && !rs.querySelector('.forum-reply-input')) {
+              var ri = createReplyInput(postId);
+              if (ri) { rs.appendChild(ri); if (typeof wireReplyInput === 'function') wireReplyInput(ri, rs, post, postId); }
+            }
+          }
+        };
+
+        // Collapse button
+        var collapseBtn = post.querySelector('.forum-post__collapse-btn');
+        if (collapseBtn) {
+          collapseBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            post.classList.remove('forum-post--expanded');
+          });
+        }
+      }
+
+      // Render saved replies for a single post (called on expand)
+      function renderSavedRepliesForPost(post, postId) {
+        if (post.dataset.repliesRendered) return;
+        var allReplies = SharedData.getReplies();
+        var replies = allReplies[postId];
+        if (!replies || replies.length === 0) return;
+        var section = post.querySelector('.forum-post__replies-section');
+        if (!section) return;
+        // Deduplicate replies by time+text
+        var seen = {};
+        replies.forEach(function(r) {
+          var key = r.time + '|' + r.text;
+          if (seen[key]) return;
+          seen[key] = true;
+          var replyEl = document.createElement('div');
+          replyEl.className = 'forum-reply';
+          var replyUser = r.username || getDisplayName();
+          replyEl.innerHTML =
+            '<div class="forum-reply__avatar">' + escapeHtml(replyUser.charAt(0)) + '</div>' +
+            '<div class="forum-reply__body">' +
+              '<div class="forum-reply__header">' +
+                '<span class="forum-reply__username">' + escapeHtml(replyUser) + '</span>' +
+                '<span class="forum-reply__time">' + r.time + '</span>' +
+              '</div>' +
+              '<p class="forum-reply__text">' + escapeHtml(r.text) + '</p>' +
+            '</div>';
+          section.appendChild(replyEl);
+        });
+        post.dataset.repliesRendered = 'true';
+      }
+
+      function wireReplyInput(replyInput, repliesSection, post, postId) {
+        var field = replyInput.querySelector('.forum-reply-input__field');
+        var btn = replyInput.querySelector('.forum-reply-input__btn');
+
+        field.addEventListener('input', function() {
+          btn.disabled = field.value.trim().length === 0;
+          field.style.height = 'auto';
+          field.style.height = Math.min(field.scrollHeight, 120) + 'px';
+        });
+
+        field.addEventListener('click', function(e) { e.stopPropagation(); });
+        field.addEventListener('keydown', function(e) { e.stopPropagation(); });
+
+        // Enter to send (Shift+Enter for new line)
+        field.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            if (!btn.disabled) btn.click();
+          }
+        });
+
+        var phIdx = 0;
+        setInterval(function() {
+          if (document.activeElement !== field) {
+            phIdx = (phIdx + 1) % replyPlaceholders.length;
+            field.placeholder = replyPlaceholders[phIdx];
+          }
+        }, 5000);
+
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var text = field.value.trim();
+          if (!text) return;
+
+          // 安全锁定检查
+          if (window.MidnightSecurity && window.MidnightSecurity.isLocked && window.MidnightSecurity.isLocked()) {
+            showToast('您的会话因异常行为被临时锁定，请稍后再试', 'error');
+            return;
+          }
+
+          var now = new Date().toLocaleString('zh-CN');
+          var newReply = document.createElement('div');
+          newReply.className = 'forum-reply forum-reply--new';
+          newReply.innerHTML =
+            '<div class="forum-reply__avatar">' + escapeHtml(getDisplayName().charAt(0)) + '</div>' +
+            '<div class="forum-reply__body">' +
+              '<div class="forum-reply__header">' +
+                '<span class="forum-reply__username">' + escapeHtml(getDisplayName()) + '</span>' +
+                '<span class="forum-reply__time">' + now + '</span>' +
+              '</div>' +
+              '<p class="forum-reply__text">' + escapeHtml(text) + '</p>' +
+            '</div>';
+          repliesSection.insertBefore(newReply, replyInput);
+
+          // Save to shared data (synced to all users)
+          var replyData = { text: text, time: now, username: getDisplayName() };
+          SharedData.addReply(postId, replyData, function(ok, reason) {
+            if (ok) {
+              console.log('[论坛] 回声已同步');
+            } else if (reason === 'rate_limit') {
+              // 回滚 UI
+              if (newReply.parentNode) newReply.parentNode.removeChild(newReply);
+              showToast('回复过于频繁，请稍后再试', 'warning');
+            } else if (reason === 'validation') {
+              if (newReply.parentNode) newReply.parentNode.removeChild(newReply);
+              showToast('回复内容不合法', 'error');
+            } else if (reason === 'limit') {
+              if (newReply.parentNode) newReply.parentNode.removeChild(newReply);
+              showToast('该帖子回复数已达上限', 'warning');
+            } else {
+              console.warn('[论坛] 回声同步失败，已保存到本地');
+            }
+          });
+
+          field.value = '';
+          field.style.height = 'auto';
+          btn.disabled = true;
+
+          // Update reply count using the shared function
+          updateAllReplyCounts();
+
+          // Flash confirmation on the reply
+          newReply.style.borderLeft = '2px solid var(--brand-primary-light)';
+          setTimeout(function() {
+            newReply.style.borderLeft = '';
+          }, 2000);
+
+          // Scroll the new reply into view
+           newReply.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          });
+        }
+
+      // --- Sidebar: click subtitle → scroll to post + highlight ---
+      document.querySelectorAll('.sidebar-category-link').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          var targetId = this.getAttribute('data-target-post');
+          if (!targetId) return;
+          var targetPost = document.querySelector('[data-post-id="' + targetId + '"]');
+          if (!targetPost) return;
+
+          targetPost.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+          targetPost.classList.remove('forum-post--highlight');
+          void targetPost.offsetWidth;
+          targetPost.classList.add('forum-post--highlight');
+
+          setTimeout(function() {
+            targetPost.classList.remove('forum-post--highlight');
+          }, 2000);
+        });
+      });
+
+      // --- Reply Input Template ---
+      function createReplyInput(postId) {
+        var wrapper = document.createElement('div');
+        wrapper.className = 'forum-reply-input';
+        wrapper.innerHTML =
+          '<div class="forum-reply-input__avatar">' + escapeHtml(getDisplayName().charAt(0)) + '</div>' +
+          '<div class="forum-reply-input__wrap">' +
+            '<textarea class="forum-reply-input__field" placeholder="写下你的回声..." rows="1" data-reply-post="' + postId + '"></textarea>' +
+            '<div class="forum-reply-input__actions">' +
+              '<button class="forum-reply-input__btn" data-reply-btn="' + postId + '" disabled>发送回声</button>' +
+            '</div>' +
+          '</div>';
+        return wrapper;
+      }
+
+      // --- Eerie placeholder rotation for reply inputs ---
+      var replyPlaceholders = [
+        '写下你的回声...',
+        '你看到了什么...',
+        '你确定要回复吗...',
+        '有人在听...',
+        '继续...',
+        '它知道你在打字...'
+      ];
+
+      // --- Wire up existing (static) posts ---
+      document.querySelectorAll('.forum-post[data-post-id]').forEach(function(post) {
+        if (post.classList.contains('forum-post--archived') ||
+            post.classList.contains('forum-post--deleted')) return;
+        if (post._wired) return;
+        var postId = post.getAttribute('data-post-id');
+        wirePostExpand(post, postId);
+        post._wired = true;
+      });
+
+      </script>
+
+  <script>
+    (function() {
+      if (window.MidnightRecharge) {
+        MidnightRecharge.renderTopbarCoin('topbar-coin-spot');
+        var spot = document.getElementById('topbar-coin-spot');
+        if (spot) spot.style.cursor = 'pointer';
+      }
+    })();
   </script>
 </body>
 </html>
