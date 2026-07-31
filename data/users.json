@@ -75,7 +75,13 @@
       ],
       "registered_at": "2026-08-01T04:35:00Z",
       "device_token": "dt_traveler_1bedrd381lfv"
+    },
+    "旅者": {
+      "coins": 0,
+      "transactions": [],
+      "registered_at": "2026-07-31T21:05:47.504Z",
+      "device_token": "dt_grt0d2nyk78ms9flmzb"
     }
   },
-  "last_updated": "2026-07-31T20:58:53.894Z"
+  "last_updated": "2026-07-31T21:05:47.509Z"
 }
