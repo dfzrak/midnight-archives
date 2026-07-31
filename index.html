@@ -1,60 +1,133 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>午夜档案馆</title>
-  <link rel="stylesheet" href="colors_and_type.css">
-  <style>
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      text-align: center;
-    }
-    .logo {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: var(--brand-primary-light);
-      margin-bottom: 1rem;
-      animation: glow-pulse 3s ease-in-out infinite;
-    }
-    .subtitle {
-      color: var(--brand-muted-foreground);
-      font-size: 0.875rem;
-      margin-bottom: 3rem;
-    }
-    .enter-link {
-      display: inline-block;
-      padding: 0.75rem 2rem;
-      background: var(--brand-primary);
-      color: var(--brand-primary-foreground);
-      border-radius: var(--radius-md);
-      font-size: 1rem;
-      transition: all var(--transition-normal);
-      text-decoration: none;
-    }
-    .enter-link:hover {
-      background: var(--brand-primary-light);
-      box-shadow: var(--shadow-glow);
-    }
-    .status-bar {
-      position: fixed;
-      bottom: 1rem;
-      left: 0;
-      right: 0;
-      text-align: center;
-      color: var(--neutral-600);
-      font-size: 0.75rem;
-    }
-  </style>
-</head>
-<body>
-  <div class="logo animate-glow">午夜档案馆</div>
-  <p class="subtitle">每一条记录，都是一个未完的故事</p>
-  <a href="pages/forum.html" class="enter-link">进入档案馆</a>
-  <div class="status-bar">系统初始化中... 第 3,847 次归档准备就绪...</div>
-</body>
-</html>
+ <!DOCTYPE html>
+ <html lang="zh-CN">
+ <head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>午夜档案馆 v2 — AI驱动的故事平台</title>
+   <meta name="description" content="午夜档案馆 — 一个在午夜才会打开的网站。真实故事、悬疑档案、匿名投稿。入口不公开，私信获取网址。">
+   <link rel="stylesheet" href="colors_and_type.css">
+   <style>
+     body {
+       display: flex;
+       flex-direction: column;
+       align-items: center;
+       justify-content: center;
+       min-height: 100vh;
+       text-align: center;
+       background: #0a0a0f;
+     }
+     .logo {
+       font-size: 2.5rem;
+       font-weight: 700;
+       color: var(--brand-primary-light);
+       margin-bottom: 0.5rem;
+       animation: glow-pulse 3s ease-in-out infinite;
+     }
+     .version-tag {
+       display: inline-block;
+       padding: 0.15rem 0.6rem;
+       background: rgba(180,150,120,0.15);
+       border: 1px solid rgba(180,150,120,0.3);
+       color: var(--brand-primary);
+       border-radius: 999px;
+       font-size: 0.7rem;
+       margin-bottom: 1rem;
+     }
+     .subtitle {
+       color: var(--brand-muted-foreground);
+       font-size: 0.875rem;
+       margin-bottom: 2rem;
+     }
+     .nav-links {
+       display: flex;
+       flex-direction: column;
+       gap: 0.75rem;
+       margin-bottom: 2rem;
+     }
+     .enter-link {
+       display: inline-block;
+       padding: 0.75rem 2rem;
+       background: var(--brand-primary);
+       color: var(--bg-primary);
+       border-radius: var(--radius-md);
+       font-size: 1rem;
+       transition: all var(--transition-normal);
+       text-decoration: none;
+       min-width: 180px;
+     }
+     .enter-link:hover {
+       background: var(--brand-primary-light);
+       box-shadow: var(--shadow-glow);
+       transform: translateY(-1px);
+     }
+     .enter-link.secondary {
+       background: transparent;
+       border: 1px solid var(--neutral-600);
+       color: var(--neutral-400);
+     }
+     .enter-link.secondary:hover {
+       border-color: var(--brand-primary);
+       color: var(--brand-primary-light);
+       background: rgba(180,150,120,0.05);
+     }
+     .features {
+       display: flex;
+       gap: 2rem;
+       margin-top: 2rem;
+       flex-wrap: wrap;
+       justify-content: center;
+     }
+     .feature-item {
+       text-align: center;
+       color: var(--neutral-500);
+       font-size: 0.75rem;
+       max-width: 120px;
+     }
+     .feature-item .icon {
+       font-size: 1.5rem;
+       margin-bottom: 0.3rem;
+       display: block;
+     }
+     .status-bar {
+       position: fixed;
+       bottom: 1rem;
+       left: 0;
+       right: 0;
+       text-align: center;
+       color: var(--neutral-600);
+       font-size: 0.7rem;
+     }
+   </style>
+ </head>
+ <body>
+   <div class="logo animate-glow">午夜档案馆</div>
+   <span class="version-tag">AI Agent v2</span>
+   <p class="subtitle">每一条记录，都是一个未完的故事</p>
+   
+   <div class="nav-links">
+     <a href="pages/forum.html" class="enter-link">📂 进入档案馆</a>
+     <a href="pages/submit.html" class="enter-link secondary">✍️ 投递故事</a>
+   </div>
+
+   <div class="features">
+     <div class="feature-item">
+       <span class="icon">🤖</span>
+       AI 润色
+     </div>
+     <div class="feature-item">
+       <span class="icon">🎬</span>
+       视频生成
+     </div>
+     <div class="feature-item">
+       <span class="icon">🔍</span>
+       内容审核
+     </div>
+     <div class="feature-item">
+       <span class="icon">📊</span>
+       数据分析
+     </div>
+   </div>
+
+   <div class="status-bar">v2 · AI Agent 已就绪 · 免费永远是档案馆的底色</div>
+ </body>
+ </html>
