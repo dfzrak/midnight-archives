@@ -94,6 +94,44 @@ function injCss(){if(cssDone)return;cssDone=true;
 var s=document.createElement('style');
 s.textContent='.rs{max-width:700px;margin:0 auto;padding:2rem 1rem}.bc{text-align:center;padding:2rem;background:linear-gradient(180deg,rgba(200,160,120,.08),rgba(200,160,120,.02));border:1px solid rgba(200,160,120,.12);border-radius:12px;margin-bottom:2.5rem}.bi{font-size:2.5rem;margin-bottom:.5rem}.ba{font-size:3rem;font-weight:700;color:#d4b88c;font-family:"JetBrains Mono",monospace}.bl{font-size:.85rem;color:rgba(200,160,120,.5);margin-top:.3rem}.bh{font-size:.7rem;color:rgba(200,160,120,.25);margin-top:.5rem;font-style:italic}.rt{font-size:1.1rem;color:rgba(200,160,120,.6);margin:2rem 0 1rem;padding-left:.5rem;border-left:2px solid rgba(200,160,120,.3)}.cp{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:2rem}.ci{background:rgba(200,160,120,.03);border:1px solid rgba(200,160,120,.08);border-radius:10px;padding:1.5rem 1rem;text-align:center;transition:all .3s}.ci:hover{border-color:rgba(200,160,120,.2);background:rgba(200,160,120,.06);transform:translateY(-2px)}.cii{font-size:2rem;margin-bottom:.5rem}.cin{font-size:1rem;font-weight:600;color:#d4b88c}.cic{font-size:1.5rem;font-weight:700;color:#c8a070;margin:.5rem 0}.cip{font-size:1.2rem;color:rgba(255,255,255,.7)}.cid{font-size:.75rem;color:rgba(200,160,120,.35);margin:0 0 1rem;font-style:italic}.br{padding:.5rem 1.5rem;background:transparent;border:1px solid rgba(200,160,120,.3);color:#c8a070;border-radius:6px;cursor:pointer;font-family:inherit;font-size:.85rem}.br:hover{background:rgba(200,160,120,.15);border-color:rgba(200,160,120,.5)}.si{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem}@media(max-width:600px){.si{grid-template-columns:1fr}}.sm{background:rgba(200,160,120,.025);border:1px solid rgba(200,160,120,.06);border-radius:10px;padding:1.5rem;display:flex;flex-direction:column;gap:.6rem;transition:all .3s}.sm:hover{border-color:rgba(200,160,120,.15);background:rgba(200,160,120,.04)}.sml{opacity:.45}.smi{font-size:2rem}.smn{font-size:1.1rem;color:#d4b88c;font-weight:600}.smc{font-size:.9rem;color:#c8a070;font-weight:600}.smd{font-size:.8rem;color:rgba(200,160,120,.35);line-height:1.5;flex:1}.bb{padding:.5rem 1.5rem;background:transparent;border:1px solid rgba(200,160,120,.2);color:#c8a070;border-radius:6px;cursor:pointer;font-family:inherit;font-size:.85rem;margin-top:auto}.bb:hover:not(:disabled){background:rgba(200,160,120,.15);border-color:rgba(200,160,120,.4)}.bb:disabled{opacity:.3;cursor:not-allowed}.rf{text-align:center;color:rgba(200,160,120,.2);font-size:.75rem;margin-top:2rem;line-height:1.8}';
 document.head.appendChild(s);}
-window.MidnightRecharge={COIN_PACKAGES:CP,getBalance:gb,renderRecharge:renderRecharge,renderTopbarCoin:renderTopbarCoin,showToast:toast,submitOrder:submitOrder,syncBalanceFromGist:syncBalanceFromGist};
-console.log('[Archive] 充值系统 v7 | 余额',bal,'🧱 | 订单Gist同步 + 余额Gist同步');
+window.MidnightRecharge={COIN_PACKAGES:CP,getBalance:gb,renderRecharge:renderRecharge,renderTopbarCoin:renderTopbarCoin,showToast:toast,submitOrder:submitOrder,syncBalanceFromGist:syncBalanceFromGist,
+ // 管理员验证函数：直接 PATCH Gist 发放余额
+ verifyOrder: function(oid, cb) {
+  var xhr=new XMLHttpRequest();
+  xhr.open('GET',GIST_API,true);
+  xhr.setRequestHeader('Authorization','Bearer '+GIST_TOKEN);
+  xhr.setRequestHeader('Accept','application/vnd.github.v3+json');
+  xhr.onload=function(){
+   if(xhr.status!==200){if(cb)cb(false);return}
+   try{
+    var gist=JSON.parse(xhr.responseText);
+    var bf=gist.files&&gist.files['balance.json'];
+    if(!bf){if(cb)cb(false);return}
+    var bd=JSON.parse(bf.content||'{}');
+    var found=false;
+    for(var i=0;i<(bd.pending_orders||[]).length;i++){
+     var o=bd.pending_orders[i];
+     if(o.oid===oid&&o.st==='pending'){
+      var coins=CP[o.pk]?CP[o.pk].c:10;
+      bd.coins=(bd.coins||0)+coins;
+      o.st='verified';
+      found=coins;
+      break;
+     }
+    }
+    if(!found){if(cb)cb(false,'not_found');return}
+    bd.last_updated=new Date().toISOString();
+    var px=new XMLHttpRequest();
+    px.open('PATCH',GIST_API,true);
+    px.setRequestHeader('Authorization','Bearer '+GIST_TOKEN);
+    px.setRequestHeader('Accept','application/vnd.github.v3+json');
+    px.setRequestHeader('Content-Type','application/json');
+    px.onload=function(){if(cb)cb(px.status===200,found)};
+    px.send(JSON.stringify({files:{'balance.json':{content:JSON.stringify(bd)}}}));
+   }catch(e){if(cb)cb(false)}
+  };
+  xhr.send();
+ }
+};
+console.log('[Archive] 充值系统 v8 | 余额',bal,'🧱 | 订单Gist同步 + 余额Gist同步');
 })();
