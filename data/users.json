@@ -46,7 +46,12 @@
       "coins": 0,
       "transactions": [],
       "registered_at": "2026-07-31T20:14:59.130Z"
+    },
+    "管理员": {
+      "coins": 0,
+      "transactions": [],
+      "registered_at": "2026-07-31T20:15:05.115Z"
     }
   },
-  "last_updated": "2026-07-31T20:14:59.130Z"
+  "last_updated": "2026-07-31T20:15:05.115Z"
 }
