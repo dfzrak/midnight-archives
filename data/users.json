@@ -81,7 +81,13 @@
       "transactions": [],
       "registered_at": "2026-07-31T21:05:47.504Z",
       "device_token": "dt_grt0d2nyk78ms9flmzb"
+    },
+    "服主": {
+      "coins": 0,
+      "transactions": [],
+      "registered_at": "2026-07-31T21:06:22.564Z",
+      "device_token": "dt_53ujcbr2je3ms9fmv8l"
     }
   },
-  "last_updated": "2026-07-31T21:05:47.509Z"
+  "last_updated": "2026-07-31T21:06:22.565Z"
 }
