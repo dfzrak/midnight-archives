@@ -11,19 +11,6 @@
       "verified_at": "2026-08-01T01:20:00+08:00"
     },
     {
-      "oid": "MA-MS98PLT4",
-      "pk": "medium",
-      "tm": 1785520347077,
-      "st": "pending"
-    },
-    {
-      "oid": "MA-MS994JFT",
-      "pk": "large",
-      "tid": "manual",
-      "tm": 1785521041651,
-      "st": "pending"
-    },
-    {
       "oid": "MA-MS995FAA",
       "pk": "small",
       "tid": "manual",
