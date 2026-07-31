@@ -128,18 +128,33 @@
     injectStyles();
   }
 
+  // ===== 支付弹窗（含订单追踪）=====
   function showPaymentModal(pkgKey) {
     const ex=document.querySelector('.pym-overlay');if(ex)ex.remove();
     const p=COIN_PACKAGES[pkgKey];
+    const orderId='MA-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).substring(2,6).toUpperCase();
     const ov=document.createElement('div');ov.className='pym-overlay';
-    ov.innerHTML=`<div class="pym-modal"><div class="pym-close">✕</div><div class="pym-header"><div class="pym-icon">${pkgKey==='huge'?'🔮':pkgKey==='large'?'💰':'🪙'}</div><h3>${p.name}</h3><p>${p.desc}</p></div><div class="pym-detail"><div class="pym-row"><span>获得</span><span>+${p.coins} 🧱</span></div><div class="pym-row"><span>支付</span><span class="pym-price">¥${p.price}</span></div></div><div class="pym-qr"><img src="../assets/alipay-qr.jpg" alt="收款码" class="pym-qr-img" onerror="this.parentElement.innerHTML='<p style=color:rgba(200,160,120,0.4);padding:2rem>收款码加载中…</p>'"><p class="pym-qr-hint">📱 支付宝扫一扫</p><p class="pym-qr-sub">支付 ¥${p.price} 后点击下方</p></div><div class="pym-actions"><button class="btn-cnf" data-pkg="${pkgKey}">✅ 已完成支付</button><button class="btn-ccl">取消</button></div></div>`;
+    ov.innerHTML=`<div class="pym-modal"><div class="pym-close">✕</div><div class="pym-header"><div class="pym-icon">${pkgKey==='huge'?'🔮':pkgKey==='large'?'💰':'🪙'}</div><h3>${p.name}</h3><p>${p.desc}</p></div><div class="pym-detail"><div class="pym-row"><span>获得</span><span>+${p.coins} 🧱</span></div><div class="pym-row"><span>支付</span><span class="pym-price">¥${p.price}</span></div><div class="pym-row" style="font-size:.7rem;"><span>订单号</span><span style="color:rgba(200,160,120,.3);font-family:monospace">${orderId}</span></div></div><div class="pym-qr"><img src="../assets/alipay-qr.jpg" alt="收款码" class="pym-qr-img" onerror="this.parentElement.innerHTML='<p style=color:rgba(200,160,120,0.4);padding:2rem>收款码加载中…</p>'"><p class="pym-qr-hint">📱 支付宝扫一扫</p><p class="pym-qr-sub">⚠ 转账时请在<strong>备注中填写订单号</strong></p><p class="pym-qr-sub" style="color:rgba(200,160,120,.2);margin-top:.2rem">${orderId}</p></div><div class="pym-actions"><button class="btn-cnf" data-pkg="${pkgKey}" data-order="${orderId}">✅ 已完成支付</button><button class="btn-ccl">取消</button></div></div>`;
     ov.querySelector('.btn-ccl').onclick=()=>ov.remove();
     ov.querySelector('.pym-close').onclick=()=>ov.remove();
-    ov.querySelector('.btn-cnf').onclick=function(){const r=recharge(this.dataset.pkg);if(r.success){ov.remove();showToast('🎉 充值成功！+'+r.added+'🧱 余额'+r.balance+'🧱',3000);const s=document.querySelector('.recharge-section');if(s){renderRecharge(s.parentElement.id||'recharge-root')}}};
+    ov.querySelector('.btn-cnf').onclick=function(){
+      const r=recharge(this.dataset.pkg);
+      if(r.success){
+        // 记录订单
+        const orders=JSON.parse(localStorage.getItem('midnight_orders')||'[]');
+        orders.push({orderId:this.dataset.order,package:pkgKey,coins:p.coins,price:p.price,time:Date.now(),status:'confirmed'});
+        localStorage.setItem('midnight_orders',JSON.stringify(orders.slice(-30)));
+        ov.remove();
+        showToast('🎉 充值成功！+'+r.added+'🧱 余额'+r.balance+'🧱',3000);
+        const s=document.querySelector('.recharge-section');
+        if(s){renderRecharge(s.parentElement.id||'recharge-root')}
+      }
+    };
     ov.addEventListener('click',function(e){if(e.target===ov)ov.remove()});
     document.body.appendChild(ov);
   }
 
+  // ===== 档案馆通灵（AI Agent 增强版）=====
   function showSeanceModal() {
     const ex=document.querySelector('.se-overlay');if(ex)ex.remove();
     const ov=document.createElement('div');ov.className='se-overlay';
@@ -156,7 +171,34 @@
       const rd=ov.querySelector('.se-response');const actions=ov.querySelector('.se-actions');
       actions.innerHTML='<button class="btn-ccl-se">关闭</button>';
       actions.querySelector('.btn-ccl-se').onclick=()=>ov.remove();
-      const reply=SEANCE_REPLIES[Math.floor(Math.random()*SEANCE_REPLIES.length)];
+      // AI Agent 分析用户输入，匹配最合适的回复
+      let reply;
+      if(window.MidnightAI){
+        const intent=window.MidnightAI.detectIntent(t);
+        const classification=window.MidnightAI.classify(t);
+        // 根据分类和意图选择回复模板
+        const tone=classification?classification.label:'未知';
+        if(/床底|柜子|身后|背后|角落|有人|看不见|藏/.test(t)){
+          reply=SEANCE_REPLIES.find(r=>r.includes('烛火晃了一下'))||SEANCE_REPLIES[5];
+        }else if(/害怕|恐惧|害怕|诡异|不对劲|奇怪/.test(t)){
+          reply=SEANCE_REPLIES.find(r=>r.includes('准备好了吗'))||SEANCE_REPLIES[3];
+        }else if(/故事|经历|发生|告诉|说/.test(t)&&t.length>20){
+          reply=SEANCE_REPLIES.find(r=>r.includes('已经存档'))||SEANCE_REPLIES[1];
+        }else if(/(\?|吗|呢|谁|什么|怎么|为什么|哪里)/.test(t)){
+          reply=SEANCE_REPLIES.find(r=>r.includes('同样的问题'))||SEANCE_REPLIES[3];
+        }else if(t.length>30){
+          reply=SEANCE_REPLIES.find(r=>r.includes('听到了你的低语'))||SEANCE_REPLIES[0];
+        }else{
+          reply=SEANCE_REPLIES.find(r=>r.includes('档案馆很老了'))||SEANCE_REPLIES[4];
+        }
+        // 个性化注入用户关键词
+        const keyword=t.replace(/[?？!！。，,.\s]/g,'').substring(0,8);
+        if(keyword.length>=2){
+          reply=reply.replace('档案馆收到了你的低语','档案馆收到了你关于「'+keyword+'」的低语');
+        }
+      }else{
+        reply=SEANCE_REPLIES[Math.floor(Math.random()*SEANCE_REPLIES.length)];
+      }
       rd.style.display='block';rd.innerHTML='';
       let i=0;const chars=reply.split('');
       const timer=setInterval(()=>{if(i<chars.length){rd.innerHTML+=chars[i]==='\n'?'<br>':chars[i];i++;rd.scrollTop=rd.scrollHeight}else{clearInterval(timer)}},30);
