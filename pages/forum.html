@@ -2912,6 +2912,11 @@
 
       // ===== Post expand/collapse (shared function) =====
       function wirePostExpand(post, postId) {
+        // 保底：直接 onclick 属性切换展开
+        post.onclick = function(e) {
+          if (post.classList.contains('forum-post--archived') || post.classList.contains('forum-post--deleted')) return;
+          post.classList.toggle('forum-post--expanded');
+        };
         post.addEventListener('click', function(e) {
           try {
             if (e.target.closest('.forum-post__collapse-btn')) return;
