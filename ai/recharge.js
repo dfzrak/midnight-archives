@@ -192,6 +192,8 @@
     const existing = document.querySelector('.payment-overlay');
     if (existing) existing.remove();
 
+    const qrUrl = 'assets/alipay-qr.jpg';
+
     const overlay = document.createElement('div');
     overlay.className = 'payment-overlay';
     overlay.innerHTML = `
@@ -205,21 +207,10 @@
           <div class="payment-row"><span>获得档案币</span><span>${pkg.coins} 🧱</span></div>
           <div class="payment-row"><span>支付金额</span><span class="payment-price">¥${pkg.price}</span></div>
         </div>
-        <div class="payment-qr-hint">
-          <div class="qr-placeholder">
-            <pre>
-┌─────────────────┐
-│                 │
-│    📱 扫码支付    │
-│                 │
-│  微信 / 支付宝   │
-│                 │
-│   ¥${String(pkg.price).padStart(4, ' ')}         │
-│                 │
-└─────────────────┘
-            </pre>
-          </div>
-          <p class="payment-qr-sub">支付完成后点击下方按钮确认</p>
+        <div class="payment-qr-area">
+          <img src="${qrUrl}" alt="支付宝收款码" class="payment-qr-img" onerror="this.parentElement.innerHTML='<p style=color:rgba(200,160,120,0.3)>收款码加载失败，请刷新页面重试</p>'">
+          <p class="payment-qr-hint">📱 打开支付宝扫一扫</p>
+          <p class="payment-qr-sub">支付金额 <strong>¥${pkg.price}</strong> · 完成后点击下方按钮</p>
         </div>
         <div class="payment-actions">
           <button class="btn-confirm-pay" data-pkg="${pkgKey}">✅ 已完成支付</button>
@@ -495,19 +486,19 @@
         font-size: 0.9rem;
       }
       .payment-price { color: #d4b88c; font-weight: 700; }
-      .payment-qr-hint { text-align: center; margin-bottom: 1.5rem; }
-      .qr-placeholder pre {
-        display: inline-block;
-        font-size: 0.55rem;
-        color: rgba(200,160,120,0.3);
-        background: rgba(200,160,120,0.03);
-        border: 1px solid rgba(200,160,120,0.08);
-        padding: 1rem;
+      .payment-qr-area { text-align: center; margin-bottom: 1.5rem; }
+      .payment-qr-img {
+        display: block;
+        margin: 0 auto 0.8rem;
+        width: 200px;
+        height: 200px;
         border-radius: 8px;
-        line-height: 1.3;
-        font-family: "Courier New", monospace;
+        border: 1px solid rgba(200,160,120,0.15);
+        object-fit: contain;
+        background: #fff;
       }
-      .payment-qr-sub { color: rgba(200,160,120,0.25); font-size: 0.7rem; margin-top: 0.5rem; }
+      .payment-qr-hint { color: rgba(200,160,120,0.5); font-size: 0.85rem; margin-bottom: 0.3rem; }
+      .payment-qr-sub { color: rgba(200,160,120,0.3); font-size: 0.7rem; margin-top: 0.3rem; }
       .payment-actions {
         display: flex;
         gap: 0.8rem;
