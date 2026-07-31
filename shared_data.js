@@ -1,42 +1,32 @@
 /**
- * 午夜档案馆 — 共享数据层 v3
- * 使用 GitHub 仓库中的 JSON 文件作为跨用户共享数据库
- * - 读取：raw.githubusercontent.com（免费，无限制，无需认证）
- * - 写入：GitHub API（需要 token）
- * - localStorage 作为离线缓存和降级方案
- * - 内置防护：频率限制、输入净化、数据验证、错误恢复
+ * 午夜档案馆 — 共享数据层 v5
+ * GitHub 仓库 Contents API — 与 users.json 同一基础设施
+ * 所有设备（QQ/微信/浏览器）通过同一 API 读写，天然跨设备同步
  */
 (function() {
   'use strict';
 
-  // ===== 配置 =====
   var CONFIG = {
-    DATA_FILE: 'data/forum-posts.json',
     API_URL: 'https://api.github.com/repos/dfzrak/midnight-archives/contents/data/forum-posts.json',
-    TOKEN_KEY: 'midnight_archives_gh_token',
-    RAW_URL: 'https://raw.githubusercontent.com/dfzrak/midnight-archives/main/data/forum-posts.json',
     SYNC_INTERVAL: 30000,
     LOCAL_POSTS_KEY: 'midnight_archives_posts',
     LOCAL_REPLIES_KEY: 'midnight_archives_replies',
     LOCAL_USERNAME_KEY: 'midnight_archives_username',
-    // 防护配置
     MAX_POSTS: 200,
     MAX_REPLIES_PER_POST: 50,
     MAX_TITLE_LEN: 80,
     MAX_CONTENT_LEN: 2000,
     MAX_REPLY_LEN: 500,
     MAX_USERNAME_LEN: 20,
-    RATE_LIMIT_POST: 60000,    // 发帖间隔 60 秒
-    RATE_LIMIT_REPLY: 10000,   // 回复间隔 10 秒
-    RATE_LIMIT_SYNC: 5000,     // 同步间隔 5 秒
-    MAX_PAYLOAD_SIZE: 500000,  // 最大 payload 500KB
+    RATE_LIMIT_POST: 60000,
+    RATE_LIMIT_REPLY: 10000,
+    RATE_LIMIT_SYNC: 5000,
+    MAX_PAYLOAD_SIZE: 500000,
     MAX_SYNC_RETRIES: 3
   };
 
-   // 内置 token（由 GitHub Actions 在构建时注入）
-   var BUILTIN_TOKEN = 'ghp_cHuHuP24J392M7jHtgaeI4KRLWtYry'+'298doJ';
+  var BUILTIN_TOKEN = 'ghp_cHuHuP24J392M7jHtgaeI4KRLWtYry'+'298doJ';
 
-  // ===== 防护系统 =====
   var _lastPostTime = 0;
   var _lastReplyTime = 0;
   var _lastSyncAttempt = 0;
@@ -46,7 +36,7 @@
 
   function sanitize(str, maxLen) {
     if (typeof str !== 'string') return '';
-    str = str.replace(/<[^>]*>/g, '');  // 移除 HTML 标签
+    str = str.replace(/<[^>]*>/g, '');
     str = str.replace(/javascript:/gi, '');
     str = str.replace(/on\w+=/gi, '');
     str = str.replace(/data:/gi, '');
@@ -88,7 +78,6 @@
     if (Date.now() > _circuitResetTime) {
       _circuitBroken = false;
       _syncRetries = 0;
-      console.log('[防护] 熔断器已重置');
       return false;
     }
     return true;
@@ -96,28 +85,20 @@
 
   function tripCircuitBreaker() {
     _circuitBroken = true;
-    _circuitResetTime = Date.now() + 60000; // 1 分钟后重置
-    console.warn('[防护] 熔断器触发，暂停远程操作 60 秒');
+    _circuitResetTime = Date.now() + 60000;
+    console.warn('[共享数据] 熔断器触发，60秒后重试');
   }
 
   function checkRateLimit(type) {
     var now = Date.now();
     if (type === 'post') {
-      if (now - _lastPostTime < CONFIG.RATE_LIMIT_POST) {
-        console.warn('[防护] 发帖过于频繁，请等待');
-        return false;
-      }
+      if (now - _lastPostTime < CONFIG.RATE_LIMIT_POST) return false;
       _lastPostTime = now;
     } else if (type === 'reply') {
-      if (now - _lastReplyTime < CONFIG.RATE_LIMIT_REPLY) {
-        console.warn('[防护] 回复过于频繁，请等待');
-        return false;
-      }
+      if (now - _lastReplyTime < CONFIG.RATE_LIMIT_REPLY) return false;
       _lastReplyTime = now;
     } else if (type === 'sync') {
-      if (now - _lastSyncAttempt < CONFIG.RATE_LIMIT_SYNC) {
-        return false;
-      }
+      if (now - _lastSyncAttempt < CONFIG.RATE_LIMIT_SYNC) return false;
       _lastSyncAttempt = now;
     }
     return true;
@@ -125,26 +106,38 @@
 
   function getToken() {
     try {
-      var userToken = localStorage.getItem(CONFIG.TOKEN_KEY);
-      if (userToken) return userToken;
-      // BUILTIN_TOKEN 优先于 window.__GITHUB_TOKEN__（_config.js 可能有过期的旧 Token）
-      if (BUILTIN_TOKEN && BUILTIN_TOKEN !== '__GITHUB_TOKEN_PLACEHOLDER__') return BUILTIN_TOKEN;
-      if (window.__GITHUB_TOKEN__) return window.__GITHUB_TOKEN__;
-      return '';
-    } catch(e) { return BUILTIN_TOKEN || ''; }
+      var t = localStorage.getItem(CONFIG.TOKEN_KEY || 'midnight_archives_gh_token');
+      return t || BUILTIN_TOKEN;
+    } catch(e) { return BUILTIN_TOKEN; }
   }
-  function setToken(t) {
-    try { localStorage.setItem(CONFIG.TOKEN_KEY, t); }
-    catch(e) {}
+
+  // Encode JSON for GitHub API
+  function encodeForAPI(str) {
+    var bytes = new TextEncoder().encode(str);
+    var binary = '';
+    for (var i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+  }
+
+  // Decode from GitHub API
+  function decodeFromAPI(b64) {
+    var binary = atob(b64.replace(/\n/g, ''));
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return new TextDecoder().decode(bytes);
   }
 
   var currentData = { posts: [], replies: {} };
+  var _remoteSha = null;
   var lastSyncTime = 0;
   var isOnline = false;
   var syncTimer = null;
   var isSyncing = false;
 
-  // ===== 核心 API =====
   var SharedData = {
     CONFIG: CONFIG,
 
@@ -168,75 +161,31 @@
     getRepliesForPost: function(postId) { return (currentData.replies || {})[postId] || []; },
 
     addPost: function(post, callback) {
-      // 防护：频率限制
-      if (!checkRateLimit('post')) {
-        if (callback) callback(false, 'rate_limit');
-        return;
-      }
-      // 防护：输入验证
+      if (!checkRateLimit('post')) { if (callback) callback(false, 'rate_limit'); return; }
       var cleanPost = validatePost(post);
-      if (!cleanPost) {
-        console.warn('[防护] 帖子数据验证失败');
-        if (callback) callback(false, 'validation');
-        return;
-      }
-      // 防护：去重
+      if (!cleanPost) { if (callback) callback(false, 'validation'); return; }
       var exists = currentData.posts.some(function(p) { return p.id === cleanPost.id; });
       if (exists) { if (callback) callback(true); return; }
-      // 防护：帖子数量上限
       if (currentData.posts.length >= CONFIG.MAX_POSTS) {
-        currentData.posts = currentData.posts.slice(0, CONFIG.MAX_POSTS - 1);
+        currentData.posts = currentData.posts.slice(-Math.floor(CONFIG.MAX_POSTS / 2));
       }
-      currentData.posts.unshift(cleanPost);
+      currentData.posts.push(cleanPost);
       this._saveToLocal();
       this._syncToRemote(function(ok) { if (callback) callback(ok); });
     },
 
     addReply: function(postId, reply, callback) {
-      // 防护：频率限制
-      if (!checkRateLimit('reply')) {
-        if (callback) callback(false, 'rate_limit');
-        return;
-      }
+      if (!checkRateLimit('reply')) { if (callback) callback(false, 'rate_limit'); return; }
       if (!postId || typeof postId !== 'string') { if (callback) callback(false); return; }
-      // 防护：输入验证
       var cleanReply = validateReply(reply);
-      if (!cleanReply) {
-        console.warn('[防护] 回复数据验证失败');
-        if (callback) callback(false, 'validation');
-        return;
-      }
+      if (!cleanReply) { if (callback) callback(false, 'validation'); return; }
       if (!currentData.replies[postId]) currentData.replies[postId] = [];
-      // 防护：单帖回复上限
       if (currentData.replies[postId].length >= CONFIG.MAX_REPLIES_PER_POST) {
-        console.warn('[防护] 该帖子回复数已达上限');
-        if (callback) callback(false, 'limit');
-        return;
+        currentData.replies[postId] = currentData.replies[postId].slice(-Math.floor(CONFIG.MAX_REPLIES_PER_POST / 2));
       }
-      var isDup = currentData.replies[postId].some(function(r) {
-        return r.time === cleanReply.time && r.text === cleanReply.text;
-      });
-      if (isDup) { if (callback) callback(true); return; }
       currentData.replies[postId].push(cleanReply);
       this._saveToLocal();
       this._syncToRemote(function(ok) { if (callback) callback(ok); });
-    },
-
-    isOnline: function() { return isOnline; },
-
-    setGitHubToken: function(token) {
-      if (typeof token === 'string' && token.length > 0 && token.length < 200) {
-        setToken(token);
-        console.log('[共享数据] GitHub Token 已保存');
-      }
-    },
-
-    hasToken: function() {
-      return !!getToken();
-    },
-
-    refresh: function(callback) {
-      this._syncFromRemote(function(ok) { if (callback) callback(ok); });
     },
 
     _loadFromLocal: function() {
@@ -248,13 +197,10 @@
             currentData.posts = pp.map(validatePost).filter(Boolean).slice(0, CONFIG.MAX_POSTS);
           }
         }
-      } catch(e) {}
-      try {
         var r = localStorage.getItem(CONFIG.LOCAL_REPLIES_KEY);
         if (r) {
           var rr = JSON.parse(r);
           if (rr && typeof rr === 'object') {
-            // 清理无效回复
             var cleanReplies = {};
             Object.keys(rr).forEach(function(k) {
               if (Array.isArray(rr[k])) {
@@ -264,7 +210,9 @@
             currentData.replies = cleanReplies;
           }
         }
-      } catch(e) {}
+      } catch(e) {
+        console.warn('[共享数据] 本地缓存读取失败:', e.message);
+      }
     },
 
     _saveToLocal: function() {
@@ -272,7 +220,6 @@
         localStorage.setItem(CONFIG.LOCAL_POSTS_KEY, JSON.stringify(currentData.posts));
         localStorage.setItem(CONFIG.LOCAL_REPLIES_KEY, JSON.stringify(currentData.replies));
       } catch(e) {
-        // 存储满时清理旧数据
         try {
           localStorage.removeItem(CONFIG.LOCAL_POSTS_KEY);
           localStorage.removeItem(CONFIG.LOCAL_REPLIES_KEY);
@@ -287,27 +234,24 @@
       if (checkCircuitBreaker()) { if (callback) callback(false); return; }
       if (!checkRateLimit('sync')) { if (callback) callback(false); return; }
       isSyncing = true;
+      var done = false;
       var timeoutId = setTimeout(function() {
-        isSyncing = false;
-        _syncRetries++;
-        if (_syncRetries >= CONFIG.MAX_SYNC_RETRIES) tripCircuitBreaker();
-        if (callback) callback(false);
+        if (!done) { done = true; isSyncing = false; _syncRetries++; if (_syncRetries >= CONFIG.MAX_SYNC_RETRIES) tripCircuitBreaker(); if (callback) callback(false); }
       }, 10000);
-fetch(CONFIG.API_URL + '?t=' + Date.now(), {headers: {'Authorization': 'Bearer ' + BUILTIN_TOKEN, 'Accept': 'application/vnd.github.v3+json'}})
+
+      fetch(CONFIG.API_URL + '?t=' + Date.now(), {
+        headers: { 'Authorization': 'Bearer ' + BUILTIN_TOKEN, 'Accept': 'application/vnd.github.v3+json' }
+      })
       .then(function(resp) {
-        clearTimeout(timeoutId);
         if (!resp.ok) throw new Error('HTTP ' + resp.status);
         return resp.json();
       })
       .then(function(apiResp) {
-        if (!apiResp.content) throw new Error('文件不存在');
-        if (!apiResp.content) throw new Error('文件不存在');
-        var remote;
-        try {
-          rawStr = new TextDecoder().decode(Uint8Array.from(atob(apiResp.content.replace(/\n/g,'')), function(c){return c.charCodeAt(0)}));
-        } catch(parseErr) {
-          throw new Error('JSON 解析失败');
-        }
+        if (done) return;
+        clearTimeout(timeoutId);
+        if (!apiResp.content) throw new Error('No content');
+        var rawStr = decodeFromAPI(apiResp.content);
+        var remote = JSON.parse(rawStr.replace(/^\uFEFF/, ''));
         _remoteSha = apiResp.sha;
         if (remote.posts && Array.isArray(remote.posts)) {
           currentData.posts = remote.posts.map(validatePost).filter(Boolean).slice(0, CONFIG.MAX_POSTS);
@@ -321,16 +265,21 @@ fetch(CONFIG.API_URL + '?t=' + Date.now(), {headers: {'Authorization': 'Bearer '
           });
           currentData.replies = cleanReplies;
         }
-        SharedData._saveToLocal();
         lastSyncTime = Date.now();
-        isSyncing = false;
         _syncRetries = 0;
+        isOnline = true;
+        isSyncing = false;
+        done = true;
+        SharedData._saveToLocal();
+        if (SharedData.onDataUpdate) SharedData.onDataUpdate();
         if (callback) callback(true);
       })
       .catch(function(err) {
+        if (done) return;
         clearTimeout(timeoutId);
-        console.warn('[共享数据] 读取失败:', err.message);
+        console.warn('[共享数据] 远程同步失败:', err.message);
         isSyncing = false;
+        done = true;
         _syncRetries++;
         if (_syncRetries >= CONFIG.MAX_SYNC_RETRIES) tripCircuitBreaker();
         if (callback) callback(false);
@@ -340,72 +289,73 @@ fetch(CONFIG.API_URL + '?t=' + Date.now(), {headers: {'Authorization': 'Bearer '
     _syncToRemote: function(callback) {
       if (checkCircuitBreaker()) { if (callback) callback(false); return; }
       var token = getToken();
-      if (!token) {
-        console.warn('[共享数据] 未设置 GitHub Token，无法写入远程');
-        if (callback) callback(false);
-        return;
-      }
+      if (!token) { if (callback) callback(false); return; }
+
       var payload = {
         posts: currentData.posts,
         replies: currentData.replies,
         lastUpdated: new Date().toISOString()
       };
       var payloadStr = JSON.stringify(payload);
-      // 防护：payload 大小检查
       if (payloadStr.length > CONFIG.MAX_PAYLOAD_SIZE) {
-        console.warn('[防护] 数据包过大，裁剪旧数据');
         currentData.posts = currentData.posts.slice(0, Math.floor(currentData.posts.length / 2));
-        payload = {
-          posts: currentData.posts,
-          replies: currentData.replies,
-          lastUpdated: new Date().toISOString()
-        };
+        payload.posts = currentData.posts;
         payloadStr = JSON.stringify(payload);
       }
-      var timeoutId = setTimeout(function() {
-        _syncRetries++;
-        if (_syncRetries >= CONFIG.MAX_SYNC_RETRIES) tripCircuitBreaker();
-        if (callback) callback(false);
-      }, 15000);
-      fetch(CONFIG.API_URL, {
-        method: 'PUT',
-        headers: {
-          'Authorization': 'Bearer ' + token,
-          'Content-Type': 'application/json',
-          'Accept': 'application/vnd.github.v3+json'
-        },
-        body: JSON.stringify({
+
+      var doPut = function(sha) {
+        var body = JSON.stringify({
           message: '论坛数据同步',
-          content: btoa(String.fromCharCode.apply(null, new TextEncoder().encode(payloadStr))),
-          sha: _remoteSha
+          content: encodeForAPI(payloadStr),
+          sha: sha
+        });
+        fetch(CONFIG.API_URL, {
+          method: 'PUT',
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json',
+            'Accept': 'application/vnd.github.v3+json'
+          },
+          body: body
         })
-      })
-      .then(function(resp) {
-        clearTimeout(timeoutId);
-        if (!resp.ok) throw new Error('HTTP ' + resp.status);
-        lastSyncTime = Date.now();
-        _syncRetries = 0;
-        if (callback) callback(true);
-      })
-      .catch(function(err) {
-        clearTimeout(timeoutId);
-        console.warn('[共享数据] 写入失败:', err.message);
-        _syncRetries++;
-        if (_syncRetries >= CONFIG.MAX_SYNC_RETRIES) tripCircuitBreaker();
-        if (callback) callback(false);
-      });
+        .then(function(resp) {
+          if (!resp.ok) throw new Error('HTTP ' + resp.status);
+          return resp.json();
+        })
+        .then(function(result) {
+          _remoteSha = result.content ? result.content.sha : result.sha;
+          lastSyncTime = Date.now();
+          _syncRetries = 0;
+          SharedData._saveToLocal();
+          if (callback) callback(true);
+        })
+        .catch(function(err) {
+          console.warn('[共享数据] 写入失败:', err.message);
+          _syncRetries++;
+          if (_syncRetries >= CONFIG.MAX_SYNC_RETRIES) tripCircuitBreaker();
+          if (callback) callback(false);
+        });
+      };
+
+      // If we have a SHA, use it. Otherwise fetch first.
+      if (_remoteSha) {
+        doPut(_remoteSha);
+      } else {
+        fetch(CONFIG.API_URL + '?t=' + Date.now(), {
+          headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github.v3+json' }
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(d) { _remoteSha = d.sha; doPut(_remoteSha); })
+        .catch(function() { if (callback) callback(false); });
+      }
     },
 
     _startAutoSync: function() {
       if (syncTimer) clearInterval(syncTimer);
       syncTimer = setInterval(function() {
-        if (document.visibilityState === 'visible') {
-          SharedData._syncFromRemote(function(ok) {
-            if (ok && typeof SharedData.onDataUpdate === 'function') {
-              SharedData.onDataUpdate();
-            }
-          });
-        }
+        SharedData._syncFromRemote(function(ok) {
+          if (ok && SharedData.onDataUpdate) SharedData.onDataUpdate();
+        });
       }, CONFIG.SYNC_INTERVAL);
     },
 
