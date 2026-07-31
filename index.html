@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>午夜档案馆</title>
+  <link rel="stylesheet" href="colors_and_type.css">
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+    }
+    .logo {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--brand-primary-light);
+      margin-bottom: 1rem;
+      animation: glow-pulse 3s ease-in-out infinite;
+    }
+    .subtitle {
+      color: var(--brand-muted-foreground);
+      font-size: 0.875rem;
+      margin-bottom: 3rem;
+    }
+    .enter-link {
+      display: inline-block;
+      padding: 0.75rem 2rem;
+      background: var(--brand-primary);
+      color: var(--brand-primary-foreground);
+      border-radius: var(--radius-md);
+      font-size: 1rem;
+      transition: all var(--transition-normal);
+      text-decoration: none;
+    }
+    .enter-link:hover {
+      background: var(--brand-primary-light);
+      box-shadow: var(--shadow-glow);
+    }
+    .status-bar {
+      position: fixed;
+      bottom: 1rem;
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: var(--neutral-600);
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="logo animate-glow">午夜档案馆</div>
+  <p class="subtitle">每一条记录，都是一个未完的故事</p>
+  <a href="pages/forum.html" class="enter-link">进入档案馆</a>
+  <div class="status-bar">系统初始化中... 第 3,847 次归档准备就绪...</div>
+</body>
+</html>

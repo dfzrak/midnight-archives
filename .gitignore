@@ -1,0 +1,7 @@
+.git
+.github
+generation-tree.json
+midnight-archives.design
+*.design
+_site
+.DS_Store

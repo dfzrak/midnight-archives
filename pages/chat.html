@@ -1,0 +1,1853 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>私信 — 午夜档案馆</title>
+  <link rel="stylesheet" href="../colors_and_type.css">
+  <script src="../_config.js"></script>
+  <script src="../security.js"></script>
+  <script src="../shared_data.js?v=3"></script>
+  <style>
+    /* ===== Forum Page Styles (base) ===== */
+
+    /* --- Top Bar --- */
+    .forum-topbar {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: var(--space-8);
+    }
+
+    .forum-topbar__title-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .forum-topbar__title {
+      font-family: var(--font-display);
+      font-size: var(--text-3xl);
+      font-weight: 600;
+      color: var(--brand-foreground);
+      letter-spacing: 0.04em;
+      animation: glow-pulse 5s ease-in-out infinite;
+    }
+
+    .forum-topbar__subtitle {
+      font-size: var(--text-sm);
+      color: var(--brand-muted-foreground);
+      margin-top: var(--space-1);
+      opacity: 0.7;
+      font-style: italic;
+    }
+
+    .forum-topbar__btn-new-post {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-6);
+      background: var(--brand-primary);
+      color: var(--brand-primary-foreground);
+      border: 1px solid var(--brand-primary-light);
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      white-space: nowrap;
+    }
+
+    .forum-topbar__btn-new-post:hover {
+      background: var(--brand-primary-light);
+      box-shadow: 0 0 16px hsla(0, 85%, 32%, 0.3);
+    }
+
+    /* --- Announcement Banner --- */
+    .forum-announcement {
+      background: hsla(0, 40%, 12%, 0.45);
+      border-left: 3px solid var(--brand-primary);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      padding: var(--space-4) var(--space-5);
+      margin-bottom: var(--space-8);
+      font-size: var(--text-sm);
+      color: var(--brand-card-foreground);
+      animation: announcement-flicker 6s ease-in-out infinite;
+      position: relative;
+    }
+
+    .forum-announcement__label {
+      color: var(--brand-primary-light);
+      font-weight: 600;
+      margin-right: var(--space-2);
+    }
+
+    @keyframes announcement-flicker {
+      0%, 100% { opacity: 1; }
+      48% { opacity: 1; }
+      50% { opacity: 0.92; }
+      52% { opacity: 1; }
+      76% { opacity: 0.96; }
+      78% { opacity: 1; }
+    }
+
+    /* --- Post List --- */
+    .forum-post-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      margin-bottom: var(--space-10);
+    }
+
+    /* --- Post Card --- */
+    .forum-post {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-4);
+      padding: var(--space-5);
+      background: var(--brand-card);
+      border: 1px solid var(--neutral-800);
+      border-radius: var(--radius-md);
+      transition: all var(--transition-normal);
+      position: relative;
+      animation: fade-in 0.4s ease backwards;
+    }
+
+    .forum-post:nth-child(1) { animation-delay: 0.05s; }
+    .forum-post:nth-child(2) { animation-delay: 0.1s; }
+    .forum-post:nth-child(3) { animation-delay: 0.15s; }
+    .forum-post:nth-child(4) { animation-delay: 0.2s; }
+    .forum-post:nth-child(5) { animation-delay: 0.25s; }
+    .forum-post:nth-child(6) { animation-delay: 0.3s; }
+    .forum-post:nth-child(7) { animation-delay: 0.35s; }
+    .forum-post:nth-child(8) { animation-delay: 0.4s; }
+    .forum-post:nth-child(9) { animation-delay: 0.45s; }
+    .forum-post:nth-child(10) { animation-delay: 0.5s; }
+    .forum-post:nth-child(11) { animation-delay: 0.55s; }
+    .forum-post:nth-child(12) { animation-delay: 0.6s; }
+
+    .forum-post:not(.forum-post--archived):not(.forum-post--deleted):hover {
+      border-color: var(--brand-primary-faint);
+      box-shadow: 0 0 20px hsla(0, 85%, 32%, 0.08);
+    }
+
+    /* Post Icon */
+    .forum-post__icon {
+      font-size: 1.4rem;
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--neutral-850);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--neutral-750);
+    }
+
+    .forum-post:nth-child(odd) .forum-post__icon {
+      animation: drift 6s ease-in-out infinite;
+    }
+
+    .forum-post:nth-child(even) .forum-post__icon {
+      animation: drift 8s ease-in-out infinite reverse;
+    }
+
+    /* Post Body */
+    .forum-post__body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .forum-post__title-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      margin-bottom: var(--space-1);
+    }
+
+    .forum-post__title {
+      font-size: var(--text-base);
+      font-weight: 500;
+      color: var(--brand-foreground);
+      cursor: pointer;
+      transition: color var(--transition-fast);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .forum-post:not(.forum-post--archived):not(.forum-post--deleted) .forum-post__title:hover {
+      color: var(--brand-primary-light);
+    }
+
+    .forum-post__new-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 1px 6px;
+      background: var(--brand-primary-ghost);
+      color: var(--brand-primary-light);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      animation: new-tag-glow 2.5s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes new-tag-glow {
+      0%, 100% { box-shadow: 0 0 4px hsla(0, 75%, 42%, 0.2); }
+      50% { box-shadow: 0 0 10px hsla(0, 75%, 42%, 0.4); }
+    }
+
+    .forum-post__excerpt {
+      font-size: var(--text-sm);
+      color: var(--brand-muted-foreground);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: var(--space-3);
+    }
+
+    /* Post Meta (right side) */
+    .forum-post__meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: var(--space-1);
+      flex-shrink: 0;
+      min-width: 100px;
+    }
+
+    .forum-post__user {
+      font-size: var(--text-sm);
+      color: var(--brand-muted-foreground);
+      cursor: pointer;
+      transition: color var(--transition-fast);
+    }
+
+    .forum-post__user:hover {
+      color: var(--brand-foreground);
+    }
+
+    .forum-post__user--eerie {
+      color: var(--eerie-glow);
+    }
+
+    .forum-post__user--eerie:hover {
+      color: hsl(160, 35%, 35%);
+    }
+
+    .forum-post__time {
+      font-size: var(--text-xs);
+      color: var(--neutral-500);
+    }
+
+    .forum-post__replies {
+      font-size: var(--text-xs);
+      color: var(--neutral-500);
+    }
+
+    /* Post Footer — tags */
+    .forum-post__footer {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .forum-post__tag {
+      display: inline-block;
+      padding: 2px 10px;
+      background: var(--neutral-800);
+      color: var(--brand-muted-foreground);
+      font-size: var(--text-xs);
+      border-radius: var(--radius-full);
+      border: 1px solid var(--neutral-750);
+    }
+
+    /* --- Archived Posts --- */
+    .forum-post--archived {
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    .forum-post--archived .forum-post__title {
+      color: var(--neutral-500);
+    }
+
+    .forum-post--archived .forum-post__excerpt {
+      color: var(--neutral-600);
+    }
+
+    .forum-post--archived[data-tooltip]::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: -28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--neutral-800);
+      color: var(--brand-muted-foreground);
+      font-size: var(--text-xs);
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity var(--transition-fast);
+      pointer-events: none;
+    }
+
+    .forum-post--archived:hover[data-tooltip]::after {
+      opacity: 1;
+    }
+
+    /* --- Deleted Posts --- */
+    .forum-post--deleted {
+      opacity: 0.3;
+      background: var(--neutral-950);
+      border-style: dashed;
+      pointer-events: none;
+    }
+
+    .forum-post--deleted .forum-post__title {
+      color: var(--neutral-600);
+      font-style: italic;
+    }
+
+    .forum-post--deleted .forum-post__excerpt {
+      color: var(--neutral-700);
+    }
+
+    .forum-post--deleted[data-tooltip]::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: -28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--neutral-800);
+      color: var(--brand-muted-foreground);
+      font-size: var(--text-xs);
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity var(--transition-fast);
+      pointer-events: none;
+    }
+
+    .forum-post--deleted:hover[data-tooltip]::after {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* --- Divider --- */
+    .forum-divider {
+      border: none;
+      height: 1px;
+      background: var(--neutral-800);
+      margin: var(--space-4) 0;
+      opacity: 0.5;
+    }
+
+    /* --- Section Label --- */
+    .forum-section-label {
+      font-size: var(--text-xs);
+      color: var(--neutral-600);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: var(--space-3);
+      padding-left: var(--space-1);
+    }
+
+    /* --- Bottom Status --- */
+    .forum-bottom-status {
+      text-align: center;
+      font-size: var(--text-xs);
+      color: var(--neutral-700);
+      padding: var(--space-6) 0 var(--space-16);
+      animation: flicker 8s ease-in-out infinite;
+      opacity: 0.5;
+      letter-spacing: 0.06em;
+    }
+
+    /* --- Responsive --- */
+    @media (max-width: 900px) {
+      .forum-post {
+        flex-wrap: wrap;
+      }
+      .forum-post__meta {
+        flex-direction: row;
+        gap: var(--space-3);
+        width: 100%;
+        justify-content: flex-start;
+        margin-top: var(--space-2);
+      }
+      .forum-topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-4);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="midnight-archives-shell">
+    <style>
+      /* ===== Shell-specific styles ===== */
+      .midnight-archives-shell {
+        --shell-header-h: 60px;
+        --shell-sidebar-w: 240px;
+        position: relative;
+        min-height: 100vh;
+        background: var(--brand-background);
+        color: var(--brand-foreground);
+        font-family: var(--font-sans);
+      }
+
+      /* ===== Fixed Header ===== */
+      .shell-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: var(--shell-header-h);
+        background: var(--brand-card);
+        border-bottom: 1px solid var(--brand-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 var(--space-6);
+        z-index: 100;
+        animation: flicker 4s ease-in-out infinite;
+      }
+
+      .shell-header__logo {
+        font-family: var(--font-display);
+        font-size: var(--text-xl);
+        font-weight: 600;
+        color: var(--brand-primary-light);
+        animation: glow-pulse 3s ease-in-out infinite;
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+      }
+
+      .shell-header__nav {
+        display: flex;
+        gap: var(--space-8);
+        align-items: center;
+      }
+
+      .shell-header__nav-item {
+        font-size: var(--text-sm);
+        color: var(--brand-muted-foreground);
+        cursor: pointer;
+        padding: var(--space-2) 0;
+        position: relative;
+        transition: color var(--transition-fast);
+        text-decoration: none;
+        white-space: nowrap;
+      }
+
+      .shell-header__nav-item:hover {
+        color: var(--brand-foreground);
+      }
+
+      .shell-header__nav-item[data-active="true"] {
+        color: var(--brand-primary-light);
+      }
+
+      .shell-header__nav-item[data-active="true"]::after {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--brand-primary);
+        border-radius: 1px;
+      }
+
+      .shell-header__user {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        white-space: nowrap;
+      }
+
+      .shell-header__avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: var(--radius-full);
+        background: var(--neutral-800);
+        border: 1px solid var(--brand-border);
+        flex-shrink: 0;
+      }
+
+      .shell-header__status {
+        font-size: var(--text-xs);
+        color: var(--brand-muted-foreground);
+      }
+
+      .shell-header__status .dot {
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--state-success);
+        margin-right: var(--space-1);
+        animation: glow-pulse 2s ease-in-out infinite;
+      }
+
+      /* ===== Main Layout ===== */
+      .shell-layout {
+        display: flex;
+        padding-top: var(--shell-header-h);
+        min-height: 100vh;
+      }
+
+      /* ===== Left Sidebar (hidden) ===== */
+      .shell-sidebar {
+        display: none !important;
+      }
+
+      .sidebar-section {
+        padding: 0 var(--space-5);
+        margin-bottom: var(--space-8);
+      }
+
+      .sidebar-section__title {
+        font-size: var(--text-xs);
+        font-weight: 600;
+        color: var(--brand-muted-foreground);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: var(--space-4);
+      }
+
+      /* Category List */
+      .sidebar-categories {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .sidebar-category {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        padding: var(--space-3) var(--space-4);
+        margin: 0 calc(-1 * var(--space-4));
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: background var(--transition-fast);
+        color: var(--brand-foreground);
+        font-size: var(--text-sm);
+        position: relative;
+      }
+
+      .sidebar-category:hover {
+        background: var(--neutral-800);
+      }
+
+      .sidebar-category:hover::after {
+        content: "";
+        position: absolute;
+        bottom: 4px;
+        left: var(--space-4);
+        right: var(--space-4);
+        height: 1px;
+        background: var(--brand-primary-faint);
+      }
+
+      .sidebar-category__icon {
+        font-size: var(--text-base);
+        width: 20px;
+        text-align: center;
+        flex-shrink: 0;
+      }
+
+      .sidebar-category[data-dom-id="cat-vanished"] {
+        color: var(--brand-muted-foreground);
+        font-style: italic;
+      }
+
+      /* Online Users */
+      .sidebar-online {
+        margin-top: auto;
+        padding-top: var(--space-6);
+        border-top: 1px solid var(--neutral-800);
+      }
+
+      .sidebar-online__list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+      }
+
+      .sidebar-online__user {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        font-size: var(--text-sm);
+        color: var(--brand-foreground);
+      }
+
+      .sidebar-online__dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--state-success);
+        flex-shrink: 0;
+        animation: glow-pulse 2s ease-in-out infinite;
+      }
+
+      .sidebar-online__typing {
+        font-size: var(--text-xs);
+        color: var(--brand-muted-foreground);
+        margin-left: auto;
+        animation: flicker 1.5s ease-in-out infinite;
+      }
+
+      /* ===== Main Content Area ===== */
+      .shell-content {
+        margin-left: var(--shell-sidebar-w);
+        flex: 1;
+        padding: var(--space-8) var(--space-6);
+        min-height: calc(100vh - var(--shell-header-h));
+      }
+
+      /* ===== Footer ===== */
+      .shell-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: var(--space-3) var(--space-6);
+        text-align: center;
+        font-size: var(--text-xs);
+        color: var(--neutral-600);
+        background: linear-gradient(to top, var(--brand-background), transparent);
+        pointer-events: none;
+        z-index: 40;
+      }
+
+      .shell-footer__text {
+        animation: flicker 8s ease-in-out infinite;
+        opacity: 0.6;
+      }
+
+      /* ===== Responsive ===== */
+      @media (max-width: 768px) {
+        .shell-sidebar {
+          display: none;
+        }
+        .shell-content {
+          margin-left: 0;
+        }
+        .shell-header__nav {
+          gap: var(--space-4);
+        }
+      }
+
+      /* ===== Naming Modal ===== */
+      .naming-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.88);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 350;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.4s ease;
+      }
+
+      .naming-overlay.visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .naming-modal {
+        background: linear-gradient(180deg, #141210, #111114);
+        border: 1px solid rgba(240, 200, 100, 0.12);
+        border-radius: var(--radius-lg);
+        padding: var(--space-8);
+        max-width: 380px;
+        width: 90%;
+        text-align: center;
+        transform: translateY(16px) scale(0.95);
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .naming-overlay.visible .naming-modal {
+        transform: translateY(0) scale(1);
+      }
+
+      .naming-modal__icon {
+        font-size: 2.2rem;
+        margin-bottom: var(--space-4);
+        animation: candle-flicker 3s ease-in-out infinite;
+      }
+
+      .naming-modal__title {
+        font-family: var(--font-display);
+        font-size: var(--text-lg);
+        font-weight: 600;
+        color: var(--brand-foreground);
+        margin-bottom: var(--space-2);
+        letter-spacing: 0.04em;
+      }
+
+      .naming-modal__subtitle {
+        font-size: var(--text-xs);
+        color: var(--neutral-500);
+        margin-bottom: var(--space-5);
+        font-style: italic;
+        line-height: 1.5;
+      }
+
+      .naming-modal__input {
+        width: 100%;
+        padding: var(--space-3) var(--space-4);
+        font-size: var(--text-base);
+        font-family: var(--font-sans);
+        color: var(--brand-foreground);
+        background: var(--neutral-850);
+        border: 1px solid var(--neutral-700);
+        border-radius: var(--radius-md);
+        outline: none;
+        text-align: center;
+        transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+        margin-bottom: var(--space-4);
+      }
+
+      .naming-modal__input:focus {
+        border-color: var(--brand-primary-faint);
+        box-shadow: 0 0 0 3px hsla(0, 85%, 32%, 0.1);
+      }
+
+      .naming-modal__input::placeholder {
+        color: var(--neutral-600);
+      }
+
+      .naming-modal__hint {
+        font-size: var(--text-xs);
+        color: var(--neutral-600);
+        margin-bottom: var(--space-5);
+      }
+
+      .naming-modal__actions {
+        display: flex;
+        gap: var(--space-3);
+        justify-content: center;
+      }
+
+      .naming-modal__btn {
+        padding: var(--space-2) var(--space-6);
+        font-size: var(--text-sm);
+        font-family: var(--font-sans);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+      }
+
+      .naming-modal__btn--confirm {
+        background: var(--brand-primary);
+        color: var(--brand-foreground);
+        border: 1px solid var(--brand-border);
+      }
+
+      .naming-modal__btn--confirm:hover:not(:disabled) {
+        background: var(--brand-primary-light);
+        box-shadow: 0 0 12px hsla(0, 85%, 32%, 0.2);
+      }
+
+      .naming-modal__btn--confirm:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+
+      .naming-modal__btn--skip {
+        background: transparent;
+        color: var(--neutral-500);
+        border: 1px solid var(--neutral-700);
+      }
+
+      .naming-modal__btn--skip:hover {
+        color: var(--neutral-400);
+        border-color: var(--neutral-600);
+      }
+    </style>
+
+    <!-- ===== Header ===== -->
+    <header class="shell-header">
+      <div class="shell-header__logo animate-glow">午夜档案馆</div>
+
+      <nav class="shell-header__nav">
+        <a href="forum.html" class="shell-header__nav-item" data-dom-id="nav-forum" data-active="true">论坛</a>
+        <a href="submit.html" class="shell-header__nav-item" data-dom-id="nav-submit">发帖</a>
+      </nav>
+
+      <div class="shell-header__user">
+        <div class="shell-header__avatar"></div>
+        <span class="shell-header__status">
+          <span class="dot"></span>
+          在线 · 存活中
+        </span>
+      </div>
+    </header>
+
+    <!-- ===== Layout ===== -->
+    <div class="shell-layout">
+      <!-- Left Sidebar -->
+      <aside class="shell-sidebar">
+        <!-- Categories -->
+        <div class="sidebar-section">
+          <h3 class="sidebar-section__title">档案分类</h3>
+          <ul class="sidebar-categories">
+            <li class="sidebar-category" data-dom-id="cat-whispers">
+              <span class="sidebar-category__icon">🫧</span>
+              <span>深夜碎语</span>
+            </li>
+            <li class="sidebar-category" data-dom-id="cat-urban">
+              <span class="sidebar-category__icon">🏙</span>
+              <span>都市传说</span>
+            </li>
+            <li class="sidebar-category" data-dom-id="cat-vanished">
+              <span class="sidebar-category__icon">👻</span>
+              <span>已消失的帖子</span>
+            </li>
+            <li class="sidebar-category" data-dom-id="cat-archives">
+              <span class="sidebar-category__icon">📁</span>
+              <span>第七档案</span>
+            </li>
+            <li class="sidebar-category" data-dom-id="cat-mysteries">
+              <span class="sidebar-category__icon">❓</span>
+              <span>未解之谜</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Online Users -->
+        <div class="sidebar-section sidebar-online">
+          <h3 class="sidebar-section__title">当前在线</h3>
+          <ul class="sidebar-online__list">
+            <li class="sidebar-online__user" data-dom-id="user-nightwatcher">
+              <span class="sidebar-online__dot"></span>
+              <span>夜巡者</span>
+            </li>
+            <li class="sidebar-online__user" data-dom-id="user-archivist">
+              <span class="sidebar-online__dot"></span>
+              <span>归档人</span>
+              <span class="sidebar-online__typing">输入中...</span>
+            </li>
+            <li class="sidebar-online__user" data-dom-id="user-shadow">
+              <span class="sidebar-online__dot"></span>
+              <span>影子访客</span>
+            </li>
+            <li class="sidebar-online__user" data-dom-id="user-anonymous">
+              <span class="sidebar-online__dot"></span>
+              <span>匿名者_7749</span>
+            </li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="shell-content">
+
+        <!-- Top Bar -->
+        <div class="forum-topbar">
+          <div class="forum-topbar__title-group">
+            <h1 class="forum-topbar__title">论坛</h1>
+            <span class="forum-topbar__subtitle">每一条帖子，都是一个未完的故事</span>
+          </div>
+          <button class="forum-topbar__btn-new-post" data-dom-id="btn-new-post">
+            <span>+</span> 发帖
+          </button>
+        </div>
+
+        <!-- Announcement Banner -->
+        <div class="forum-announcement">
+          <span class="forum-announcement__label">公告：</span>深夜 2:00-4:00 系统维护期间，所有已删除帖子将短暂可见。请勿截图。
+        </div>
+
+        <!-- Post List -->
+        <div class="forum-post-list">
+
+          <!-- Post 1 — Pinned / New -->
+          <article class="forum-post">
+            <div class="forum-post__icon">🔑</div>
+            <div class="forum-post__body">
+              <div class="forum-post__title-row">
+                <span class="forum-post__title" data-dom-id="post-1">有人记得那栋拆迁的医院吗？</span>
+                <span class="forum-post__new-tag">新</span>
+              </div>
+              <p class="forum-post__excerpt">小时候路过那栋废弃医院，总能闻到消毒水的味道。但邻居说那栋楼十年前就已经拆了，现在那里是一片空地。</p>
+              <div class="forum-post__footer">
+                <span class="forum-post__tag">深夜碎语</span>
+              </div>
+            </div>
+            <div class="forum-post__meta">
+              <span class="forum-post__user" data-dom-id="user-夜行者">夜行者</span>
+              <span class="forum-post__time">3小时前</span>
+              <span class="forum-post__replies">7 条回声</span>
+            </div>
+          </article>
+
+          <!-- Post 2 -->
+          <article class="forum-post">
+            <div class="forum-post__icon">📷</div>
+            <div class="forum-post__body">
+              <div class="forum-post__title-row">
+                <span class="forum-post__title" data-dom-id="post-2">我在监控里看到了不该看到的东西</span>
+              </div>
+              <p class="forum-post__excerpt">公司监控室凌晨值班，屏幕画面里出现了一个从不存在于员工名单中的人影。回放时，那段录像恰好损坏。</p>
+              <div class="forum-post__footer">
+                <span class="forum-post__tag">都市传说</span>
+              </div>
+            </div>
+            <div class="forum-post__meta">
+              <span class="forum-post__user" data-dom-id="user-守夜人">守夜人</span>
+              <span class="forum-post__time">昨日</span>
+              <span class="forum-post__replies">23 条回声</span>
+            </div>
+          </article>
+
+          <!-- Post 3 -->
+          <article class="forum-post">
+            <div class="forum-post__icon">✉️</div>
+            <div class="forum-post__body">
+              <div class="forum-post__title-row">
+                <span class="forum-post__title" data-dom-id="post-3">这封信的寄件人已经去世三年了</span>
+              </div>
+              <p class="forum-post__excerpt">邮戳是上周的，字迹和他生前一模一样。信里只写了一句话："还记得第七个抽屉吗？"</p>
+              <div class="forum-post__footer">
+                <span class="forum-post__tag">未解之谜</span>
+              </div>
+            </div>
+            <div class="forum-post__meta">
+              <span class="forum-post__user forum-post__user--eerie" data-dom-id="user-档案员">档案员</span>
+              <span class="forum-post__time">昨日</span>
+              <span class="forum-post__replies">41 条回声</span>
+            </div>
+          </article>
+
+          <!-- Post 4 -->
+          <article class="forum-post">
+            <div class="forum-post__icon">📞</div>
+            <div class="forum-post__body">
+              <div class="forum-post__title-row">
+                <span class="forum-post__title" data-dom-id="post-4">凌晨三点的电话，来电显示是我自己</span>
+              </div>
+              <p class="forum-post__excerpt">手机响了，屏幕亮起自己的名字和号码。接起来，只听到呼吸声——但那不是我的呼吸节奏。</p>
+              <div class="forum-post__footer">
+                <span class="forum-post__tag">深夜碎语</span>
+              </div>
+            </div>
+            <div class="forum-post__meta">
+              <span class="forum-post__user" data-dom-id="user-无名氏">无名氏</span>
+              <span class="forum-post__time">数日前</span>
+              <span class="forum-post__replies">56 条回声</span>
+            </div>
+          </article>
+
+          <!-- Post 5 -->
+          <article class="forum-post">
+            <div class="forum-post__icon">🚦</div>
+            <div class="forum-post__body">
+              <div class="forum-post__title-row">
+                <span class="forum-post__title" data-dom-id="post-5">那个路口的红绿灯，只在雨天出现</span>
+              </div>
+              <p class="forum-post__excerpt">晴天经过时那里只是一个普通的T字路口。但每逢下雨，一盏红绿灯就会亮起，指向一条地图上不存在的路。</p>
+              <div class="forum-post__footer">
+                <span class="forum-post__tag">都市传说</span>
+              </div>
+            </div>
+            <div class="forum-post__meta">
+              <span class="forum-post__user" data-dom-id="user-夜行者">夜行者</span>
+              <span class="forum-post__time">数日前</span>
+              <span class="forum-post__replies">18 条回声</span>
+            </div>
+          </article>
+
+          <!-- Post 6 — Archived -->
+          <article class="forum-post forum-post--archived" data-tooltip="此帖已被收录">
+            <div class="forum-post__icon">🗝️</div>
+            <div class="forum-post__body">
+              <div class="forum-post__title-row">
+                <span class="forum-post__title" data-dom-id="post-6">我收到了一条来自已注销账号的消息</span>
+              </div>
+              <p class="forum-post__excerpt">系统提示该用户不存在，但消息记录还在。内容是一串坐标，指向城郊那座已经关闭的档案馆。</p>
+              <div class="forum-post__footer">
+                <span class="forum-post__tag">已消失的帖子</span>
+              </div>
+            </div>
+            <div class="forum-post__meta">
+              <span class="forum-post__user">已注销</span>
+              <span class="forum-post__time">时间不明</span>
+              <span class="forum-post__replies">— 条回声</span>
+            </div>
+          </article>
+
+          <!-- Post 7 -->
+          <article class="forum-post">
+            <div class="forum-post__icon">📁</div>
+            <div class="forum-post__body">
+              <div class="forum-post__title-row">
+                <span class="forum-post__title" data-dom-id="post-7">档案室里第七个抽屉从未被打开过</span>
+              </div>
+              <p class="forum-post__excerpt">我在那栋楼工作了十二年，每个抽屉我都整理过。唯独第七个，锁孔形状很奇怪，没有任何钥匙能匹配。</p>
+              <div class="forum-post__footer">
+                <span class="forum-post__tag">第七档案</span>
+              </div>
+            </div>
+            <div class="forum-post__meta">
+              <span class="forum-post__user forum-post__user--eerie" data-dom-id="user-档案员">档案员</span>
+              <span class="forum-post__time">数日前</span>
+              <span class="forum-post__replies">89 条回声</span>
+            </div>
+          </article>
+
+          <!-- Post 8 -->
+          <article class="forum-post">
+            <div class="forum-post__icon">🚇</div>
+            <div class="forum-post__body">
+              <div class="forum-post__title-row">
+                <span class="forum-post__title" data-dom-id="post-8">地铁末班车上的第13位乘客</span>
+              </div>
+              <p class="forum-post__excerpt">车厢里明明只有十二个人，但报站系统说"第十三位乘客请注意，您的终点站到了"。所有人都面面相觑。</p>
+              <div class="forum-post__footer">
+                <span class="forum-post__tag">都市传说</span>
+              </div>
+            </div>
+            <div class="forum-post__meta">
+              <span class="forum-post__user" data-dom-id="user-守夜人">守夜人</span>
+              <span class="forum-post__time">时间不明</span>
+              <span class="forum-post__replies">34 条回声</span>
+            </div>
+          </article>
+
+          <!-- Archived Post 9 -->
+          <article class="forum-post forum-post--archived" data-tooltip="此帖已被收录">
+            <div class="forum-post__icon">📖</div>
+            <div class="forum-post__body">
+              <div class="forum-post__title-row">
+                <span class="forum-post__title">关于"那个地方"的集体记忆</span>
+              </div>
+              <p class="forum-post__excerpt">帖子里记录了十七个人对同一个地点的不同描述。没有两个人说的是同一个地方，但所有人都坚信自己去过。</p>
+              <div class="forum-post__footer">
+                <span class="forum-post__tag">已归档</span>
+              </div>
+            </div>
+            <div class="forum-post__meta">
+              <span class="forum-post__user">匿名者</span>
+              <span class="forum-post__time">时间不明</span>
+              <span class="forum-post__replies">112 条回声</span>
+            </div>
+          </article>
+
+          <!-- Divider -->
+          <hr class="forum-divider">
+
+          <!-- Section: Deleted Posts -->
+          <div class="forum-section-label">已删除 / 不可用</div>
+
+          <!-- Deleted Post 1 -->
+          <article class="forum-post forum-post--deleted" data-tooltip="此帖已被收录">
+            <div class="forum-post__icon">👤</div>
+            <div class="forum-post__body">
+              <div class="forum-post__title-row">
+                <span class="forum-post__title">[该帖子已被系统归档]</span>
+              </div>
+              <p class="forum-post__excerpt">内容不可用</p>
+            </div>
+            <div class="forum-post__meta">
+              <span class="forum-post__user" style="color: var(--neutral-600);">—</span>
+              <span class="forum-post__time">时间不明</span>
+            </div>
+          </article>
+
+          <!-- Deleted Post 2 -->
+          <article class="forum-post forum-post--deleted" data-tooltip="此帖已被收录">
+            <div class="forum-post__icon">👤</div>
+            <div class="forum-post__body">
+              <div class="forum-post__title-row">
+                <span class="forum-post__title">[内容不可用]</span>
+              </div>
+              <p class="forum-post__excerpt">内容不可用</p>
+            </div>
+            <div class="forum-post__meta">
+              <span class="forum-post__user" style="color: var(--neutral-600);">—</span>
+              <span class="forum-post__time">时间不明</span>
+            </div>
+          </article>
+
+          <!-- Deleted Post 3 -->
+          <article class="forum-post forum-post--deleted" data-tooltip="此帖已被收录">
+            <div class="forum-post__icon">👤</div>
+            <div class="forum-post__body">
+              <div class="forum-post__title-row">
+                <span class="forum-post__title">[该帖子已被系统归档]</span>
+              </div>
+              <p class="forum-post__excerpt">内容不可用</p>
+            </div>
+            <div class="forum-post__meta">
+              <span class="forum-post__user" style="color: var(--neutral-600);">—</span>
+              <span class="forum-post__time">时间不明</span>
+            </div>
+          </article>
+
+          <!-- Deleted Post 4 -->
+          <article class="forum-post forum-post--deleted" data-tooltip="此帖已被收录">
+            <div class="forum-post__icon">👤</div>
+            <div class="forum-post__body">
+              <div class="forum-post__title-row">
+                <span class="forum-post__title">[内容不可用]</span>
+              </div>
+              <p class="forum-post__excerpt">内容不可用</p>
+            </div>
+            <div class="forum-post__meta">
+              <span class="forum-post__user" style="color: var(--neutral-600);">—</span>
+              <span class="forum-post__time">时间不明</span>
+            </div>
+          </article>
+
+        </div><!-- end forum-post-list -->
+
+        <!-- Bottom Status Bar -->
+        <div class="forum-bottom-status">
+          系统运行中... 数据同步完成... 第 3,847 次归档...
+        </div>
+
+      </main>
+    </div><!-- end shell-layout -->
+
+    <!-- ===== Footer ===== -->
+    <footer class="shell-footer">
+      <span class="shell-footer__text">系统运行中... 第 3,847 次归档...</span>
+    </footer>
+
+    <!-- Naming Modal -->
+    <div class="naming-overlay" id="naming-overlay">
+      <div class="naming-modal">
+        <div class="naming-modal__icon">👤</div>
+        <div class="naming-modal__title">你是谁？</div>
+        <div class="naming-modal__subtitle">档案馆需要知道你的名字。你的每一条发言都将署上此名。</div>
+        <input type="text" class="naming-modal__input" id="naming-input" placeholder="输入你的名字..." maxlength="20" autocomplete="off">
+        <div class="naming-modal__hint">2-20个字符，一经设定仅可修改一次</div>
+        <div class="naming-modal__actions">
+          <button class="naming-modal__btn naming-modal__btn--confirm" id="naming-confirm" disabled>确认</button>
+          <button class="naming-modal__btn naming-modal__btn--skip" id="naming-skip">以后再说</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- end midnight-archives-shell -->
+
+  <!-- ===== Chat Overlay ===== -->
+  <style>
+    /* ===== Chat Overlay: Backdrop ===== */
+    .chat-backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.45);
+      z-index: 900;
+      backdrop-filter: saturate(0.3) brightness(0.6);
+      -webkit-backdrop-filter: saturate(0.3) brightness(0.6);
+      animation: chat-backdrop-in 0.3s ease;
+    }
+
+    @keyframes chat-backdrop-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* ===== Chat Overlay: Window ===== */
+    .chat-window {
+      display: none;
+      position: fixed;
+      bottom: var(--space-6);
+      right: var(--space-6);
+      width: 380px;
+      height: 500px;
+      background: var(--brand-card);
+      border: 1px solid var(--brand-border);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      flex-direction: column;
+      overflow: hidden;
+      animation: chat-window-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes chat-window-in {
+      from {
+        opacity: 0;
+        transform: translateY(24px) scale(0.96);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* ===== Chat Header ===== */
+    .chat-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-4) var(--space-5);
+      border-bottom: 1px solid var(--brand-border);
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    /* Scanline overlay on header */
+    .chat-header::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(255, 255, 255, 0.008) 2px,
+        rgba(255, 255, 255, 0.008) 4px
+      );
+      pointer-events: none;
+      animation: scanline-drift 3s linear infinite;
+    }
+
+    @keyframes scanline-drift {
+      from { background-position: 0 0; }
+      to { background-position: 0 8px; }
+    }
+
+    .chat-header__info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .chat-header__name-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .chat-header__username {
+      font-size: var(--text-base);
+      font-weight: 500;
+      color: var(--brand-foreground);
+      font-family: var(--font-display);
+      letter-spacing: 0.02em;
+    }
+
+    .chat-header__status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--state-success);
+      flex-shrink: 0;
+      animation: chat-pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes chat-pulse-dot {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.5);
+      }
+      50% {
+        box-shadow: 0 0 0 5px rgba(76, 175, 80, 0);
+      }
+    }
+
+    .chat-header__subtitle {
+      font-size: var(--text-xs);
+      color: var(--brand-muted-foreground);
+      margin-top: 2px;
+    }
+
+    .chat-header__close {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-md);
+      color: var(--brand-muted-foreground);
+      font-size: var(--text-base);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      position: relative;
+      z-index: 1;
+      flex-shrink: 0;
+    }
+
+    .chat-header__close:hover {
+      color: var(--eerie-glow);
+      background: rgba(255, 255, 255, 0.05);
+      text-shadow: 0 0 8px var(--eerie-glow);
+    }
+
+    /* ===== Chat Messages Area ===== */
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--space-4) var(--space-5);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+      height: 350px;
+      scroll-behavior: smooth;
+    }
+
+    /* Scrollbar styling */
+    .chat-messages::-webkit-scrollbar {
+      width: 4px;
+    }
+    .chat-messages::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .chat-messages::-webkit-scrollbar-thumb {
+      background: var(--neutral-700);
+      border-radius: 2px;
+    }
+    .chat-messages::-webkit-scrollbar-thumb:hover {
+      background: var(--neutral-600);
+    }
+
+    /* ===== Message Bubbles ===== */
+    .chat-msg {
+      display: flex;
+      flex-direction: column;
+      max-width: 80%;
+      animation: msg-fade-in 0.3s ease;
+    }
+
+    @keyframes msg-fade-in {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Received (left) */
+    .chat-msg--received {
+      align-self: flex-start;
+    }
+
+    .chat-msg--received .chat-msg__bubble {
+      background: var(--neutral-800);
+      color: var(--neutral-200);
+      border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) var(--radius-sm);
+      padding: var(--space-3) var(--space-4);
+      font-size: var(--text-sm);
+      line-height: 1.55;
+    }
+
+    /* Sent (right) */
+    .chat-msg--sent {
+      align-self: flex-end;
+    }
+
+    .chat-msg--sent .chat-msg__bubble {
+      background: var(--brand-primary-faint);
+      color: var(--neutral-200);
+      border-radius: var(--radius-lg) var(--radius-lg) var(--radius-sm) var(--radius-lg);
+      padding: var(--space-3) var(--space-4);
+      font-size: var(--text-sm);
+      line-height: 1.55;
+    }
+
+    /* Timestamp */
+    .chat-msg__time {
+      font-size: 10px;
+      color: var(--neutral-500);
+      margin-top: 4px;
+      padding: 0 2px;
+    }
+
+    .chat-msg--sent .chat-msg__time {
+      text-align: right;
+    }
+
+    /* Read indicator */
+    .chat-msg__read {
+      font-size: 10px;
+      color: var(--neutral-600);
+      text-align: right;
+      margin-top: 2px;
+    }
+
+    /* Last received message: faint red text shadow */
+    .chat-msg--last-received .chat-msg__bubble {
+      text-shadow: 0 0 6px hsla(0, 70%, 40%, 0.25);
+    }
+
+    /* System message */
+    .chat-msg--system {
+      align-self: center;
+      max-width: 100%;
+    }
+
+    .chat-msg--system .chat-msg__text {
+      font-size: var(--text-xs);
+      color: var(--neutral-600);
+      text-align: center;
+      letter-spacing: 0.04em;
+      opacity: 0.6;
+      padding: var(--space-2) 0;
+    }
+
+    /* ===== Typing Indicator ===== */
+    .chat-typing {
+      display: none;
+      align-self: flex-start;
+      padding: var(--space-3) var(--space-4);
+      gap: var(--space-2);
+      align-items: center;
+    }
+
+    .chat-typing[data-visible="true"] {
+      display: flex;
+    }
+
+    .chat-typing__dots {
+      display: flex;
+      gap: 3px;
+      align-items: center;
+    }
+
+    .chat-typing__dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--neutral-500);
+      animation: typing-wave 1.4s ease-in-out infinite;
+    }
+
+    .chat-typing__dot:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+
+    .chat-typing__dot:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+
+    @keyframes typing-wave {
+      0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.4;
+      }
+      30% {
+        transform: translateY(-6px);
+        opacity: 1;
+      }
+    }
+
+    .chat-typing__text {
+      font-size: var(--text-xs);
+      color: var(--brand-muted-foreground);
+      font-style: italic;
+    }
+
+    /* ===== Chat Input Area ===== */
+    .chat-input-area {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      border-top: 1px solid var(--brand-border);
+      flex-shrink: 0;
+      background: var(--brand-card);
+    }
+
+    .chat-input-area__field {
+      flex: 1;
+      background: var(--neutral-850);
+      border: 1px solid var(--neutral-750);
+      border-radius: var(--radius-md);
+      padding: var(--space-3) var(--space-4);
+      font-size: var(--text-sm);
+      color: var(--brand-foreground);
+      font-family: var(--font-sans);
+      outline: none;
+      transition: border-color var(--transition-fast);
+      min-width: 0;
+    }
+
+    .chat-input-area__field::placeholder {
+      color: var(--neutral-600);
+      font-style: italic;
+    }
+
+    .chat-input-area__field:focus {
+      border-color: var(--brand-primary-faint);
+    }
+
+    .chat-input-area__send {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--brand-primary);
+      color: var(--brand-primary-foreground);
+      border: 1px solid var(--brand-primary-light);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-size: var(--text-sm);
+      transition: all var(--transition-fast);
+      flex-shrink: 0;
+    }
+
+    .chat-input-area__send:hover {
+      background: var(--brand-primary-light);
+      box-shadow: 0 0 12px hsla(0, 85%, 32%, 0.3);
+    }
+
+    /* ===== Responsive: Chat ===== */
+    @media (max-width: 480px) {
+      .chat-window {
+        width: calc(100vw - var(--space-4) * 2);
+        right: var(--space-4);
+        bottom: var(--space-4);
+        height: 70vh;
+      }
+    }
+  </style>
+
+  <!-- Backdrop -->
+  <div class="chat-backdrop" data-dom-id="chat-backdrop"></div>
+
+  <!-- Chat Window -->
+  <div class="chat-window">
+
+    <!-- Chat Header -->
+    <div class="chat-header">
+      <div class="chat-header__info">
+        <div class="chat-header__name-row">
+          <span class="chat-header__username">夜行者</span>
+          <span class="chat-header__status-dot"></span>
+        </div>
+        <div class="chat-header__subtitle">在线状态：最近活跃于 未知时间</div>
+      </div>
+      <button class="chat-header__close" data-dom-id="chat-close" aria-label="关闭聊天">
+        &#10005;
+      </button>
+    </div>
+
+    <!-- Chat Messages -->
+    <div class="chat-messages" data-dom-id="chat-messages">
+
+      <!-- Message 1: Received -->
+      <div class="chat-msg chat-msg--received" style="animation-delay: 0.05s;">
+        <div class="chat-msg__bubble">你也在这里？</div>
+        <div class="chat-msg__time">23:47</div>
+      </div>
+
+      <!-- Message 2: Sent -->
+      <div class="chat-msg chat-msg--sent" style="animation-delay: 0.1s;">
+        <div class="chat-msg__bubble">这条消息你能看到吗？</div>
+        <div class="chat-msg__time">23:48</div>
+        <div class="chat-msg__read">已读?</div>
+      </div>
+
+      <!-- Message 3: Received -->
+      <div class="chat-msg chat-msg--received" style="animation-delay: 0.15s;">
+        <div class="chat-msg__bubble">我发了一条帖子，但好像被系统删除了</div>
+        <div class="chat-msg__time">23:50</div>
+      </div>
+
+      <!-- Message 4: Sent -->
+      <div class="chat-msg chat-msg--sent" style="animation-delay: 0.2s;">
+        <div class="chat-msg__bubble">什么内容？</div>
+        <div class="chat-msg__time">23:51</div>
+      </div>
+
+      <!-- Message 5: Received — last message, faint red text shadow -->
+      <div class="chat-msg chat-msg--received chat-msg--last-received" style="animation-delay: 0.25s;">
+        <div class="chat-msg__bubble">不记得了...但我确定我写过</div>
+        <div class="chat-msg__time">[时间无法确认]</div>
+      </div>
+
+      <!-- System Message -->
+      <div class="chat-msg chat-msg--system">
+        <div class="chat-msg__text">消息已加密 · 仅双方可见</div>
+      </div>
+
+      <!-- Typing Indicator -->
+      <div class="chat-typing" data-visible="false" id="chat-typing-indicator">
+        <div class="chat-typing__dots">
+          <span class="chat-typing__dot"></span>
+          <span class="chat-typing__dot"></span>
+          <span class="chat-typing__dot"></span>
+        </div>
+        <span class="chat-typing__text">对方正在输入...</span>
+      </div>
+
+    </div><!-- end chat-messages -->
+
+    <!-- Chat Input Area -->
+    <div class="chat-input-area">
+      <input
+        type="text"
+        class="chat-input-area__field"
+        data-dom-id="chat-input"
+        placeholder="说点什么..."
+        autocomplete="off"
+        spellcheck="false"
+      >
+      <button class="chat-input-area__send" data-dom-id="chat-send" aria-label="发送">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+
+  </div><!-- end chat-window -->
+
+  <script>
+    /* ===== Chat Overlay Scripts ===== */
+    (function() {
+      // --- Placeholder rotation ---
+      const chatInput = document.querySelector('[data-dom-id="chat-input"]');
+      const placeholders = [
+        "说点什么...",
+        "有人在听吗...",
+        "请确认对方在线...",
+        "输入消息..."
+      ];
+      let placeholderIndex = 0;
+
+      function rotatePlaceholder() {
+        placeholderIndex = (placeholderIndex + 1) % placeholders.length;
+        chatInput.setAttribute("placeholder", placeholders[placeholderIndex]);
+      }
+
+      setInterval(rotatePlaceholder, 4000);
+
+      // --- Typing indicator (show briefly then hide) ---
+      const typingIndicator = document.getElementById("chat-typing-indicator");
+
+      function flashTypingIndicator() {
+        if (!typingIndicator) return;
+        typingIndicator.setAttribute("data-visible", "true");
+        setTimeout(function() {
+          if (typingIndicator) typingIndicator.setAttribute("data-visible", "false");
+        }, 3000);
+      }
+
+      // Show typing indicator once after 2 seconds, then every 12 seconds
+      setTimeout(function() {
+        flashTypingIndicator();
+        setInterval(flashTypingIndicator, 12000);
+      }, 2000);
+
+      // --- Close chat (backdrop or X button) ---
+      var backdrop = document.querySelector('[data-dom-id="chat-backdrop"]');
+      var closeBtn = document.querySelector('[data-dom-id="chat-close"]');
+
+      function openChat() {
+        var chatWindow = document.querySelector('.chat-window');
+        var chatBackdrop = document.querySelector('.chat-backdrop');
+        if (chatWindow) {
+          chatWindow.style.display = 'flex';
+          chatWindow.style.opacity = '1';
+          chatWindow.style.transform = 'translateY(0) scale(1)';
+        }
+        if (chatBackdrop) {
+          chatBackdrop.style.display = 'block';
+          chatBackdrop.style.opacity = '1';
+        }
+      }
+
+      function closeChat() {
+        var chatWindow = document.querySelector('.chat-window');
+        var chatBackdrop = document.querySelector('.chat-backdrop');
+        if (chatWindow) {
+          chatWindow.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+          chatWindow.style.opacity = '0';
+          chatWindow.style.transform = 'translateY(16px) scale(0.97)';
+        }
+        if (chatBackdrop) {
+          chatBackdrop.style.transition = 'opacity 0.25s ease';
+          chatBackdrop.style.opacity = '0';
+        }
+        setTimeout(function() {
+          if (chatWindow) chatWindow.style.display = 'none';
+          if (chatBackdrop) chatBackdrop.style.display = 'none';
+        }, 250);
+      }
+
+      if (backdrop) backdrop.addEventListener("click", closeChat);
+      if (closeBtn) closeBtn.addEventListener("click", closeChat);
+
+      // --- Send button (adds message, no real functionality) ---
+      var sendBtn = document.querySelector('[data-dom-id="chat-send"]');
+
+      function sendMessage() {
+        var text = chatInput.value.trim();
+        if (!text) return;
+
+        var messagesContainer = document.querySelector('[data-dom-id="chat-messages"]');
+        var typingEl = document.getElementById("chat-typing-indicator");
+
+        // Create message element
+        var msgDiv = document.createElement("div");
+        msgDiv.className = "chat-msg chat-msg--sent";
+
+        var bubble = document.createElement("div");
+        bubble.className = "chat-msg__bubble";
+        bubble.textContent = text;
+
+        var time = document.createElement("div");
+        time.className = "chat-msg__time";
+        var now = new Date();
+        var hh = String(now.getHours()).padStart(2, "0");
+        var mm = String(now.getMinutes()).padStart(2, "0");
+        time.textContent = hh + ":" + mm;
+
+        msgDiv.appendChild(bubble);
+        msgDiv.appendChild(time);
+
+        // Insert before typing indicator
+        messagesContainer.insertBefore(msgDiv, typingEl);
+
+        // Clear input
+        chatInput.value = "";
+
+        // Scroll to bottom
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+
+      if (sendBtn) sendBtn.addEventListener("click", sendMessage);
+      if (chatInput) {
+        chatInput.addEventListener("keydown", function(e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            sendMessage();
+          }
+        });
+      }
+    })();
+  </script>
+
+  <!-- ===== Naming Modal Scripts ===== -->
+  <script>
+    (function() {
+      'use strict';
+
+      // ===== Username System =====
+      var STORAGE_USERNAME = 'midnight_archives_username';
+
+      function getUsername() {
+        try { return localStorage.getItem(STORAGE_USERNAME) || ''; }
+        catch(e) { return ''; }
+      }
+
+      function setUsername(name) {
+        try { localStorage.setItem(STORAGE_USERNAME, name); }
+        catch(e) {}
+      }
+
+      function getDisplayName() {
+        return getUsername() || '匿名者';
+      }
+
+      // Naming modal elements
+      var namingOverlay = document.getElementById('naming-overlay');
+      var namingInput = document.getElementById('naming-input');
+      var namingConfirm = document.getElementById('naming-confirm');
+      var namingSkip = document.getElementById('naming-skip');
+      var headerAvatar = document.querySelector('.shell-header__avatar');
+      var NAME_LOCK_KEY = 'midnight_archives_name_locked';
+
+      function isNameLocked() {
+        try { return localStorage.getItem(NAME_LOCK_KEY) === '1'; } catch(e) { return false; }
+      }
+      function lockName() {
+        try { localStorage.setItem(NAME_LOCK_KEY, '1'); } catch(e) {}
+      }
+
+      // Update header status display
+      function refreshHeaderStatus() {
+        var name = getUsername();
+        var statusEl = document.querySelector('.shell-header__status');
+        if (statusEl) {
+          var dotHtml = '<span class="dot"></span>';
+          statusEl.innerHTML = dotHtml + ' ' + (name || '在线 · 存活中');
+        }
+      }
+      refreshHeaderStatus();
+
+      // Open naming modal on avatar click — check lock
+      function openNamingModal() {
+        if (isNameLocked()) {
+          return;
+        }
+        if (!namingOverlay) return;
+        namingOverlay.classList.add('visible');
+        namingInput.value = getUsername();
+        namingConfirm.disabled = namingInput.value.trim().length < 2;
+        setTimeout(function() { namingInput.focus(); }, 300);
+      }
+      if (headerAvatar) headerAvatar.addEventListener('click', openNamingModal);
+
+      // Input validation
+      if (namingInput) {
+        namingInput.addEventListener('input', function() {
+          namingConfirm.disabled = namingInput.value.trim().length < 2;
+        });
+        namingInput.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' && !namingConfirm.disabled) {
+            namingConfirm.click();
+          }
+        });
+      }
+
+      // Confirm naming — lock after first set
+      if (namingConfirm) {
+        namingConfirm.addEventListener('click', function() {
+          var name = namingInput.value.trim();
+          if (name.length < 2) return;
+          setUsername(name);
+          lockName();
+          refreshHeaderStatus();
+          namingOverlay.classList.remove('visible');
+          // Update hint for future visits
+          var hint = namingOverlay.querySelector('.naming-modal__hint');
+          if (hint) hint.textContent = '名字已锁定，不可修改';
+        });
+      }
+
+      // Skip naming
+      if (namingSkip) {
+        namingSkip.addEventListener('click', function() {
+          namingOverlay.classList.remove('visible');
+        });
+      }
+
+      // Show naming modal on first visit if no username set
+      if (!getUsername()) {
+        setTimeout(function() {
+          if (namingOverlay) {
+            namingOverlay.classList.add('visible');
+            setTimeout(function() { if (namingInput) namingInput.focus(); }, 300);
+          }
+        }, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>
