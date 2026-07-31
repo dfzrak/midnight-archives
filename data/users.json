@@ -1,20 +1,37 @@
 {
   "users": {
-    "管理员": {
+    "ç®¡çå": {
       "coins": 100,
-      "transactions": [{"amount": 100, "desc": "初始余额", "time": "2026-08-01T04:20:00Z"}],
+      "transactions": [
+        {
+          "amount": 100,
+          "desc": "åå§ä½é¢",
+          "time": "2026-08-01T04:20:00Z"
+        }
+      ],
       "registered_at": "2026-08-01T04:20:00Z"
     },
     "zero": {
       "coins": 10,
-      "transactions": [{"amount": 10, "desc": "初始余额", "time": "2026-08-01T04:20:00Z"}],
+      "transactions": [
+        {
+          "amount": 10,
+          "desc": "åå§ä½é¢",
+          "time": "2026-08-01T04:20:00Z"
+        }
+      ],
       "registered_at": "2026-08-01T04:20:00Z"
     },
-    "旅行者": {
+    "æè¡è": {
       "coins": 0,
       "transactions": [],
       "registered_at": "2026-08-01T04:20:00Z"
+    },
+    "管理员": {
+      "coins": 0,
+      "transactions": [],
+      "registered_at": "2026-07-31T20:20:23.136Z"
     }
   },
-  "last_updated": "2026-08-01T04:20:00Z"
+  "last_updated": "2026-07-31T20:20:23.137Z"
 }
