@@ -154,5 +154,5 @@ function renderTopbar(cid){
 }
 
 window.MidnightRecharge={COIN_PACKAGES:PKG,getBalance:function(){return bal},renderRecharge:renderRecharge,renderTopbarCoin:renderTopbar,showToast:toast,syncBalance:syncBal};
-console.log('[Archive] 充值系统 v20 | 余额',bal,'🧱 | 手动验证模式');
+console.log('[Archive] 充值系统 v20 | 余额',bal,'🧱 | 智能验证模式');
 })();
