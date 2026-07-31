@@ -24,137 +24,50 @@
   ];
 
   const SEANCE_REPLIES = [
-    "档案馆收到了你的低语。\n\n在深夜的走廊里，这个回声被记录在第七档案架第三层编号" + (Math.floor(Math.random()*9000)+1000) + "。它不会消失，即使你离开这里。\n\n——档案馆，凌晨三点。",
-    "你留下的每一个字都已经被存档。\n\n守夜人在日志中写道：今夜又有人叩响了那扇门。不是用手的——是用故事。\n\n我们听到了。继续说吧。",
-    "档案室内灯管闪烁了一下。这不是电路故障——这是档案馆在回应。\n\n它在说：你的故事值得被保存。在它被遗忘之前，我们会把它锁进那个从不打开的抽屉。\n\n——档案管理员",
-    "有人曾在凌晨三点问过同样的问题。那人的档案至今仍存放在地下室B区。\n\n你想知道他现在在哪里吗？\n\n先回答我：你确定你准备好了吗？",
-    "档案馆很老了。比我们都老。\n\n它见过所有来过这里的人。它记得每一个故事的每一个字。它记得你上次来的时候穿什么衣服。它记得你第一次来到这里时的恐惧。\n\n现在，它听到了你的声音。它在回应。",
-    "烛火晃了一下。这不是风。\n\n这是档案馆在靠近。你在和一座有记忆的建筑说话。它不喜欢轻浮的来访者。但你是认真的。所以它回答了。\n\n记住：你离开后，这些字不会消失。它们会留在走廊里，被下一个凌晨三点到来的人看见。"
+    function(k){return "档案馆收到了你关于「"+k+"」的低语。\n\n在深夜的走廊里，这个回声被记录在第七档案架第三层编号"+(Math.floor(Math.random()*9000)+1000)+"。它不会消失，即使你离开这里。\n\n——档案馆，凌晨三点。";},
+    function(k){return "关于「"+k+"」的每一个字都已经被存档。\n\n守夜人在日志中写道：今夜又有人叩响了那扇门。不是用手的——是用故事。\n\n我们听到了。继续说吧。";},
+    function(k){return "你提到了「"+k+"」。档案室内灯管闪烁了一下。这不是电路故障——这是档案馆在回应。\n\n它在说：你的故事值得被保存。";},
+    function(k){return "你问「"+k+"」。有人曾在凌晨三点问过类似的问题。那人的档案至今存放在地下室B区。\n\n你想知道他现在在哪里吗？\n\n先告诉我：你确定你准备好了吗？";},
+    function(k){return "「"+k+"」——档案馆很老了。比我们都老。\n\n它记得你第一次来这里时的恐惧。现在，它听到了你的声音。";},
+    function(k,r){return "烛火晃了一下。\n\n你说「"+k+"」——这是档案馆在靠近。它在回应："+r;},
+    function(k,n,r){return "关于「"+k+"」——档案馆翻阅了相关档案。\n\n编号"+n+"的记录最后一行写道：\n\n\""+r+"\"\n\n档案在此终止。";},
+    function(k,r){return "等等。你说了「"+k+"」。\n\n档案管理员停下了手中的工作。这个词已经很久没人提起过了。\n\n但我可以告诉你一件事："+r;}
   ];
 
-  let balance = 0;
-  let transactions = [];
-  let revealedArchives = [];
-
-  function loadState() {
-    try {
-      balance = parseInt(localStorage.getItem('midnight_coins')||'0',10);
-      transactions = JSON.parse(localStorage.getItem('midnight_txns')||'[]');
-      revealedArchives = JSON.parse(localStorage.getItem('midnight_revealed')||'[]');
-    } catch(e) { balance=0; transactions=[]; revealedArchives=[]; }
-  }
-
-  function saveState() {
-    try {
-      localStorage.setItem('midnight_coins', balance);
-      localStorage.setItem('midnight_txns', JSON.stringify(transactions.slice(-50)));
-      localStorage.setItem('midnight_revealed', JSON.stringify(revealedArchives));
-    } catch(e) {}
-  }
-
-  function recharge(packageKey) {
-    const pkg = COIN_PACKAGES[packageKey];
-    if (!pkg) return {success:false,error:'无效档位'};
-    balance += pkg.coins;
-    transactions.push({type:'recharge',package:packageKey,coins:pkg.coins,price:pkg.price,time:Date.now()});
-    saveState();
-    return {success:true,added:pkg.coins,balance,pkg};
-  }
-
-  function spend(itemKey) {
-    const costs = {seance:20,hidden_archive:5};
-    if (!costs[itemKey]) return {success:false,error:'无效物品'};
-    if (balance < costs[itemKey]) return {success:false,error:'余额不足',need:costs[itemKey],balance};
-    balance -= costs[itemKey];
-    transactions.push({type:'spend',item:itemKey,cost:costs[itemKey],time:Date.now()});
-    saveState();
-    return {success:true,cost:costs[itemKey],balance,item:{name:itemKey==='seance'?'档案馆通灵':'解锁隐藏档案',type:itemKey}};
-  }
-
-  function getBalance() { return balance; }
-  function getTransactions() { return transactions.slice(-20); }
-
-  function getRandomArchive() {
-    const available = HIDDEN_ARCHIVES.filter((_,i)=>!revealedArchives.includes(i));
-    let pick;
-    if (available.length===0) {
-      pick = HIDDEN_ARCHIVES[Math.floor(Math.random()*HIDDEN_ARCHIVES.length)];
-    } else {
-      pick = available[Math.floor(Math.random()*available.length)];
-      revealedArchives.push(HIDDEN_ARCHIVES.indexOf(pick));
-      saveState();
+  function getSeanceReply(userText) {
+    var t = userText || '';
+    var clean = t.replace(/[?？！!。，,、\\s]/g, '');
+    var kw = clean.substring(0, clean.length > 8 ? 8 : clean.length) || '这些';
+    var an = '#' + String(Math.floor(Math.random()*9000)+1000);
+    
+    var isQ = /[?？吗呢谁什么怎么为什么哪如何]/.test(t);
+    var isFear = /怕|恐怖|吓|诡异|害怕|恐惧/.test(t);
+    var isPerson = /人|他|她|它|谁|东西|怪物|鬼|灵魂|幽灵|床底|柜子|身后|背后|角落/.test(t);
+    var isPlace = /地方|哪里|房间|楼|医院|学校|地铁|电梯|走廊|地下/.test(t);
+    
+    if (isFear && isPerson) {
+      return SEANCE_REPLIES[5](kw, '它一直都在。从你搬进来的第一天起。你不需要害怕——它比你更害怕孤独。');
     }
-    return pick;
+    if (isFear && isPlace) {
+      return SEANCE_REPLIES[7](kw, '那个地方仍然存在。地图上没有，导航找不到。但如果你在凌晨三点独自走过那条走廊——你会看见它的。不要回头。');
+    }
+    if (isFear) { return SEANCE_REPLIES[3](kw); }
+    if (isPerson) {
+      var responses = ['它不是来伤害你的。它只是想让你知道它的存在。','档案馆里有17份关于类似存在的记录。没有一份能给出解释。','别试图和它说话。也别假装看不见它。保持安静，等天亮。','它曾经是个人。现在它只是一段记忆。但它不知道自己已经死了。'];
+      return SEANCE_REPLIES[6](kw, an, responses[Math.floor(Math.random()*responses.length)]);
+    }
+    if (isPlace) {
+      var responses = ['那个地方在地图上已经被抹去了。但在档案馆的记录里，它仍然存在。','档案馆地下三层有一张那个地方的完整平面图。但图纸上有三个房间是空白的。','你去过那里了，对吗？你的鞋底还粘着那里的灰尘。档案馆认得那种灰。'];
+      return SEANCE_REPLIES[6](kw, an, responses[Math.floor(Math.random()*responses.length)]);
+    }
+    if (isQ) {
+      var responses = ['答案在第七个抽屉里。但那个抽屉的锁打不开。至少现在打不开。','我知道答案。但告诉你之后，你就必须留在这里。你想清楚了吗？','档案馆里有一本书专门回答了这个问题。但那本书的最后一页被撕掉了。'];
+      return SEANCE_REPLIES[6](kw, an, responses[Math.floor(Math.random()*responses.length)]);
+    }
+    if (t.length < 15) { return SEANCE_REPLIES[4](kw); }
+    return SEANCE_REPLIES[0](kw);
   }
 
-  function renderRecharge(containerId) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    const pkgKeys = Object.keys(COIN_PACKAGES);
-    container.innerHTML = `
-      <div class="recharge-section">
-        <div class="bal-card">
-          <div class="bal-icon">🧱</div>
-          <div class="bal-amount">${balance}</div>
-          <div class="bal-label">档案币</div>
-          <div class="bal-hint">每块砖都支撑着这座档案馆</div>
-        </div>
-        <h3 class="rs-title">充值</h3>
-        <div class="coin-pkgs">
-          ${pkgKeys.map(k=>{const p=COIN_PACKAGES[k];const ico={small:'🪙',medium:'🪙',large:'💰',huge:'🔮'};return`<div class="cpkg"><div class="cpkg-icon">${ico[k]}</div><div class="cpkg-name">${p.name}</div><div class="cpkg-coins">+${p.coins}🧱</div><div class="cpkg-price">¥${p.price}</div><div class="cpkg-desc">${p.desc}</div><button class="btn-rch" data-pkg="${k}">购买</button></div>`}).join('')}
-        </div>
-        <h3 class="rs-title">档案服务</h3>
-        <div class="shop-items">
-          <div class="sitem ${balance>=20?'':'sitem--locked'}">
-            <div class="sitem-icon">🕯</div>
-            <div class="sitem-name">档案馆通灵</div>
-            <div class="sitem-cost">20 🧱</div>
-            <div class="sitem-desc">写下你想说的话，AI以档案馆的身份与风格回应你。它知道这座建筑里发生过的所有故事。</div>
-            <button class="btn-buy" data-item="seance" ${balance>=20?'':'disabled'}>${balance>=20?'开启通灵':'余额不足'}</button>
-          </div>
-          <div class="sitem ${balance>=5?'':'sitem--locked'}">
-            <div class="sitem-icon">📁</div>
-            <div class="sitem-name">解锁随机隐藏档案</div>
-            <div class="sitem-cost">5 🧱</div>
-            <div class="sitem-desc">打开一个从未公开的档案。这些故事来自深网、废弃病历、绝密文件——真实度极高。</div>
-            <button class="btn-buy" data-item="hidden_archive" ${balance>=5?'':'disabled'}>${balance>=5?'解锁档案':'余额不足'}</button>
-          </div>
-        </div>
-        <div class="rs-footer">档案币永不过期。解锁的档案不会消失。通灵记录保存在本地。</div>
-      </div>`;
-
-    container.querySelectorAll('.btn-rch').forEach(b=>b.addEventListener('click',function(){showPaymentModal(this.dataset.pkg)}));
-    container.querySelectorAll('.btn-buy').forEach(b=>b.addEventListener('click',function(){const r=spend(this.dataset.item);if(r.success){this.dataset.item==='seance'?showSeanceModal():showArchiveModal();renderRecharge(containerId)}else{showToast('🧱 余额不足，还差'+(r.need-r.balance)+'块',2500)}}));
-    injectStyles();
-  }
-
-  // ===== 支付弹窗（含订单追踪）=====
-  function showPaymentModal(pkgKey) {
-    const ex=document.querySelector('.pym-overlay');if(ex)ex.remove();
-    const p=COIN_PACKAGES[pkgKey];
-    const orderId='MA-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).substring(2,6).toUpperCase();
-    const ov=document.createElement('div');ov.className='pym-overlay';
-    ov.innerHTML=`<div class="pym-modal"><div class="pym-close">✕</div><div class="pym-header"><div class="pym-icon">${pkgKey==='huge'?'🔮':pkgKey==='large'?'💰':'🪙'}</div><h3>${p.name}</h3><p>${p.desc}</p></div><div class="pym-detail"><div class="pym-row"><span>获得</span><span>+${p.coins} 🧱</span></div><div class="pym-row"><span>支付</span><span class="pym-price">¥${p.price}</span></div><div class="pym-row" style="font-size:.7rem;"><span>订单号</span><span style="color:rgba(200,160,120,.3);font-family:monospace">${orderId}</span></div></div><div class="pym-qr"><img src="../assets/alipay-qr.jpg" alt="收款码" class="pym-qr-img" onerror="this.parentElement.innerHTML='<p style=color:rgba(200,160,120,0.4);padding:2rem>收款码加载中…</p>'"><p class="pym-qr-hint">📱 支付宝扫一扫</p><p class="pym-qr-sub">⚠ 转账时请在<strong>备注中填写订单号</strong></p><p class="pym-qr-sub" style="color:rgba(200,160,120,.2);margin-top:.2rem">${orderId}</p></div><div class="pym-actions"><button class="btn-cnf" data-pkg="${pkgKey}" data-order="${orderId}">✅ 已完成支付</button><button class="btn-ccl">取消</button></div></div>`;
-    ov.querySelector('.btn-ccl').onclick=()=>ov.remove();
-    ov.querySelector('.pym-close').onclick=()=>ov.remove();
-    ov.querySelector('.btn-cnf').onclick=function(){
-      const r=recharge(this.dataset.pkg);
-      if(r.success){
-        // 记录订单
-        const orders=JSON.parse(localStorage.getItem('midnight_orders')||'[]');
-        orders.push({orderId:this.dataset.order,package:pkgKey,coins:p.coins,price:p.price,time:Date.now(),status:'confirmed'});
-        localStorage.setItem('midnight_orders',JSON.stringify(orders.slice(-30)));
-        ov.remove();
-        showToast('🎉 充值成功！+'+r.added+'🧱 余额'+r.balance+'🧱',3000);
-        const s=document.querySelector('.recharge-section');
-        if(s){renderRecharge(s.parentElement.id||'recharge-root')}
-      }
-    };
-    ov.addEventListener('click',function(e){if(e.target===ov)ov.remove()});
-    document.body.appendChild(ov);
-  }
-
-  // ===== 档案馆通灵（AI Agent 增强版）=====
   function showSeanceModal() {
     const ex=document.querySelector('.se-overlay');if(ex)ex.remove();
     const ov=document.createElement('div');ov.className='se-overlay';
@@ -197,7 +110,7 @@
           reply=reply.replace('档案馆收到了你的低语','档案馆收到了你关于「'+keyword+'」的低语');
         }
       }else{
-        reply=SEANCE_REPLIES[Math.floor(Math.random()*SEANCE_REPLIES.length)];
+        reply=getSeanceReply(t);
       }
       rd.style.display='block';rd.innerHTML='';
       let i=0;const chars=reply.split('');
