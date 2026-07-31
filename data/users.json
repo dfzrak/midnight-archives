@@ -36,7 +36,12 @@
       "coins": 0,
       "transactions": [],
       "registered_at": "2026-07-31T20:14:37.149Z"
+    },
+    "旅者": {
+      "coins": 0,
+      "transactions": [],
+      "registered_at": "2026-07-31T20:14:44.158Z"
     }
   },
-  "last_updated": "2026-07-31T20:14:37.149Z"
+  "last_updated": "2026-07-31T20:14:44.158Z"
 }
