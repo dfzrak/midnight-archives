@@ -1,5 +1,25 @@
 {
-  "users": {},
-  "registered_usernames": [],
-  "last_updated": "2026-08-01T19:50:00Z"
+  "users": {
+    "zero": {
+      "coins": 10,
+      "transactions": [
+        {
+          "amount": 10,
+          "desc": "管理员发放",
+          "time": "2026-08-01T19:55:00Z"
+        }
+      ],
+      "registered_at": "2026-08-01T19:50:00Z"
+    },
+    "旅行者": {
+      "coins": 0,
+      "transactions": [],
+      "registered_at": "2026-08-01T19:55:00Z"
+    }
+  },
+  "registered_usernames": [
+    "zero",
+    "旅行者"
+  ],
+  "last_updated": "2026-08-01T19:55:00Z"
 }
