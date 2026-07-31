@@ -64,6 +64,7 @@ var A='https://api.github.com/repos/dfzrak/midnight-archives/contents/data/users
 var T=atob('Sm9kODkyeXJZdFdMUks0SWVhZ3RIajdNMjkzSjQyUHVIdUhjX3BoZw==').split('').reverse().join('');
 var LK='midnight_archives_username';
 var NK='midnight_archives_name_locked';
+var DK='midnight_archives_device_token';
 var sh=null,all={},me=null,coin=0,locked=false;
 
 var HA=[
@@ -142,6 +143,8 @@ function spend(am,desc,cb){
  });
 }
 
+function genDeviceToken(){return 'dt_'+Math.random().toString(36).substring(2,16)+Date.now().toString(36);}
+function getDeviceToken(){try{var t=localStorage.getItem(DK);if(!t){t=genDeviceToken();localStorage.setItem(DK,t);}return t;}catch(e){return genDeviceToken();}}
 function renderLogin(){
  document.getElementById('un').textContent='未登录';
  var r=document.getElementById('root');
@@ -150,9 +153,10 @@ function renderLogin(){
  function doReg(){
   var n=vName(ni.value);if(!n){err.textContent='用户名不能为空';return}
   if(n==='匿名者'||n==='未登录'||n==='档案馆'||n==='书记员'){err.textContent='保留名，不可注册';return}
-  if(all[n]){err.textContent='该用户名已被注册';return}
+  if(all[n]&&all[n].device_token){err.textContent='该用户名已被其他设备注册，不可重复使用';return}
   var br=document.getElementById('br');br.disabled=true;err.textContent='';
-  all[n]={coins:0,transactions:[],registered_at:new Date().toISOString()};
+  var dt=getDeviceToken();
+  all[n]={coins:0,transactions:[],registered_at:new Date().toISOString(),device_token:dt};
   sUsers('注册: '+n,function(e){
    br.disabled=false;
    if(e){err.textContent='注册失败，请重试';return}
@@ -165,6 +169,7 @@ function renderLogin(){
  function doLogin(){
   var n=vName(ni.value);if(!n){err.textContent='请输入用户名';return}
   if(!all[n]){err.textContent='用户名不存在，请先注册';return}
+  if(all[n].device_token){var dt=getDeviceToken();if(all[n].device_token!==dt){err.textContent='该用户名已在其他设备注册，不能在此设备登录';return}}
   me=n;coin=all[n].coins||0;
   try{localStorage.setItem(LK,n);localStorage.setItem(NK,'1')}catch(e){}
   locked=true;
@@ -241,9 +246,21 @@ try{locked=localStorage.getItem(NK)==='1'}catch(e){locked=false}
 fUsers(function(e){
  if(e){document.getElementById('root').innerHTML='<div style="text-align:center;padding:3rem;color:var(--m)">⚠ 无法连接服务器</div>';document.getElementById('un').textContent='离线';return}
  
+ // Check device_token for existing user. If token mismatch → reject
+ if(saved && all[saved] && all[saved].device_token){
+  var dt=getDeviceToken();
+  if(all[saved].device_token!==dt){
+   // This username belongs to another device — force logout
+   try{localStorage.removeItem(LK);localStorage.removeItem(NK)}catch(e){}
+   renderLogin();
+   return;
+  }
+ }
+ 
  // Auto-register: if localStorage has username but users.json doesn't, create it
  if(saved && !all[saved]){
-  all[saved]={coins:0,transactions:[],registered_at:new Date().toISOString()};
+  var dt2=getDeviceToken();
+  all[saved]={coins:0,transactions:[],registered_at:new Date().toISOString(),device_token:dt2};
   sUsers('自动注册: '+saved,function(ok){
    if(ok){
     me=saved;coin=0;
