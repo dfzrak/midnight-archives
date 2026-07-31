@@ -2896,7 +2896,12 @@
           } else {
             postList.appendChild(article);
           }
-          setTimeout(function() { wirePostExpand(article, up.id); }, 0);
+          try {
+            wirePostExpand(article, up.id);
+            console.log('[渲染] 帖子已绑定点击: ' + up.id + ' title=' + up.title);
+          } catch(e) {
+            console.error('[渲染] 绑定失败: ' + up.id, e);
+          }
         });
       }
       // Initial render (from localStorage data loaded by init's _loadFromLocal)
