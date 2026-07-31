@@ -93,7 +93,7 @@ function fUsers(cb){
  ajax('GET',A+'?t='+Date.now(),null,function(e,d){
   if(e){cb(e);return}
   sh=d.sha;
-  try{var u=JSON.parse(atob(d.content));all=u.users||{};cb(null)}catch(e2){cb(e2)}
+  try{var u=JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(d.content),c=>c.charCodeAt(0))));all=u.users||{};cb(null)}catch(e2){cb(e2)}
  });
 }
 
@@ -101,7 +101,7 @@ function sUsers(msg,cb){
  // IMPORTANT: No double-encoding. Content must be raw JSON string.
  var ud={users:all,last_updated:new Date().toISOString()};
  var raw=JSON.stringify(ud,null,2);
- var b64=btoa(unescape(encodeURIComponent(raw)));
+ var b64=btoa(String.fromCharCode(...new TextEncoder().encode(raw)));
  ajax('PUT',A,{message:msg||'update',content:b64,sha:sh},function(e,d){
   if(e){cb(e);return}
   sh=d.content?d.content.sha:d.sha;cb(null);
