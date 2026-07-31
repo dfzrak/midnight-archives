@@ -240,6 +240,22 @@ try{locked=localStorage.getItem(NK)==='1'}catch(e){locked=false}
 
 fUsers(function(e){
  if(e){document.getElementById('root').innerHTML='<div style="text-align:center;padding:3rem;color:var(--m)">⚠ 无法连接服务器</div>';document.getElementById('un').textContent='离线';return}
+ 
+ // Auto-register: if localStorage has username but users.json doesn't, create it
+ if(saved && !all[saved]){
+  all[saved]={coins:0,transactions:[],registered_at:new Date().toISOString()};
+  sUsers('自动注册: '+saved,function(ok){
+   if(ok){
+    me=saved;coin=0;
+    if(!locked){try{localStorage.setItem(NK,'1')}catch(e){}locked=true}
+    renderMain();
+   }else{
+    renderLogin();
+   }
+  });
+  return;
+ }
+ 
  if(saved&&all[saved]){
   me=saved;coin=all[saved].coins||0;
   if(!locked){try{localStorage.setItem(NK,'1')}catch(e){}locked=true}
