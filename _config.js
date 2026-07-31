@@ -1,2 +1,2 @@
-// Midnight Archives config
-// Token is now managed by shared_data.js v3
+// 午夜档案馆配置
+// Token 已迁移至 shared_data.js v3 的 BUILTIN_TOKEN
