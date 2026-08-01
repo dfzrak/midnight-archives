@@ -228,6 +228,11 @@
       margin-bottom: var(--space-12);
     }
 
+    /* Post card top accent bar - always visible */
+    .forum-post:not(.forum-post--archived):not(.forum-post--deleted) {
+      border-top: 2px solid hsla(0,85%,30%,0.5);
+    }
+
     /* --- Post Card --- */
     .forum-post {
       display: flex;
@@ -828,12 +833,13 @@
 
     .forum-post__tag {
       display: inline-block;
-      padding: 2px 10px;
-      background: var(--neutral-800);
+      padding: 3px 12px;
+      background: hsla(0,30%,12%,0.5);
       color: var(--brand-muted-foreground);
       font-size: var(--text-xs);
       border-radius: var(--radius-full);
-      border: 1px solid var(--neutral-750);
+      border: 1px solid hsla(0,30%,20%,0.5);
+      font-weight: 500;
     }
 
     /* --- Archived Posts --- */
@@ -1166,6 +1172,8 @@
   </style>
 </head>
 <body>
+  <!-- v2.0 Taste-Skill Redesign -->
+  <div style="position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#8b0000 20%,#c41010 50%,#8b0000 80%,transparent);z-index:9999;pointer-events:none;box-shadow:0 0 12px rgba(200,30,30,0.6);"></div>
   <div class="midnight-archives-shell">
     <style>
       /* ===== Shell-specific styles ===== */
