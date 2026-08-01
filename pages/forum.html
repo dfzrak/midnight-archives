@@ -1852,7 +1852,44 @@ function isNameLocked() {
         post._wired = true;
       });
 
-      })();
+    
+  // ═══════════════════════════════════════
+  //  午夜档案馆 · 自动恐怖特效引擎 v3
+  // ═══════════════════════════════════════
+  (function(){
+    if (window._eerieEngineLoaded) return;
+    window._eerieEngineLoaded = true;
+
+    const horrors = [
+      // 红闪
+      function(){ const d=document.createElement('div'); d.className='eerie-red-flash'; document.body.appendChild(d); setTimeout(function(){d.remove()},3200); },
+      // 屏幕闪烁
+      function(){ document.body.classList.add('eerie-screen-flicker'); setTimeout(function(){document.body.classList.remove('eerie-screen-flicker')},650); },
+      // 随机帖子染血
+      function(){ var posts=document.querySelectorAll('.forum-post:not(.forum-post--archived):not(.forum-post--deleted)'); if(!posts.length)return; var p=posts[Math.floor(Math.random()*posts.length)]; p.classList.add('eerie-blood'); setTimeout(function(){p.classList.remove('eerie-blood')},2600); },
+      // 随机帖子乱码
+      function(){ var posts=document.querySelectorAll('.forum-post:not(.forum-post--archived):not(.forum-post--deleted)'); if(!posts.length)return; var p=posts[Math.floor(Math.random()*posts.length)]; p.classList.add('eerie-glitch'); setTimeout(function(){p.classList.remove('eerie-glitch')},2000); },
+      // 帖子阴影偏移
+      function(){ var posts=document.querySelectorAll('.forum-post:not(.forum-post--archived):not(.forum-post--deleted)'); if(!posts.length)return; var p=posts[Math.floor(Math.random()*posts.length)]; p.classList.add('eerie-shadow-shift'); setTimeout(function(){p.classList.remove('eerie-shadow-shift')},3000); },
+      // 幽灵文字
+      function(){ var words=['你看到了吗','祂在看着你','不要回头','档案室的门又开了','404 NOT FOUND','第13层','别信他们','凌晨三点','它在呼吸']; var w=words[Math.floor(Math.random()*words.length)]; var el=document.createElement('div'); el.className='eerie-ghost-text'; el.textContent=w; el.style.bottom=(40+Math.random()*120)+'px'; el.style.left=(15+Math.random()*70)+'%'; el.style.transform='translateX(-50%)'; el.style.fontSize=(12+Math.random()*8)+'px'; document.body.appendChild(el); requestAnimationFrame(function(){el.classList.add('visible'); setTimeout(function(){el.classList.remove('visible'); setTimeout(function(){el.remove()},1600)},1800+Math.random()*1200)}); },
+      // 粗扫描线
+      function(){ document.body.classList.add('eerie-scanlines'); setTimeout(function(){document.body.classList.remove('eerie-scanlines')},4000); }
+    ];
+
+    function randomHorror() {
+      var fn = horrors[Math.floor(Math.random()*horrors.length)];
+      try { fn(); } catch(e) {}
+      var next = 8000 + Math.random()*22000; // 8-30秒
+      setTimeout(randomHorror, next);
+    }
+
+    // 页面加载 2 秒后启动，首击红闪
+    setTimeout(function(){
+      var d=document.createElement('div'); d.className='eerie-red-flash'; document.body.appendChild(d); setTimeout(function(){d.remove()},3200);
+      setTimeout(randomHorror, 5000 + Math.random()*8000);
+    }, 2000);
+  })();
   </script>
 </body>
 </html>
