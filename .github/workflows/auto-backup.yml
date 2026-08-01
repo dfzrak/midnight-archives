@@ -1,0 +1,28 @@
+name: Auto Backup
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # 每天凌晨0点备份
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Create backup
+        run: |
+          timestamp=$(date +%Y%m%d_%H%M%S)
+          backup_dir="backups/${timestamp}"
+          mkdir -p "${backup_dir}"
+          cp -r * "${backup_dir}" 2>/dev/null || true
+          
+      - name: Commit backup
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "Auto backup: $(date)" || exit 0
+          git push
