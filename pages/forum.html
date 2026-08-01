@@ -1880,15 +1880,32 @@ function isNameLocked() {
     function randomHorror() {
       var fn = horrors[Math.floor(Math.random()*horrors.length)];
       try { fn(); } catch(e) {}
-      var next = 8000 + Math.random()*22000; // 8-30秒
+      var next = 3000 + Math.random()*7000;
       setTimeout(randomHorror, next);
     }
 
-    // 页面加载 2 秒后启动，首击红闪
+    // 开幕红闪
     setTimeout(function(){
       var d=document.createElement('div'); d.className='eerie-red-flash'; document.body.appendChild(d); setTimeout(function(){d.remove()},3200);
-      setTimeout(randomHorror, 5000 + Math.random()*8000);
-    }, 2000);
+      randomHorror();
+    }, 1500);
+
+    // 持续幽灵文字
+    setInterval(function(){
+      if (document.querySelectorAll('.eerie-ghost-text').length > 0) return;
+      var words=['你看到了吗','祂在看着你','不要回头','档案室的门又开了','404 NOT FOUND','第13层','别信他们','凌晨三点','它在呼吸'];
+      var w=words[Math.floor(Math.random()*words.length)];
+      var el=document.createElement('div');
+      el.className='eerie-ghost-text';
+      el.textContent=w;
+      el.style.bottom=(40+Math.random()*120)+'px';
+      el.style.left=(15+Math.random()*70)+'%';
+      el.style.transform='translateX(-50%)';
+      el.style.fontSize=(12+Math.random()*8)+'px';
+      document.body.appendChild(el);
+      requestAnimationFrame(function(){el.classList.add('visible'); setTimeout(function(){el.classList.remove('visible'); setTimeout(function(){el.remove()},1600)},1800+Math.random()*1200)});
+    }, 8000);
+
   })();
   </script>
 </body>
