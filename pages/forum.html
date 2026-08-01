@@ -1858,8 +1858,62 @@ function isNameLocked() {
   //  强制折叠所有帖子详情（修复外部CSS覆盖）
   // ═══════════════════════════════════════
   (function(){
+    // 初始折叠所有帖子的详情和全文
     document.querySelectorAll('.forum-post__expanded-content').forEach(function(el){
       el.style.display = 'none';
+    });
+    document.querySelectorAll('.forum-post__full-text').forEach(function(el){
+      el.style.display = 'none';
+    });
+    document.querySelectorAll('.forum-post__replies-section').forEach(function(el){
+      el.style.display = 'none';
+    });
+    document.querySelectorAll('.forum-post__collapse-btn').forEach(function(el){
+      el.style.display = 'none';
+    });
+    
+    // 修正展开逻辑：监听所有帖子的点击
+    document.querySelectorAll('.forum-post[data-post-id]').forEach(function(post){
+      if (post.classList.contains('forum-post--archived') || post.classList.contains('forum-post--deleted')) return;
+      post.addEventListener('click', function(e){
+        if (e.target.closest('.forum-post__collapse-btn')) {
+          // 收起
+          var ec = post.querySelector('.forum-post__expanded-content');
+          var ft = post.querySelector('.forum-post__full-text');
+          var rs = post.querySelector('.forum-post__replies-section');
+          var cb = post.querySelector('.forum-post__collapse-btn');
+          if (ec) ec.style.display = 'none';
+          if (ft) ft.style.display = 'none';
+          if (rs) rs.style.display = 'none';
+          if (cb) cb.style.display = 'none';
+          post.classList.remove('forum-post--expanded');
+          return;
+        }
+        if (e.target.closest('.forum-reply-input') || e.target.closest('.forum-reply')) return;
+        
+        var wasExpanded = post.classList.contains('forum-post--expanded');
+        if (wasExpanded) {
+          var ec = post.querySelector('.forum-post__expanded-content');
+          var ft = post.querySelector('.forum-post__full-text');
+          var rs = post.querySelector('.forum-post__replies-section');
+          var cb = post.querySelector('.forum-post__collapse-btn');
+          if (ec) ec.style.display = 'none';
+          if (ft) ft.style.display = 'none';
+          if (rs) rs.style.display = 'none';
+          if (cb) cb.style.display = 'none';
+          post.classList.remove('forum-post--expanded');
+        } else {
+          var ec = post.querySelector('.forum-post__expanded-content');
+          var ft = post.querySelector('.forum-post__full-text');
+          var rs = post.querySelector('.forum-post__replies-section');
+          var cb = post.querySelector('.forum-post__collapse-btn');
+          if (ec) ec.style.display = 'block';
+          if (ft) ft.style.display = 'block';
+          if (rs) rs.style.display = 'block';
+          if (cb) cb.style.display = 'inline-block';
+          post.classList.add('forum-post--expanded');
+        }
+      });
     });
   })();
 
