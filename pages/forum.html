@@ -72,8 +72,8 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:996;b
 @keyframes new-tag-pulse{0%,100%{box-shadow:0 0 6px rgba(200,30,30,0.2)}50%{box-shadow:0 0 16px rgba(200,30,30,0.5)}}
 .forum-post__excerpt{font-size:0.85rem;color:rgba(170,155,135,0.55);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:0.75rem}
 .forum-post--expanded .forum-post__excerpt{display:none}
-.forum-post__expanded-content{display:none;margin-top:0.75rem;opacity:0}
-.forum-post--expanded .forum-post__expanded-content{display:block;animation:expand-fade-in 0.4s ease forwards}
+.forum-post__expanded-content{display:none!important;margin-top:0.75rem;opacity:0}
+.forum-post--expanded .forum-post__expanded-content{display:block!important;animation:expand-fade-in 0.4s ease forwards}
 @keyframes expand-fade-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
 .forum-post__full-text{font-size:0.9rem;color:rgba(190,170,150,0.8);line-height:1.85;background:rgba(0,0,0,0.25);border-left:2px solid rgba(139,0,0,0.3);padding:1rem 1.25rem;border-radius:0 3px 3px 0;margin-bottom:1rem;font-family:'Noto Serif SC',serif}
 .forum-post__collapse-btn{display:inline-block;font-size:0.75rem;color:rgba(170,140,120,0.5);cursor:pointer;padding:0.25rem 0.75rem;border-radius:2px;transition:all 0.2s ease;margin-bottom:1rem;user-select:none;letter-spacing:0.05em}
