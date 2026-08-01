@@ -77,8 +77,14 @@
       "device_token": "dt_traveler_1bedrd381lfv"
     },
     "旅者": {
-      "coins": 0,
-      "transactions": [],
+      "coins": 100,
+      "transactions": [
+        {
+          "amount": 100,
+          "desc": "管理员发放",
+          "time": "2026-08-01T07:49:55.227846+00:00"
+        }
+      ],
       "registered_at": "2026-07-31T21:05:47.504Z",
       "device_token": "dt_grt0d2nyk78ms9flmzb"
     },
@@ -101,5 +107,5 @@
       "device_token": "dt_pdj1qdc2uu8ms9h75kq"
     }
   },
-  "last_updated": "2026-07-31T21:49:58.394Z"
+  "last_updated": "2026-08-01T07:49:55.227846+00:00"
 }
