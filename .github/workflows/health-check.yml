@@ -1,0 +1,20 @@
+name: Website Health Check
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'  # 每5分钟检查一次
+  workflow_dispatch:
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check website status
+        run: |
+          curl -I https://dfzrak.github.io/midnight-archives/
+          curl -s -o /dev/null -w "%{http_code}" https://dfzrak.github.io/midnight-archives/ | grep 200 || exit 1
+          
+      - name: Check security headers
+        run: |
+          headers=$(curl -s -I https://dfzrak.github.io/midnight-archives/)
+          echo "$headers" | grep -E "(X-Frame-Options|X-Content-Type-Options|X-XSS-Protection|Strict-Transport-Security)" || echo "Missing security headers"
