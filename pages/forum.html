@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>论坛 — 午夜档案馆</title>
+  <title>论坛 - 午夜档案馆</title>
   <meta name="description" content="午夜档案馆论坛。深夜开放时间 23:00-05:00。真实故事、悬疑档案、匿名投稿。每一条帖子，都是一个未完的故事。">
   <meta name="keywords" content="午夜论坛,悬疑论坛,恐怖故事,都市传说,匿名投稿,深夜论坛">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://dfzrak.github.io/midnight-archives/pages/forum.html">
-  <meta property="og:title" content="论坛 — 午夜档案馆">
+  <meta property="og:title" content="论坛 - 午夜档案馆">
   <meta property="og:description" content="午夜档案馆论坛。深夜开放时间 23:00-05:00。真实故事、悬疑档案、匿名投稿。每一条帖子，都是一个未完的故事。">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://dfzrak.github.io/midnight-archives/pages/forum.html">
   <meta property="og:site_name" content="午夜档案馆">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="论坛 — 午夜档案馆">
+  <meta name="twitter:title" content="论坛 - 午夜档案馆">
   <meta name="twitter:description" content="午夜档案馆论坛。深夜开放时间 23:00-05:00。真实故事、悬疑档案、匿名投稿。每一条帖子，都是一个未完的故事。">
   <link rel="stylesheet" href="../colors_and_type.css">
   <script src="../security.js"></script>
@@ -71,6 +71,12 @@
     .forum-topbar__btn-new-post:hover {
       background: var(--brand-primary-light);
       box-shadow: 0 0 16px hsla(0, 85%, 32%, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .forum-topbar__btn-new-post:active {
+      transform: translateY(1px) scale(0.97);
+      box-shadow: 0 0 6px hsla(0, 85%, 32%, 0.15);
     }
 
     /* --- Top Bar Actions Container --- */
@@ -101,6 +107,10 @@
     @keyframes scanline-drift {
       0% { transform: translateY(0); }
       100% { transform: translateY(6px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body::after { animation: none; }
     }
 
     /* Ambient vignette */
@@ -203,8 +213,8 @@
     .forum-post-list {
       display: flex;
       flex-direction: column;
-      gap: var(--space-3);
-      margin-bottom: var(--space-10);
+      gap: var(--space-5);
+      margin-bottom: var(--space-12);
     }
 
     /* --- Post Card --- */
@@ -212,13 +222,34 @@
       display: flex;
       align-items: flex-start;
       gap: var(--space-4);
-      padding: var(--space-5);
+      padding: var(--space-6);
       background: var(--brand-card);
       border: 1px solid var(--neutral-800);
       border-radius: var(--radius-md);
       transition: all var(--transition-normal);
       position: relative;
       animation: fade-in 0.4s ease backwards;
+      overflow: hidden;
+    }
+
+    /* Subtle left accent line on post hover */
+    .forum-post:not(.forum-post--archived):not(.forum-post--deleted)::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 14px;
+      bottom: 14px;
+      width: 2px;
+      background: var(--brand-primary);
+      border-radius: 0 2px 2px 0;
+      opacity: 0;
+      transform: scaleY(0.3);
+      transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .forum-post:not(.forum-post--archived):not(.forum-post--deleted):hover::before {
+      opacity: 1;
+      transform: scaleY(1);
     }
 
     .forum-post:nth-child(1) { animation-delay: 0.05s; }
@@ -526,7 +557,8 @@
 
     .forum-reply-input__field:focus {
       border-color: var(--brand-primary-faint);
-      box-shadow: 0 0 8px hsla(0, 85%, 32%, 0.1);
+      box-shadow: 0 0 0 3px hsla(0, 85%, 32%, 0.08), 0 0 12px hsla(0, 85%, 32%, 0.08);
+      background: var(--neutral-850);
     }
 
     .forum-reply-input__actions {
@@ -550,6 +582,11 @@
     .forum-reply-input__btn:hover:not(:disabled) {
       background: var(--brand-primary-light);
       box-shadow: 0 0 8px hsla(0, 85%, 32%, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .forum-reply-input__btn:active:not(:disabled) {
+      transform: translateY(1px) scale(0.97);
     }
 
     .forum-reply-input__btn:disabled {
@@ -1069,6 +1106,23 @@
       color: rgba(255,255,255,0.1);
       letter-spacing: 3px;
       font-family: 'Noto Serif SC', serif;
+    }
+
+    /* ===== Reduced Motion ===== */
+    @media (prefers-reduced-motion: reduce) {
+      .midnight-archives-shell,
+      .shell-header,
+      .forum-announcement,
+      .forum-bottom-status,
+      .system-dm-toast__hint,
+      .system-dm-toast__icon,
+      .forum-post__new-tag,
+      .dm-badge,
+      .shell-footer__text { animation: none; }
+
+      .forum-post { animation: none; transition: none; }
+      .forum-reply { animation: none; }
+      .forum-post:not(.forum-post--archived):not(.forum-post--deleted):hover { transform: none; }
     }
   </style>
 </head>
@@ -1709,7 +1763,7 @@
               </div>
               <p class="forum-post__excerpt">小时候路过那栋废弃医院，总能闻到消毒水的味道。但邻居说那栋楼十年前就已经拆了，现在那里是一片空地。</p>
               <div class="forum-post__expanded-content">
-                <div class="forum-post__full-text">小时候路过那栋废弃医院，总能闻到消毒水的味道。但邻居说那栋楼十年前就已经拆了，现在那里是一片空地。上周我路过那里，味道又出现了。我问了附近的居民，他们都说那里从来没有过什么医院。但我手机里存着一张照片——2008年拍的，背景就是那栋楼。照片的拍摄日期是2008年3月15日。问题是，2008年3月15日那天，我还不到三岁。</div>
+                <div class="forum-post__full-text">小时候路过那栋废弃医院，总能闻到消毒水的味道。但邻居说那栋楼十年前就已经拆了，现在那里是一片空地。上周我路过那里，味道又出现了。我问了附近的居民，他们都说那里从来没有过什么医院。但我手机里存着一张照片，2008年拍的，背景就是那栋楼。照片的拍摄日期是2008年3月15日。问题是，2008年3月15日那天，我还不到三岁。</div>
                 <span class="forum-post__collapse-btn" data-dom-id="collapse-post-1">▲ 收起</span>
                 <div class="forum-post__replies-section">
                   <div class="forum-post__replies-title">回声</div>
@@ -1821,7 +1875,7 @@
               </div>
               <p class="forum-post__excerpt">邮戳是上周的，字迹和他生前一模一样。信里只写了一句话："还记得第七个抽屉吗？"</p>
               <div class="forum-post__expanded-content">
-                <div class="forum-post__full-text">邮戳是上周的，字迹和他生前一模一样。信里只写了一句话："还记得第七个抽屉吗？"我查了邮局的记录，这封信确实是上周寄出的。但寄件地址——那栋楼在三年前就拆了。更诡异的是，信封里还有一张照片，是档案室的全景。照片里，第七个抽屉是打开的。但那个抽屉，我昨天刚检查过，还是锁着的。</div>
+                <div class="forum-post__full-text">邮戳是上周的，字迹和他生前一模一样。信里只写了一句话："还记得第七个抽屉吗？"我查了邮局的记录，这封信确实是上周寄出的。但寄件地址，那栋楼在三年前就拆了。更诡异的是，信封里还有一张照片，是档案室的全景。照片里，第七个抽屉是打开的。但那个抽屉，我昨天刚检查过，还是锁着的。</div>
                 <span class="forum-post__collapse-btn" data-dom-id="collapse-post-3">▲ 收起</span>
                 <div class="forum-post__replies-section">
                   <div class="forum-post__replies-title">回声</div>
@@ -1875,9 +1929,9 @@
               <div class="forum-post__title-row">
                 <span class="forum-post__title" data-dom-id="post-4">凌晨三点的电话，来电显示是我自己</span>
               </div>
-              <p class="forum-post__excerpt">手机响了，屏幕亮起自己的名字和号码。接起来，只听到呼吸声——但那不是我的呼吸节奏。</p>
+              <p class="forum-post__excerpt">手机响了，屏幕亮起自己的名字和号码。接起来，只听到呼吸声，但那不是我的呼吸节奏。</p>
               <div class="forum-post__expanded-content">
-                <div class="forum-post__full-text">手机响了，屏幕亮起自己的名字和号码。接起来，只听到呼吸声——但那不是我的呼吸节奏。我试着说话，对方也在说话，但说的不是中文。我把通话录了音，但回放时只有一段白噪音。第二天我去营业厅查通话记录，那段时间根本没有任何来电。但我的通话录音文件还在手机里，时长13分钟。</div>
+                <div class="forum-post__full-text">手机响了，屏幕亮起自己的名字和号码。接起来，只听到呼吸声，但那不是我的呼吸节奏。我试着说话，对方也在说话，但说的不是中文。我把通话录了音，但回放时只有一段白噪音。第二天我去营业厅查通话记录，那段时间根本没有任何来电。但我的通话录音文件还在手机里，时长13分钟。</div>
                 <span class="forum-post__collapse-btn" data-dom-id="collapse-post-4">▲ 收起</span>
                 <div class="forum-post__replies-section">
                   <div class="forum-post__replies-title">回声</div>
@@ -1943,7 +1997,7 @@
               </div>
               <p class="forum-post__excerpt">晴天经过时那里只是一个普通的T字路口。但每逢下雨，一盏红绿灯就会亮起，指向一条地图上不存在的路。</p>
               <div class="forum-post__expanded-content">
-                <div class="forum-post__full-text">晴天经过时那里只是一个普通的T字路口。但每逢下雨，一盏红绿灯就会亮起，指向一条地图上不存在的路。我试过在雨天沿着那个方向走，走了大约二十分钟，走进了一片我从未见过的居民区。小区的名字叫"永安里"。我查了这个地址——地图上没有，户籍系统里也没有。但我在网上搜到了一条2005年的新闻：永安里小区因地质灾害整体搬迁。照片里的楼和我看到的一模一样。</div>
+                <div class="forum-post__full-text">晴天经过时那里只是一个普通的T字路口。但每逢下雨，一盏红绿灯就会亮起，指向一条地图上不存在的路。我试过在雨天沿着那个方向走，走了大约二十分钟，走进了一片我从未见过的居民区。小区的名字叫"永安里"。我查了这个地址，地图上没有，户籍系统里也没有。但我在网上搜到了一条2005年的新闻：永安里小区因地质灾害整体搬迁。照片里的楼和我看到的一模一样。</div>
                 <span class="forum-post__collapse-btn" data-dom-id="collapse-post-5">▲ 收起</span>
                 <div class="forum-post__replies-section">
                   <div class="forum-post__replies-title">回声</div>
@@ -2084,7 +2138,7 @@
               </div>
               <p class="forum-post__excerpt">车厢里明明只有十二个人，但报站系统说"第十三位乘客请注意，您的终点站到了"。所有人都面面相觑。</p>
               <div class="forum-post__expanded-content">
-                <div class="forum-post__full-text">车厢里明明只有十二个人，但报站系统说"第十三位乘客请注意，您的终点站到了"。所有人都面面相觑。我数了三遍，确实只有十二个。但车门关上后，我从窗户的倒影里看到了第十三个人。他就站在我身后。我不敢回头。到站后，所有人都下了车，但身后的感觉消失了。我在出口处回头看了一眼——车厢是空的。但座位上放着一个笔记本。我翻开了它，第一页写着我的名字。</div>
+                <div class="forum-post__full-text">车厢里明明只有十二个人，但报站系统说"第十三位乘客请注意，您的终点站到了"。所有人都面面相觑。我数了三遍，确实只有十二个。但车门关上后，我从窗户的倒影里看到了第十三个人。他就站在我身后。我不敢回头。到站后，所有人都下了车，但身后的感觉消失了。我在出口处回头看了一眼，车厢是空的。但座位上放着一个笔记本。我翻开了它，第一页写着我的名字。</div>
                 <span class="forum-post__collapse-btn" data-dom-id="collapse-post-8">▲ 收起</span>
                 <div class="forum-post__replies-section">
                   <div class="forum-post__replies-title">回声</div>
@@ -2168,20 +2222,21 @@
             <div class="forum-post__meta">
               <span class="forum-post__user" style="color: var(--neutral-600);">—</span>
               <span class="forum-post__time">时间不明</span>
-            </div>
-          </article>
-
-          <!-- Deleted Post 2 -->
-          <article class="forum-post forum-post--deleted" data-tooltip="此帖已被收录">
-            <div class="forum-post__icon">👤</div>
-            <div class="forum-post__body">
-              <div class="forum-post__title-row">
-                <span class="forum-post__title">[内容不可用]</span>
+<span class="forum-post__user" style="color: var(--neutral-600);">-</span>
               </div>
-              <p class="forum-post__excerpt">内容不可用</p>
-            </div>
-            <div class="forum-post__meta">
-              <span class="forum-post__user" style="color: var(--neutral-600);">—</span>
+            </article>
+
+            <!-- Deleted Post 2 -->
+            <article class="forum-post forum-post--deleted" data-tooltip="此帖已被收录">
+              <div class="forum-post__icon">👤</div>
+              <div class="forum-post__body">
+                <div class="forum-post__title-row">
+                  <span class="forum-post__title">[内容不可用]</span>
+                </div>
+                <p class="forum-post__excerpt">内容不可用</p>
+              </div>
+              <div class="forum-post__meta">
+                <span class="forum-post__user" style="color: var(--neutral-600);">-</span>
               <span class="forum-post__time">时间不明</span>
             </div>
           </article>
