@@ -1498,8 +1498,8 @@ function isNameLocked() {
       // Show naming modal on first visit if no username set
       if (!getUsername()) {
         setTimeout(function() {
-          namingOverlay.classList.add('visible');
-          setTimeout(function() { namingInput.focus(); }, 300);
+          if (namingOverlay) namingOverlay.classList.add('visible');
+          if (namingInput) setTimeout(function() { namingInput.focus(); }, 300);
         }, 2000);
       }
 
