@@ -1855,6 +1855,15 @@ function isNameLocked() {
   })();
 
   // ═══════════════════════════════════════
+  //  强制折叠所有帖子详情（修复外部CSS覆盖）
+  // ═══════════════════════════════════════
+  (function(){
+    document.querySelectorAll('.forum-post__expanded-content').forEach(function(el){
+      el.style.display = 'none';
+    });
+  })();
+
+  // ═══════════════════════════════════════
   //  午夜档案馆 · 自动恐怖特效引擎 v3
   // ═══════════════════════════════════════
   (function(){
