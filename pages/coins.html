@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>档案币 — 午夜档案馆</title>
-  <meta name="description" content="午夜档案馆档案币系统。解锁隐藏档案，通灵档案馆。">
+  <meta name="description" content="午夜档案馆档案币系统。解锁隐藏档案。">
   <meta name="keywords" content="档案币,午夜档案馆,解锁档案">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://dfzrak.github.io/midnight-archives/pages/coins.html">
   <meta property="og:title" content="档案币 — 午夜档案馆">
-  <meta property="og:description" content="午夜档案馆档案币系统。解锁隐藏档案，通灵档案馆。">
+  <meta property="og:description" content="午夜档案馆档案币系统。解锁隐藏档案。">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://dfzrak.github.io/midnight-archives/pages/coins.html">
   <meta property="og:site_name" content="午夜档案馆">
@@ -239,7 +239,7 @@ function renderLogin(){
 function renderMain(){
  document.getElementById('un').textContent=me+(locked?' 🔒':'');
  var r=document.getElementById('root');
- r.innerHTML='<div class="bc"><div class="bi">🧱</div><div class="bn" id="bal">'+coin+'</div><div class="bl">档案币 · 15秒自动同步</div></div><div class="st">档案服务</div><div class="sv-row"><div class="sv" id="sv0"><div class="svi">🕯</div><div class="svn">档案馆通灵</div><div class="svc">20 🧱</div><div class="svd">写下你想说的话，档案馆以它的身份与风格回应你。</div><button class="btn btn-p" id="b0">开启通灵</button></div><div class="sv" id="sv1"><div class="svi">📁</div><div class="svn">解锁隐藏档案</div><div class="svc">5 🧱</div><div class="svd">来自深网、废弃病历、绝密文件——真实度极高。</div><button class="btn btn-p" id="b1">解锁档案</button></div></div><div class="an"><h3>📬 获取档案币</h3><p>档案币由管理员手动发放。联系书记员，告知用户名即可充值。<br>你的用户名：<b style="color:var(--t)">'+me+'</b></p></div>';
+ r.innerHTML='<div class="bc"><div class="bi">🧱</div><div class="bn" id="bal">'+coin+'</div><div class="bl">档案币 · 15秒自动同步</div></div><div class="st">档案服务</div><div class="sv-row"><div class="an"><h3>📬 获取档案币</h3><p>档案币由管理员手动发放。联系书记员，告知用户名即可充值。<br>你的用户名：<b style="color:var(--t)">'+me+'</b></p></div>';
  updSvc();
  bindSvc();
 }
