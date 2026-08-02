@@ -130,7 +130,7 @@
       "device_token": "dt_53ujcbr2je3ms9fmv8l"
     },
     "大狗": {
-      "coins": 95,
+      "coins": 75,
       "transactions": [
         {
           "amount": 100,
@@ -141,6 +141,11 @@
           "amount": -5,
           "desc": "解锁档案",
           "time": "2026-08-02T09:50:48.463Z"
+        },
+        {
+          "amount": -20,
+          "desc": "通灵",
+          "time": "2026-08-02T09:51:17.158Z"
         }
       ],
       "registered_at": "2026-07-31T21:48:54.141Z",
@@ -159,5 +164,5 @@
       "device_token": "dt_tgf43f4awsmsbk3xry"
     }
   },
-  "last_updated": "2026-08-02T09:50:48.473Z"
+  "last_updated": "2026-08-02T09:51:17.158Z"
 }
