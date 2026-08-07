@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>午夜档案馆 — 你见过凌晨三点的档案馆吗？</title>
+  <meta name="description" content="午夜档案馆：真实故事、悬疑档案、匿名投稿。深夜开放，入口不公开。每一条帖子，都是一个未完的故事。">
+  <meta name="keywords" content="午夜档案馆,悬疑,恐怖故事,都市传说,匿名投稿,深夜论坛,真实档案">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://dfzrak.github.io/midnight-archives/">
+  <meta property="og:title" content="午夜档案馆 — 你见过凌晨三点的档案馆吗？">
+  <meta property="og:description" content="午夜档案馆：真实故事、悬疑档案、匿名投稿。深夜开放，入口不公开。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://dfzrak.github.io/midnight-archives/">
+  <meta property="og:site_name" content="午夜档案馆">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="午夜档案馆 — 你见过凌晨三点的档案馆吗？">
+  <meta name="twitter:description" content="午夜档案馆：真实故事、悬疑档案、匿名投稿。深夜开放，入口不公开。">
+  <link rel="stylesheet" href="colors_and_type.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      background: #050508;
+      overflow-x: hidden;
+      cursor: default;
+    }
+
+    .particles {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .particle {
+      position: absolute;
+      color: rgba(200,160,120,0.18);
+      font-family: "Courier New", monospace;
+      animation: float-particle linear infinite;
+      white-space: pre;
+    }
+
+    @keyframes float-particle {
+      0%   { transform: translateY(105vh) translateX(0) rotate(0deg); opacity: 0; }
+      10%  { opacity: 1; }
+      85%  { opacity: 1; }
+      100% { transform: translateY(-8vh) translateX(var(--dx)) rotate(var(--rot)); opacity: 0; }
+    }
+
+    .main-container {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .rule-line {
+      width: 120px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(200,160,120,0.35), transparent);
+      margin-bottom: 2rem;
+      animation: line-shimmer 4s ease-in-out infinite;
+    }
+    @keyframes line-shimmer {
+      0%, 100% { opacity: 0.25; width: 120px; }
+      50% { opacity: 0.7; width: 200px; }
+    }
+
+    .logo {
+      font-family: "Noto Serif SC", "SimSun", "STSong", serif;
+      font-size: 3rem;
+      font-weight: 700;
+      color: #c8a070;
+      letter-spacing: 0.35em;
+      text-shadow:
+        0 0 10px rgba(200,160,112,0.25),
+        0 0 40px rgba(200,140,80,0.1),
+        0 0 80px rgba(160,80,40,0.06);
+      margin-bottom: 0.2rem;
+      animation: logo-breath 5s ease-in-out infinite;
+      position: relative;
+    }
+    .logo::before {
+      content: "午夜檔案館";
+      position: absolute;
+      top: 3px;
+      left: 2px;
+      color: rgba(200,60,40,0.12);
+      pointer-events: none;
+      z-index: -1;
+      filter: blur(2px);
+    }
+    @keyframes logo-breath {
+      0%, 100% { text-shadow: 0 0 10px rgba(200,160,112,0.25), 0 0 40px rgba(200,140,80,0.1); }
+      50% { text-shadow: 0 0 18px rgba(200,160,112,0.45), 0 0 60px rgba(200,140,80,0.18), 0 0 100px rgba(160,80,40,0.08); }
+    }
+
+    .archive-number {
+      font-family: "JetBrains Mono", "Courier New", monospace;
+      font-size: 0.6rem;
+      color: rgba(200,160,120,0.35);
+      letter-spacing: 0.2em;
+      margin-bottom: 2.2rem;
+      border: 1px solid rgba(200,160,120,0.1);
+      border-radius: 999px;
+      padding: 0.25rem 1.2rem;
+      animation: faint-pulse 3s ease-in-out infinite;
+    }
+    @keyframes faint-pulse {
+      0%, 100% { opacity: 0.35; border-color: rgba(200,160,120,0.1); }
+      50% { opacity: 0.65; border-color: rgba(200,160,120,0.2); }
+    }
+
+    .whisper {
+      color: rgba(200,160,120,0.3);
+      font-size: 0.75rem;
+      font-style: italic;
+      letter-spacing: 0.1em;
+      margin-bottom: 3rem;
+      line-height: 2.2;
+      max-width: 320px;
+    }
+    .whisper .line {
+      display: block;
+      animation: whisper-fade 6s ease-in-out infinite;
+    }
+    .whisper .line:nth-child(2) { animation-delay: 0.4s; }
+    .whisper .line:nth-child(3) { animation-delay: 0.8s; }
+    @keyframes whisper-fade {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 0.55; }
+    }
+
+    .nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .enter-link {
+      display: inline-block;
+      padding: 0.7rem 2.2rem;
+      font-family: "Noto Serif SC", "SimSun", serif;
+      font-size: 0.95rem;
+      letter-spacing: 0.18em;
+      color: #d4b88c;
+      background: rgba(200,160,120,0.05);
+      border: 1px solid rgba(200,160,120,0.18);
+      border-radius: 2px;
+      text-decoration: none;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+      min-width: 210px;
+    }
+    .enter-link::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(200,160,120,0.06), transparent);
+      transition: left 0.5s;
+    }
+    .enter-link:hover::before {
+      left: 100%;
+    }
+    .enter-link:hover {
+      color: #eed8a8;
+      border-color: rgba(200,160,120,0.35);
+      box-shadow:
+        0 0 25px rgba(200,160,120,0.07),
+        inset 0 0 25px rgba(200,160,120,0.02);
+      transform: translateY(-1px);
+    }
+
+    .watch-line {
+      margin-top: 3rem;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.6rem;
+      color: rgba(200,160,120,0.18);
+      letter-spacing: 0.25em;
+      animation: watch-blink 4s ease-in-out infinite;
+    }
+    @keyframes watch-blink {
+      0%, 90%, 100% { opacity: 0.18; }
+      95% { opacity: 0.65; }
+    }
+
+    /* 四角暗角 */
+    .vignette {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 99;
+      background: radial-gradient(ellipse at center, transparent 50%, rgba(5,5,8,0.9) 100%);
+    }
+
+    @media (max-width: 480px) {
+      .logo { font-size: 2.2rem; letter-spacing: 0.2em; }
+      .enter-link { padding: 0.6rem 1.6rem; font-size: 0.85rem; min-width: 180px; }
+      .whisper { font-size: 0.7rem; }
+    }
+  </style>
+</head>
+<body>
+  <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">午夜档案馆</h1>
+  <div class="particles" id="particles"></div>
+  <div class="vignette"></div>
+
+  <div class="main-container">
+    <div class="rule-line"></div>
+
+    <div class="logo">午夜档案馆 </div>
+
+    <div class="archive-number">
+      ARCHIVE № ████ · ▲ · ████
+    </div>
+
+    <div class="whisper">
+      <span class="line">— 有人在午夜低语 —</span>
+      <span class="line">— 有些故事不该被遗忘 —</span>
+      <span class="line">— 你听见了吗 —</span>
+    </div>
+
+    <div class="nav-links">
+      <a href="pages/forum.html" class="enter-link">推 开 那 扇 门</a>
+      <a href="pages/submit.html" class="enter-link" style="background:transparent;border-color:rgba(200,160,120,0.08);color:rgba(200,160,120,0.35);">留 下 你 的 故 事</a>
+      <a href="pages/coins.html" class="enter-link" style="background:transparent;border-color:rgba(200,120,60,0.12);color:rgba(200,140,80,0.3);font-size:0.8rem;">🧱 档案币</a>
+    </div>
+
+    <div class="watch-line">
+      ⬡  有 人 在 看 着 你  ⬡
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      var container = document.getElementById('particles');
+      var symbols = [
+        '⬡','▲','■','◆','⬢','⬟','⬠','▣',
+        '·',':',';','†','‡','§','¶','※',
+        '01','10','0x','//','--','::','~~',
+        '⌂','◈','◊','○','◉','◎','●','□','△'
+      ];
+
+      var scenes = [
+        { data: ['╔══╗  ╔══╗','║  ║  ║  ║','║══║  ║══║','║  ║  ║  ║','║══║  ║══║','╚══╝  ╚══╝'] },
+        { data: ['┌──┬──┐','│░░│░░│','│░░│░░│','├──┼──┤','└──┴──┘'] },
+        { data: ['  ┌──┐','  │░░│',' ╱    ╲','┌──────┐','└──────┘'] },
+        { data: ['┌─┬─┬─┐','│░│░│░│','├─┴─┴─┤','└─────┘'] },
+        { data: ['╔══════════╗','║  󠁀󠁀♦ ♦ ♦  ║','║  󠁀󠁀󠁀󠁀󠁀󠁀♦  󠁀󠁀  ║','║ ♦ 󠁀󠁀󠁀󠁀󠁀♦  󠁀󠁀 ║','║  󠁀󠁀♦ ♦ ♦  ║','╚══════════╝'] }
+      ];
+
+      function rInt(min, max) { return Math.floor(Math.random()*(max-min+1))+min; }
+      function rFloat(min, max) { return Math.random()*(max-min)+min; }
+
+      for (var i=0; i<30; i++) {
+        var el = document.createElement('span');
+        el.className = 'particle';
+        el.textContent = symbols[rInt(0, symbols.length-1)];
+        el.style.left = rFloat(0, 94) + '%';
+        el.style.setProperty('--dx', rFloat(-40, 40) + 'px');
+        el.style.setProperty('--rot', rFloat(-180, 180) + 'deg');
+        el.style.animationDuration = rFloat(14, 28) + 's';
+        el.style.animationDelay = rFloat(0, 22) + 's';
+        el.style.fontSize = rFloat(0.35, 0.85) + 'rem';
+        el.style.color = 'rgba(' + rInt(120,220) + ',' + rInt(80,170) + ',' + rInt(50,120) + ',' + rFloat(0.07, 0.22) + ')';
+        container.appendChild(el);
+      }
+
+      for (var s=0; s<5; s++) {
+        var scene = scenes[rInt(0, scenes.length-1)];
+        var el = document.createElement('pre');
+        el.className = 'particle';
+        el.textContent = scene.data.join('\n');
+        el.style.left = rFloat(2, 80) + '%';
+        el.style.setProperty('--dx', rFloat(-18, 18) + 'px');
+        el.style.setProperty('--rot', rFloat(-8, 8) + 'deg');
+        el.style.animationDuration = rFloat(22, 38) + 's';
+        el.style.animationDelay = rFloat(0, 28) + 's';
+        el.style.fontSize = '0.32rem';
+        el.style.lineHeight = '1.1';
+        el.style.color = 'rgba(180,130,90,' + rFloat(0.05, 0.15) + ')';
+        el.style.letterSpacing = '0.05em';
+        container.appendChild(el);
+      }
+
+      // 间歇闪现眼睛
+      setInterval(function() {
+        var eye = document.createElement('span');
+        eye.textContent = '◉';
+        eye.style.cssText =
+          'position:fixed;left:'+rFloat(8,85)+'%;top:'+rFloat(8,78)+'%;'+
+          'font-size:'+rFloat(0.7,2.2)+'rem;color:rgba(200,160,120,0.28);'+
+          'pointer-events:none;z-index:0;animation:eye-flash 0.7s ease-out forwards;';
+        document.body.appendChild(eye);
+        setTimeout(function(){ eye.remove(); }, 800);
+      }, rInt(4000, 9000));
+
+      var es = document.createElement('style');
+      es.textContent = '@keyframes eye-flash{0%{opacity:0;transform:scale(.3)}30%{opacity:.28;transform:scale(1)}100%{opacity:0;transform:scale(.3)}}';
+      document.head.appendChild(es);
+    })();
+
+    // 屏幕闪烁
+    (function() {
+      var b = document.body;
+      setInterval(function() {
+        if (Math.random() < 0.12) {
+          b.style.opacity = '0.985';
+          setTimeout(function(){ b.style.opacity = '1'; }, 50+Math.random()*50);
+        }
+      }, 3500+Math.random()*4000);
+    })();
+  </script>
+
+</body>
+</html>

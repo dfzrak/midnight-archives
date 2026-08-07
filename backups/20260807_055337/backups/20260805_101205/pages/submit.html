@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>发帖 — 午夜档案馆</title>
+  <meta name="description" content="向午夜档案馆投稿你的故事。真实经历、悬疑见闻、都市传说。">
+  <meta name="keywords" content="投稿,发帖,午夜档案馆,悬疑故事,都市传说">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://dfzrak.github.io/midnight-archives/pages/submit.html">
+  <meta property="og:title" content="发帖 — 午夜档案馆">
+  <meta property="og:description" content="向午夜档案馆投稿你的故事。真实经历、悬疑见闻、都市传说。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://dfzrak.github.io/midnight-archives/pages/submit.html">
+  <meta property="og:site_name" content="午夜档案馆">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="发帖 — 午夜档案馆">
+  <meta name="twitter:description" content="向午夜档案馆投稿你的故事。真实经历、悬疑见闻、都市传说。">
+  <link rel="stylesheet" href="../colors_and_type.css">
+  <script src="../_config.js"></script>
+  <script src="../security.js"></script>
+  <script src="../shared_data.js?v=5"></script>
+  <style>
+    /* ===== Page: Submit ===== */
+    .submit-page { position: relative; }
+
+    /* Page Header */
+    .submit-page__header {
+      text-align: center;
+      margin-bottom: var(--space-10);
+    }
+    .submit-page__title {
+      font-family: var(--font-display);
+      font-size: var(--text-3xl);
+      font-weight: 600;
+      color: var(--brand-primary-light);
+      animation: glow-pulse 3s ease-in-out infinite;
+      letter-spacing: 0.04em;
+    }
+    .submit-page__subtitle {
+      font-size: var(--text-sm);
+      color: var(--brand-muted-foreground);
+      margin-top: var(--space-2);
+      animation: flicker 6s ease-in-out infinite;
+    }
+
+    /* Vignette overlay on form */
+    .submit-form-wrap {
+      position: relative;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .submit-form-wrap::before {
+      content: "";
+      position: absolute;
+      inset: -40px;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.45) 100%);
+      z-index: 1;
+    }
+
+    /* Form */
+    .submit-form {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-8);
+    }
+
+    /* Field group */
+    .form-group { display: flex; flex-direction: column; gap: var(--space-2); }
+    .form-label {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--brand-card-foreground);
+      letter-spacing: 0.02em;
+    }
+
+    /* Inputs */
+    .form-input,
+    .form-textarea {
+      width: 100%;
+      background: var(--brand-input);
+      border: 1px solid var(--brand-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-3) var(--space-4);
+      font-size: var(--text-base);
+      color: var(--brand-foreground);
+      font-family: var(--font-sans);
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+      outline: none;
+    }
+    .form-input::placeholder,
+    .form-textarea::placeholder {
+      color: var(--neutral-500);
+    }
+    .form-input:focus,
+    .form-textarea:focus {
+      border-color: var(--brand-primary-faint);
+      box-shadow: 0 0 12px hsla(0, 85%, 32%, 0.15), inset 0 0 6px hsla(0, 85%, 32%, 0.05);
+    }
+
+    /* Title row */
+    .title-row { position: relative; }
+    .title-counter {
+      position: absolute;
+      right: var(--space-3);
+      bottom: -1.4em;
+      font-size: var(--text-xs);
+      color: var(--neutral-500);
+      pointer-events: none;
+    }
+
+    /* Textarea container */
+    .textarea-wrap {
+      position: relative;
+    }
+    .form-textarea {
+      min-height: 300px;
+      resize: vertical;
+      line-height: 1.7;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* CRT scanline effect */
+    .textarea-wrap::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.04) 2px,
+        rgba(0,0,0,0.04) 4px
+      );
+      animation: scanline-scroll 8s linear infinite;
+      border-radius: var(--radius-md);
+    }
+    @keyframes scanline-scroll {
+      0%   { background-position: 0 0; }
+      100% { background-position: 0 200px; }
+    }
+
+    /* Ghost text */
+    .ghost-text {
+      position: absolute;
+      bottom: var(--space-8);
+      left: var(--space-4);
+      right: var(--space-4);
+      font-size: var(--text-sm);
+      color: var(--neutral-500);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 3;
+      font-style: italic;
+      transition: opacity 0.8s ease;
+      text-align: left;
+    }
+    .ghost-text.visible {
+      opacity: 0.6;
+      animation: ghost-appear 2s ease-in-out forwards;
+    }
+    @keyframes ghost-appear {
+      0%   { opacity: 0; transform: translateY(2px); }
+      20%  { opacity: 0.6; }
+      80%  { opacity: 0.6; }
+      100% { opacity: 0; transform: translateY(0); }
+    }
+
+    .char-counter {
+      text-align: right;
+      font-size: var(--text-xs);
+      color: var(--neutral-500);
+      margin-top: var(--space-1);
+    }
+
+    /* Category pills */
+    .category-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+    }
+    .category-pill {
+      padding: var(--space-2) var(--space-4);
+      font-size: var(--text-sm);
+      border: 1px solid var(--brand-border);
+      border-radius: var(--radius-full);
+      background: var(--neutral-850);
+      color: var(--brand-muted-foreground);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      user-select: none;
+    }
+    .category-pill:hover {
+      border-color: var(--neutral-600);
+      color: var(--brand-foreground);
+    }
+    .category-pill.active {
+      background: var(--brand-primary-faint);
+      border-color: var(--brand-primary);
+      color: var(--brand-primary-light);
+      box-shadow: 0 0 8px hsla(0, 85%, 32%, 0.2);
+    }
+
+    /* Remember toggle */
+    .remember-group {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+    }
+    .remember-question {
+      font-size: var(--text-sm);
+      color: var(--brand-card-foreground);
+      animation: breathe-opacity 4s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    @keyframes breathe-opacity {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    .remember-buttons {
+      display: flex;
+      gap: var(--space-2);
+    }
+    .remember-btn {
+      padding: var(--space-2) var(--space-5);
+      font-size: var(--text-sm);
+      border: 1px solid var(--brand-border);
+      border-radius: var(--radius-full);
+      background: var(--neutral-850);
+      color: var(--brand-muted-foreground);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      user-select: none;
+    }
+    .remember-btn:hover {
+      border-color: var(--neutral-600);
+      color: var(--brand-foreground);
+    }
+    .remember-btn.active {
+      background: var(--brand-primary-faint);
+      border-color: var(--brand-primary);
+      color: var(--brand-primary-light);
+      box-shadow: 0 0 8px hsla(0, 85%, 32%, 0.2);
+    }
+
+    /* Submit area */
+    .submit-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-3);
+      padding-top: var(--space-4);
+    }
+    .btn-submit {
+      padding: var(--space-3) var(--space-10);
+      font-size: var(--text-lg);
+      font-weight: 600;
+      font-family: var(--font-display);
+      border: 1px solid var(--brand-primary);
+      border-radius: var(--radius-md);
+      background: var(--brand-primary);
+      color: var(--brand-primary-foreground);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      letter-spacing: 0.04em;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-submit:hover:not(:disabled) {
+      background: var(--brand-primary-light);
+      border-color: var(--brand-primary-light);
+      box-shadow: var(--shadow-glow);
+    }
+    .btn-submit:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .submit-warning {
+      font-size: var(--text-xs);
+      color: var(--neutral-500);
+      text-align: center;
+      animation: glow-pulse-warn 3s ease-in-out infinite;
+    }
+    .submit-hint {
+      font-size: var(--text-xs);
+      color: var(--neutral-500);
+      text-align: center;
+      transition: color var(--transition-fast), opacity var(--transition-fast);
+    }
+    .submit-hint.ready {
+      color: var(--state-success);
+      opacity: 0.8;
+    }
+    @keyframes glow-pulse-warn {
+      0%, 100% { text-shadow: 0 0 2px hsla(0, 85%, 32%, 0.15); opacity: 0.7; }
+      50% { text-shadow: 0 0 6px hsla(0, 85%, 32%, 0.35); opacity: 1; }
+    }
+
+    /* ===== Success Overlay ===== */
+    .submit-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.88);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+    }
+    .submit-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .overlay-title {
+      font-family: var(--font-display);
+      font-size: var(--text-2xl);
+      color: var(--brand-primary-light);
+      margin-bottom: var(--space-6);
+      animation: glow-pulse 2s ease-in-out infinite;
+      text-align: center;
+    }
+    .overlay-progress {
+      width: 260px;
+      height: 4px;
+      background: var(--neutral-800);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      margin-bottom: var(--space-4);
+    }
+    .overlay-progress__bar {
+      height: 100%;
+      width: 0%;
+      background: var(--brand-primary);
+      border-radius: var(--radius-full);
+      transition: width 0.3s ease;
+      box-shadow: 0 0 8px hsla(0, 85%, 32%, 0.4);
+    }
+    .overlay-progress__bar.pulsing {
+      animation: progress-pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes progress-pulse {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+    .overlay-countdown {
+      font-size: var(--text-sm);
+      color: var(--brand-muted-foreground);
+    }
+    .overlay-complete {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-4);
+    }
+    .overlay-complete .checkmark {
+      font-size: 3rem;
+      color: var(--brand-primary-light);
+      animation: fade-in 0.6s ease forwards;
+    }
+    .overlay-complete .complete-text {
+      font-size: var(--text-xl);
+      color: var(--brand-foreground);
+      animation: fade-in 0.6s ease 0.2s forwards;
+      opacity: 0;
+    }
+
+    /* Bottom status */
+    .submit-status {
+      text-align: center;
+      margin-top: var(--space-12);
+      font-size: var(--text-xs);
+      color: var(--neutral-600);
+      opacity: 0.5;
+      animation: flicker 8s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body>
+
+<div class="midnight-archives-shell">
+  <style>
+    /* ===== Shell-specific styles ===== */
+    .midnight-archives-shell {
+      --shell-header-h: 60px;
+      --shell-sidebar-w: 240px;
+      position: relative;
+      min-height: 100vh;
+      background: var(--brand-background);
+      color: var(--brand-foreground);
+      font-family: var(--font-sans);
+    }
+    /* ===== Fixed Header ===== */
+    .shell-header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--shell-header-h);
+      background: var(--brand-card);
+      border-bottom: 1px solid var(--brand-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--space-6);
+      z-index: 100;
+      animation: flicker 4s ease-in-out infinite;
+    }
+    .shell-header__logo {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      font-weight: 600;
+      color: var(--brand-primary-light);
+      animation: glow-pulse 3s ease-in-out infinite;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+    .shell-header__nav {
+      display: flex;
+      gap: var(--space-8);
+      align-items: center;
+    }
+    .shell-header__nav-item {
+      font-size: var(--text-sm);
+      color: var(--brand-muted-foreground);
+      cursor: pointer;
+      padding: var(--space-2) 0;
+      position: relative;
+      transition: color var(--transition-fast);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .shell-header__nav-item:hover { color: var(--brand-foreground); }
+    .shell-header__nav-item[data-active="true"] { color: var(--brand-primary-light); }
+    .shell-header__nav-item[data-active="true"]::after {
+      content: "";
+      position: absolute;
+      bottom: -2px; left: 0; right: 0;
+      height: 2px;
+      background: var(--brand-primary);
+      border-radius: 1px;
+    }
+    .shell-header__user {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      white-space: nowrap;
+    }
+    .shell-header__avatar {
+      width: 32px; height: 32px;
+      border-radius: var(--radius-full);
+      background: var(--neutral-800);
+      border: 1px solid var(--brand-border);
+      flex-shrink: 0;
+    }
+    .shell-header__status {
+      font-size: var(--text-xs);
+      color: var(--brand-muted-foreground);
+    }
+    .shell-header__status .dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--state-success);
+      margin-right: var(--space-1);
+      animation: glow-pulse 2s ease-in-out infinite;
+    }
+    /* ===== Main Layout ===== */
+    .shell-layout {
+      display: flex;
+      padding-top: var(--shell-header-h);
+      min-height: 100vh;
+    }
+    /* ===== Left Sidebar ===== */
+    .shell-sidebar {
+      display: none !important;
+    }
+    .sidebar-section { padding: 0 var(--space-5); margin-bottom: var(--space-8); }
+    .sidebar-section__title {
+      font-size: var(--text-xs);
+      font-weight: 600;
+      color: var(--brand-muted-foreground);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: var(--space-4);
+    }
+    .sidebar-categories { list-style: none; padding: 0; margin: 0; }
+    .sidebar-category {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      margin: 0 calc(-1 * var(--space-4));
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: background var(--transition-fast);
+      color: var(--brand-foreground);
+      font-size: var(--text-sm);
+      position: relative;
+    }
+    .sidebar-category:hover { background: var(--neutral-800); }
+    .sidebar-category:hover::after {
+      content: "";
+      position: absolute;
+      bottom: 4px;
+      left: var(--space-4); right: var(--space-4);
+      height: 1px;
+      background: var(--brand-primary-faint);
+    }
+    .sidebar-category__icon {
+      font-size: var(--text-base);
+      width: 20px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .sidebar-category[data-dom-id="cat-vanished"] {
+      color: var(--brand-muted-foreground);
+      font-style: italic;
+    }
+    .sidebar-online {
+      margin-top: auto;
+      padding-top: var(--space-6);
+      border-top: 1px solid var(--neutral-800);
+    }
+    .sidebar-online__list {
+      list-style: none; padding: 0; margin: 0;
+      display: flex; flex-direction: column; gap: var(--space-3);
+    }
+    .sidebar-online__user {
+      display: flex; align-items: center; gap: var(--space-3);
+      font-size: var(--text-sm); color: var(--brand-foreground);
+    }
+    .sidebar-online__dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--state-success);
+      flex-shrink: 0;
+      animation: glow-pulse 2s ease-in-out infinite;
+    }
+    .sidebar-online__typing {
+      font-size: var(--text-xs);
+      color: var(--brand-muted-foreground);
+      margin-left: auto;
+      animation: flicker 1.5s ease-in-out infinite;
+    }
+    /* ===== Main Content Area ===== */
+    .shell-content {
+      flex: 1;
+      padding: var(--space-8) var(--space-6);
+      min-height: calc(100vh - var(--shell-header-h));
+    }
+    /* ===== Footer ===== */
+    .shell-footer {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      padding: var(--space-3) var(--space-6);
+      text-align: center;
+      font-size: var(--text-xs);
+      color: var(--neutral-600);
+      background: linear-gradient(to top, var(--brand-background), transparent);
+      pointer-events: none;
+      z-index: 40;
+    }
+    .shell-footer__text {
+      animation: flicker 8s ease-in-out infinite;
+      opacity: 0.6;
+    }
+    /* ===== Avatar & Naming ===== */
+    .shell-header__avatar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .shell-header__avatar:hover {
+      border-color: var(--brand-primary-faint);
+      box-shadow: 0 0 12px hsla(0, 85%, 32%, 0.15);
+      transform: scale(1.05);
+    }
+    .avatar-icon { font-size: 14px; line-height: 1; }
+    .shell-header__user-info { display: flex; flex-direction: column; gap: 2px; }
+    .shell-header__username { font-size: var(--text-sm); font-weight: 500; color: var(--brand-foreground); cursor: pointer; transition: color 0.2s; }
+    .shell-header__username:hover { color: var(--brand-primary-light); }
+    .naming-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.88); display: flex; align-items: center; justify-content: center; z-index: 350; opacity: 0; pointer-events: none; transition: opacity 0.4s; }
+    .naming-overlay.visible { opacity: 1; pointer-events: auto; }
+    .naming-modal { background: linear-gradient(180deg, #141210, #111114); border: 1px solid rgba(240,200,100,0.12); border-radius: var(--radius-lg); padding: var(--space-8); max-width: 380px; width: 90%; text-align: center; transform: translateY(16px) scale(0.95); transition: transform 0.4s cubic-bezier(0.16,1,0.3,1); }
+    .naming-overlay.visible .naming-modal { transform: translateY(0) scale(1); }
+    .naming-modal__icon { font-size: 2.2rem; margin-bottom: var(--space-4); animation: glow-pulse 3s ease-in-out infinite; }
+    .naming-modal__title { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 600; color: var(--brand-foreground); margin-bottom: var(--space-2); letter-spacing: 0.04em; }
+    .naming-modal__subtitle { font-size: var(--text-xs); color: var(--neutral-500); margin-bottom: var(--space-5); font-style: italic; line-height: 1.5; }
+    .naming-modal__input { width: 100%; padding: var(--space-3) var(--space-4); font-size: var(--text-base); font-family: var(--font-sans); color: var(--brand-foreground); background: var(--neutral-850); border: 1px solid var(--neutral-700); border-radius: var(--radius-md); outline: none; text-align: center; transition: border-color 0.2s, box-shadow 0.2s; margin-bottom: var(--space-4); }
+    .naming-modal__input:focus { border-color: var(--brand-primary-faint); box-shadow: 0 0 0 3px hsla(0, 85%, 32%, 0.1); }
+    .naming-modal__input::placeholder { color: var(--neutral-600); }
+    .naming-modal__hint { font-size: var(--text-xs); color: var(--neutral-600); margin-bottom: var(--space-5); }
+    .naming-modal__actions { display: flex; gap: var(--space-3); justify-content: center; }
+    .naming-modal__btn { padding: var(--space-2) var(--space-6); font-size: var(--text-sm); font-family: var(--font-sans); border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s; }
+    .naming-modal__btn--confirm { background: var(--brand-primary); color: var(--brand-foreground); border: 1px solid var(--brand-border); }
+    .naming-modal__btn--confirm:hover:not(:disabled) { background: var(--brand-primary-light); box-shadow: 0 0 12px hsla(0, 85%, 32%, 0.2); }
+    .naming-modal__btn--confirm:disabled { opacity: 0.35; cursor: not-allowed; }
+    .naming-modal__btn--skip { background: transparent; color: var(--neutral-500); border: 1px solid var(--neutral-700); }
+    .naming-modal__btn--skip:hover { color: var(--neutral-400); border-color: var(--neutral-600); }
+    /* ===== Moderation Error Overlay ===== */
+    .moderation-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.88);
+      z-index: 10001;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.8s ease;
+    }
+    .moderation-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .moderation-card {
+      background: linear-gradient(180deg, #0a0a0a 0%, #0c0606 100%);
+      border: 1px solid rgba(180, 40, 40, 0.4);
+      border-radius: 8px;
+      padding: 44px 52px;
+      max-width: 460px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 0 60px rgba(180, 40, 40, 0.15), inset 0 0 30px rgba(0,0,0,0.5);
+    }
+    .moderation-card__icon {
+      font-size: 36px;
+      color: #c41010;
+      margin-bottom: 16px;
+      text-shadow: 0 0 20px rgba(196,16,16,0.4);
+      animation: pulse-icon 2s ease-in-out infinite;
+    }
+    @keyframes pulse-icon {
+      0%, 100% { opacity: 0.8; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.1); }
+    }
+    .moderation-card__title {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 16px;
+      color: #c41010;
+      margin-bottom: 12px;
+      letter-spacing: 4px;
+      text-shadow: 0 0 12px rgba(196,16,16,0.3);
+    }
+    .moderation-card__msg {
+      font-size: 13px;
+      color: rgba(200, 200, 200, 0.8);
+      line-height: 1.8;
+      margin-bottom: 12px;
+      font-family: 'Noto Serif SC', serif;
+    }
+    .moderation-card__detail {
+      font-size: 11px;
+      color: rgba(180, 180, 180, 0.5);
+      line-height: 1.6;
+      margin-bottom: 20px;
+      padding: 10px 14px;
+      background: rgba(180, 40, 40, 0.06);
+      border-radius: 4px;
+      border: 1px solid rgba(180, 40, 40, 0.1);
+    }
+    .moderation-card__timer {
+      font-size: 11px;
+      color: rgba(255,255,255,0.15);
+      letter-spacing: 2px;
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 768px) {
+      .shell-sidebar { display: none; }
+      .shell-content { margin-left: 0; }
+      .shell-header__nav { gap: var(--space-4); }
+    }
+  </style>
+
+  <!-- ===== Header ===== -->
+  <header class="shell-header">
+    <div class="shell-header__logo animate-glow">午夜档案馆</div>
+    <nav class="shell-header__nav">
+      <a href="forum.html" class="shell-header__nav-item" data-dom-id="nav-forum">论坛</a>
+      <a href="submit.html" class="shell-header__nav-item" data-dom-id="nav-submit" data-active="true">发帖</a>
+    </nav>
+    <div class="shell-header__user" id="header-user">
+      <div class="shell-header__avatar" id="header-avatar" title="点击设置你的名字">
+        <span class="avatar-icon">👤</span>
+      </div>
+      <div class="shell-header__user-info">
+        <span class="shell-header__username" id="header-username">匿名者</span>
+        <span class="shell-header__status">
+          <span class="dot"></span>
+          在线 · 存活中
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== Layout ===== -->
+  <div class="shell-layout">
+    <!-- Left Sidebar -->
+    <aside class="shell-sidebar">
+      <div class="sidebar-section">
+        <h3 class="sidebar-section__title">档案分类</h3>
+        <ul class="sidebar-categories">
+          <li class="sidebar-category" data-dom-id="cat-whispers">
+            <span class="sidebar-category__icon">&#x1FAE7;</span>
+            <span>深夜碎语</span>
+          </li>
+          <li class="sidebar-category" data-dom-id="cat-urban">
+            <span class="sidebar-category__icon">&#x1F3D9;</span>
+            <span>都市传说</span>
+          </li>
+          <li class="sidebar-category" data-dom-id="cat-vanished">
+            <span class="sidebar-category__icon">&#x1F47B;</span>
+            <span>已消失的帖子</span>
+          </li>
+          <li class="sidebar-category" data-dom-id="cat-archives">
+            <span class="sidebar-category__icon">&#x1F4C1;</span>
+            <span>第七档案</span>
+          </li>
+          <li class="sidebar-category" data-dom-id="cat-mysteries">
+            <span class="sidebar-category__icon">&#x2753;</span>
+            <span>未解之谜</span>
+          </li>
+        </ul>
+      </div>
+      <div class="sidebar-section sidebar-online">
+        <h3 class="sidebar-section__title">当前在线</h3>
+        <ul class="sidebar-online__list">
+          <li class="sidebar-online__user" data-dom-id="user-nightwatcher">
+            <span class="sidebar-online__dot"></span>
+            <span>夜巡者</span>
+          </li>
+          <li class="sidebar-online__user" data-dom-id="user-archivist">
+            <span class="sidebar-online__dot"></span>
+            <span>归档人</span>
+            <span class="sidebar-online__typing">输入中...</span>
+          </li>
+          <li class="sidebar-online__user" data-dom-id="user-shadow">
+            <span class="sidebar-online__dot"></span>
+            <span>影子访客</span>
+          </li>
+          <li class="sidebar-online__user" data-dom-id="user-anonymous">
+            <span class="sidebar-online__dot"></span>
+            <span>匿名者_7749</span>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="shell-content">
+      <div class="submit-page">
+
+        <!-- Page Header -->
+        <div class="submit-page__header">
+          <h1 class="submit-page__title">发帖</h1>
+          <p class="submit-page__subtitle">在论坛中留下你的痕迹</p>
+        </div>
+
+        <!-- Submission Form -->
+        <div class="submit-form-wrap">
+          <form class="submit-form" id="submit-form" autocomplete="off">
+
+            <!-- Title -->
+            <div class="form-group">
+              <label class="form-label" for="input-title">帖子标题</label>
+              <div class="title-row">
+                <input
+                  type="text"
+                  class="form-input"
+                  id="input-title"
+                  data-dom-id="input-title"
+                  placeholder="给你的帖子起个名字..."
+                  maxlength="50"
+                >
+                <span class="title-counter"><span id="title-count">0</span> / 50</span>
+              </div>
+            </div>
+
+            <!-- Story Content -->
+            <div class="form-group">
+              <label class="form-label" for="textarea-content">帖子内容</label>
+              <div class="textarea-wrap">
+                <textarea
+                  class="form-textarea"
+                  id="textarea-content"
+                  data-dom-id="textarea-content"
+                  placeholder="写下你想要分享的内容..."
+                ></textarea>
+                <div class="ghost-text" id="ghost-text"></div>
+              </div>
+              <div class="char-counter"><span id="content-count">0</span> 字</div>
+            </div>
+
+            <!-- Category -->
+            <div class="form-group">
+              <label class="form-label">分类</label>
+              <div class="category-pills" id="select-category" data-dom-id="select-category">
+                <button type="button" class="category-pill" data-dom-id="cat-whispers" data-value="whispers">深夜碎语</button>
+                <button type="button" class="category-pill" data-dom-id="cat-urban" data-value="urban">都市传说</button>
+                <button type="button" class="category-pill" data-dom-id="cat-mystery" data-value="mystery">未解之谜</button>
+                <button type="button" class="category-pill" data-dom-id="cat-archives" data-value="archives">第七档案</button>
+                <button type="button" class="category-pill" data-dom-id="cat-other" data-value="other">其他</button>
+              </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="submit-area">
+              <button type="button" class="btn-submit" id="btn-submit" data-dom-id="btn-submit" disabled>发布帖子</button>
+              <p class="submit-hint" id="submit-hint">请填写标题、内容并选择分类</p>
+              <p class="submit-warning">发布后内容将不可修改。你确定要让这条信息"存在"吗？</p>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- Bottom Status -->
+        <div class="submit-status">系统等待中... 新帖子即将发布...</div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ===== Footer ===== -->
+  <footer class="shell-footer">
+    <span class="shell-footer__text">系统运行中... 第 3,847 次归档...</span>
+  </footer>
+</div>
+
+<!-- Success Overlay -->
+<div class="submit-overlay" id="submit-success-overlay" data-dom-id="submit-success-overlay">
+  <div id="overlay-processing">
+    <div class="overlay-title">您的帖子正在发布...</div>
+    <div class="overlay-progress">
+      <div class="overlay-progress__bar pulsing" id="progress-bar"></div>
+    </div>
+    <div class="overlay-countdown" id="overlay-countdown">预计 5 秒后发布</div>
+  </div>
+  <div class="overlay-complete" id="overlay-complete">
+    <div class="checkmark">&#x2714;</div>
+    <div class="complete-text">发布完成</div>
+  </div>
+</div>
+
+<!-- Naming Modal -->
+<div class="naming-overlay" id="naming-overlay">
+  <div class="naming-modal">
+    <div class="naming-modal__icon">👤</div>
+    <div class="naming-modal__title">你是谁？</div>
+    <div class="naming-modal__subtitle">档案馆需要知道你的名字。你的每一条发言都将署上此名。</div>
+    <input type="text" class="naming-modal__input" id="naming-input" placeholder="输入你的名字..." maxlength="20" autocomplete="off">
+    <div class="naming-modal__hint">2-20个字符，一经设定仅可修改一次</div>
+    <div class="naming-modal__actions">
+      <button class="naming-modal__btn naming-modal__btn--confirm" id="naming-confirm" disabled>确认</button>
+      <button class="naming-modal__btn naming-modal__btn--skip" id="naming-skip">以后再说</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  /* ===== Username System ===== */
+  var STORAGE_USERNAME = 'midnight_archives_username';
+  function getUsername() { try { return localStorage.getItem(STORAGE_USERNAME) || ''; } catch(e) { return ''; } }
+  function setUsername(name) { try { localStorage.setItem(STORAGE_USERNAME, name); } catch(e) {} }
+  function getDisplayName() { return getUsername() || '匿名者'; }
+
+  var namingOverlay = document.getElementById('naming-overlay');
+  var namingInput = document.getElementById('naming-input');
+  var namingConfirm = document.getElementById('naming-confirm');
+  var namingSkip = document.getElementById('naming-skip');
+  var headerAvatar = document.getElementById('header-avatar');
+  var headerUsername = document.getElementById('header-username');
+  var NAME_LOCK_KEY = 'midnight_archives_name_locked';
+
+  function isNameLocked() {
+    try { return localStorage.getItem(NAME_LOCK_KEY) === '1'; } catch(e) { return false; }
+  }
+  function lockName() {
+    try { localStorage.setItem(NAME_LOCK_KEY, '1'); } catch(e) {}
+  }
+
+  function refreshHeaderUsername() {
+    if (headerUsername) headerUsername.textContent = getDisplayName();
+  }
+  refreshHeaderUsername();
+
+  function openNamingModal() {
+    if (isNameLocked()) {
+      showToast('名字一经设定，不可修改。档案馆不会遗忘。', 'warning');
+      return;
+    }
+    namingOverlay.classList.add('visible');
+    namingInput.value = getUsername();
+    namingConfirm.disabled = namingInput.value.trim().length < 2;
+    setTimeout(function() { namingInput.focus(); }, 300);
+  }
+  if (headerAvatar) headerAvatar.addEventListener('click', openNamingModal);
+  if (headerUsername) headerUsername.addEventListener('click', openNamingModal);
+
+  if (namingInput) {
+    namingInput.addEventListener('input', function() { namingConfirm.disabled = namingInput.value.trim().length < 2; });
+    namingInput.addEventListener('keydown', function(e) { if (e.key === 'Enter' && !namingConfirm.disabled) namingConfirm.click(); });
+  }
+  if (namingConfirm) {
+    namingConfirm.addEventListener('click', function() {
+      var name = namingInput.value.trim();
+      if (name.length < 2) return;
+      setUsername(name);
+      lockName();
+      refreshHeaderUsername();
+      namingOverlay.classList.remove('visible');
+    });
+  }
+  if (namingSkip) {
+    namingSkip.addEventListener('click', function() { namingOverlay.classList.remove('visible'); });
+  }
+  if (!getUsername()) {
+    setTimeout(function() {
+      namingOverlay.classList.add('visible');
+      setTimeout(function() { namingInput.focus(); }, 300);
+    }, 1500);
+  }
+
+  // Toast 通知函数
+  function showToast(message, type) {
+    var toast = document.createElement('div');
+    toast.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100%);padding:12px 24px;border-radius:6px;font-size:13px;font-family:Noto Serif SC,serif;z-index:10002;opacity:0;transition:opacity 0.3s,transform 0.3s;pointer-events:none;max-width:90%;text-align:center;';
+    if (type === 'warning') {
+      toast.style.background = 'rgba(180,100,20,0.9)'; toast.style.color = '#ffd'; toast.style.border = '1px solid rgba(220,140,40,0.5)';
+    } else if (type === 'error') {
+      toast.style.background = 'rgba(160,30,30,0.9)'; toast.style.color = '#fdd'; toast.style.border = '1px solid rgba(200,60,60,0.5)';
+    } else {
+      toast.style.background = 'rgba(30,60,100,0.9)'; toast.style.color = '#ddf'; toast.style.border = '1px solid rgba(60,100,160,0.5)';
+    }
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    requestAnimationFrame(function() { toast.style.opacity = '1'; toast.style.transform = 'translateX(-50%) translateY(0)'; });
+    setTimeout(function() {
+      toast.style.opacity = '0'; toast.style.transform = 'translateX(-50%) translateY(-100%)';
+      setTimeout(function() { if (toast.parentNode) toast.remove(); }, 400);
+    }, 3000);
+  }
+
+  /* ===== Title counter ===== */
+  const titleInput = document.getElementById('input-title');
+  const titleCount = document.getElementById('title-count');
+  titleInput.addEventListener('input', () => {
+    titleCount.textContent = titleInput.value.length;
+    checkFormReady();
+  });
+
+  /* ===== Content counter ===== */
+  const textarea = document.getElementById('textarea-content');
+  const contentCount = document.getElementById('content-count');
+  textarea.addEventListener('input', () => {
+    contentCount.textContent = textarea.value.length;
+    checkFormReady();
+    triggerGhostText();
+  });
+
+  /* ===== Ghost text ===== */
+  const ghostPhrases = [
+    "不要写下那个名字...",
+    "他们正在阅读...",
+    "继续...",
+    "它知道你在这里...",
+    "不要回头看...",
+    "档案馆记得一切...",
+    "这些文字不属于你...",
+    "再写下去就会成真...",
+  ];
+  const ghostEl = document.getElementById('ghost-text');
+  let ghostTimeout = null;
+  let lastGhost = -1;
+
+  function triggerGhostText() {
+    if (ghostTimeout) return;
+    if (Math.random() > 0.25) return;
+    let idx;
+    do { idx = Math.floor(Math.random() * ghostPhrases.length); } while (idx === lastGhost);
+    lastGhost = idx;
+    ghostEl.textContent = ghostPhrases[idx];
+    ghostEl.classList.add('visible');
+    ghostTimeout = setTimeout(() => {
+      ghostEl.classList.remove('visible');
+      ghostTimeout = null;
+    }, 2000);
+  }
+
+  /* ===== Placeholder rotation ===== */
+  const placeholderVariants = [
+    "写下你想要分享的内容...",
+    "你在论坛上看到了什么...",
+    "写下你的经历...",
+    "有些事，说出来就好...",
+    "你确定要写下来吗？...",
+  ];
+  let placeholderIdx = 0;
+  setInterval(() => {
+    placeholderIdx = (placeholderIdx + 1) % placeholderVariants.length;
+    textarea.placeholder = placeholderVariants[placeholderIdx];
+  }, 6000);
+
+  /* ===== Category pills ===== */
+  const categoryPills = document.querySelectorAll('.category-pill');
+  let selectedCategory = null;
+  categoryPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      categoryPills.forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      selectedCategory = pill.dataset.value;
+      checkFormReady();
+    });
+  });
+
+  /* ===== Enable/disable submit ===== */
+  const submitBtn = document.getElementById('btn-submit');
+  const submitHint = document.getElementById('submit-hint');
+  function checkFormReady() {
+    const hasTitle = titleInput.value.trim().length > 0;
+    const hasContent = textarea.value.trim().length > 0;
+    const hasCategory = selectedCategory !== null;
+    const ready = hasTitle && hasContent && hasCategory;
+    submitBtn.disabled = !ready;
+    if (ready) {
+      submitHint.textContent = '✓ 准备就绪，可以发布';
+      submitHint.classList.add('ready');
+    } else {
+      var missing = [];
+      if (!hasTitle) missing.push('标题');
+      if (!hasContent) missing.push('内容');
+      if (!hasCategory) missing.push('分类');
+      submitHint.textContent = '还需要：' + missing.join('、');
+      submitHint.classList.remove('ready');
+    }
+  }
+
+  /* ===== 审核失败提示 ===== */
+  function showModerationError(title, message, detail) {
+    submitBtn.disabled = false;
+    var overlay = document.getElementById('moderation-error-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'moderation-error-overlay';
+      overlay.className = 'moderation-overlay';
+      document.body.appendChild(overlay);
+    }
+    overlay.innerHTML =
+      '<div class="moderation-card">' +
+        '<div class="moderation-card__icon">&#x26A0;</div>' +
+        '<div class="moderation-card__title">' + title + '</div>' +
+        '<div class="moderation-card__msg">' + message + '</div>' +
+        '<div class="moderation-card__detail">' + detail + '</div>' +
+        '<div class="moderation-card__timer" id="moderation-timer"></div>' +
+      '</div>';
+    overlay.classList.add('visible');
+
+    // 5秒倒计时后自动消失
+    var seconds = 5;
+    var timerEl = document.getElementById('moderation-timer');
+    timerEl.textContent = seconds + ' 秒后关闭';
+    var iv = setInterval(function() {
+      seconds--;
+      if (seconds <= 0) {
+        clearInterval(iv);
+        overlay.classList.remove('visible');
+      } else {
+        timerEl.textContent = seconds + ' 秒后关闭';
+      }
+    }, 1000);
+  }
+
+  /* ===== Submit handler ===== */
+  submitBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (submitBtn.disabled) return;
+    submitBtn.disabled = true;
+
+    // ===== 安全锁定检查 =====
+    if (window.MidnightSecurity && window.MidnightSecurity.isLocked && window.MidnightSecurity.isLocked()) {
+      showModerationError('操作被限制', '您的会话因异常行为被临时锁定。', '请在 5 分钟后刷新页面重试。');
+      return;
+    }
+
+    // ===== 系统审核 =====
+    var titleText = titleInput.value.trim();
+    var contentText = textarea.value.trim();
+    var combined = titleText + ' ' + contentText;
+
+    // 敏感词库
+    var bannedWords = [
+      '广告','推广','代购','加微信','加QQ','优惠券','免费领','兼职','刷单',
+      '色情','裸体','约炮','成人','黄片','AV','性交',
+      '赌博','博彩','彩票','赌球','老虎机','棋牌',
+      '毒品','大麻','冰毒','摇头丸','海洛因',
+      '政治','习近平','共产党','六四','天安门','法轮功',
+      '自杀','遗书','割腕','跳楼','安乐死',
+      '杀','砍人','炸弹','爆炸','枪击',
+      '传销','诈骗','洗钱','非法集资'
+    ];
+
+    // 诡异题材核心关键词 — 必须至少命中1个（仅限强关联词，排除常见词）
+    var eerieCoreKeywords = [
+      // ===== 鬼怪/灵异（核心） =====
+      '诡异','恐怖','灵异','闹鬼','鬼','魂','幽灵','噩梦','恶灵','怨灵','厉鬼',
+      '冤魂','孤魂','鬼魂','鬼影','鬼打墙','鬼压床','鬼故事','鬼屋','鬼火','鬼市',
+      '通灵','招魂','驱魔','降头','养鬼','附身','夺舍','转世','还魂',
+      '阴阳眼','天眼','第六感','不祥之兆','凶兆',
+      '怨念','执念','亡魂','游魂','阴魂','冤孽',
+      '狐仙','黄仙','蛇仙','水鬼','吊死鬼','白衣女鬼','红衣厉鬼',
+      '尸变','起尸','僵尸','丧尸','活死人','行尸走肉',
+      '鬼剃头','鬼遮眼','鬼迷心窍','鬼哭狼嚎',
+      // ===== 超自然/异能 =====
+      '超自然','无法解释','违背常理','超出认知',
+      '平行世界','异次元','空间折叠','时空裂缝',
+      '时间停止','时间循环','时间倒流','时空错乱',
+      '轮回','前世','来世','冥界','黄泉','奈何桥','忘川','彼岸花',
+      '巫术','咒语','诅咒','封印','祭坛','血祭',
+      '妖','魔','邪','煞','阴气','煞气','邪气','妖气','鬼气',
+      '蛊','蛊术','蛊毒','扎小人','厌胜',
+      '符箓','桃木剑','黑驴蹄子','黑狗血','朱砂',
+      '炼丹','修仙','飞升','渡劫','妖精','妖怪','魑魅魍魉',
+      '念力','隔空取物','心灵感应','读心术',
+      '结界','法阵','八卦镜','罗盘','龙脉','阴宅',
+      // ===== 恐怖场景/动作 =====
+      '废弃','荒废','破败','残垣断壁',
+      '人间蒸发','凭空消失','不翼而飞','不知去向',
+      '影子','黑影','人影','魅影','阴森','毛骨悚然','不寒而栗',
+      '偷拍','窃听',
+      '系统异常','数据异常','信号中断','蓝屏',
+      '花屏','雪花屏','滋滋声',
+      // ===== 恐惧/心理恐怖 =====
+      '幻觉','幻听','幻视','错觉','妄想','精神分裂','人格分裂',
+      '看不见','摸不着','触不到',
+      '恐惧','惶恐','惊恐','惊悚','胆寒','心惊',
+      '心悸','心跳加速','冷汗','发抖','颤抖','瘫软',
+      '精神恍惚','意识模糊','失去意识','昏迷','梦魇','夜惊',
+      '被害妄想','被迫害','被跟踪','被监视','被控制','被操纵',
+      '窒息','溺水感','坠落感','失重感','漂浮感','灵魂出窍',
+      '既视感','似曾相识','陌生又熟悉',
+      // ===== 怪声/异象 =====
+      '低语','耳语','呢喃','啜泣',
+      '惨叫','嚎叫','嘶吼','咆哮','嚎啕',
+      '呼吸声','脚步声','敲门声','刮擦声',
+      '哀嚎','呜咽','婴儿哭声',
+      '异响','怪声','电流声','白噪音','滋滋声',
+      '半夜敲门','敲窗','拍门','挠门',
+      '滴水声','嘎吱声',
+      '腐臭','血腥味','霉味','阴冷','刺骨','寒气逼人',
+      // ===== 血/伤/死亡/尸体 =====
+      '血迹','血泊','血手印','血字','血淋淋',
+      '爪痕','牙印','淤青','勒痕','咬痕','挠痕',
+      '尸体','遗体','死尸','骷髅','白骨','干尸','木乃伊',
+      '谋杀','凶杀','灭口','活埋','殉葬','虐杀','分尸','碎尸',
+      '自杀','割腕','上吊','服毒','自焚',
+      '暴毙','猝死','横死','冤死',
+      '遗书','遗物','遗言','遗照','灵堂','火化','骨灰',
+      '棺材','棺椁','寿衣','花圈','挽联',
+      '验尸','法医','死因',
+      // ===== 诡异地点 =====
+      '墓地','墓园','公墓','乱葬岗','义庄','坟场',
+      '太平间','停尸房','火葬场',
+      '废弃医院','废弃学校','废弃工厂','废弃建筑',
+      '地窖','暗室','密室','暗道','暗门','暗格',
+      '窗外有人','床底',
+      '壁橱','储物间','杂物间',
+      '山洞','洞穴','地道','矿井','地牢',
+      '荒村','荒岛','孤岛','封锁区',
+      '老宅','古宅','祖宅','祠堂','道观','修道院',
+      '精神病院','孤儿院',
+      '断桥','枯井','水潭','沼泽',
+      '死胡同',
+      // ===== 深夜/诡异时间 =====
+      '凌晨','半夜','深夜','午夜',
+      '三点十五','凌晨三点','凌晨四点',
+      '半夜醒来','半夜惊醒','夜深人静','万籁俱寂',
+      '值夜','守夜','巡夜',
+      '月黑风高','血月','红月','天狗食月',
+      // ===== 诡异行为/状态 =====
+      '梦游','清醒梦','梦中梦','鬼压床','睡眠瘫痪',
+      '失忆','记忆空白','记忆缺失','记忆断片','记忆扭曲',
+      '双重人格','另一个自己','另一个我',
+      '尾随','偷窥','窥视',
+      '被注视','被盯着',
+      '下落不明','杳无音信','音讯全无',
+      '倒计时','最后一秒',
+      // ===== 不可思议事件 =====
+      '照片里多了一个人','视频里出现了','录音里听到了',
+      '照片里没有我','照片里不认识的人','背景里有人',
+      '奇怪的是','不可思议','无法理解',
+      '有人在看','有人在听','有人跟着',
+      '背后有人','背后传来','身后有声音',
+      '不要回头','千万别回头',
+      // ===== 通信/记录异常 =====
+      '空号','号码不存在','拨不通','无法接通',
+      '陌生来电','半夜来电','无来电显示',
+      '匿名信','恐吓信','威胁信','神秘信件',
+      '内容不可用','用户不存在','账号异常',
+      '帖子不见了','评论被删','记录被篡改','数据丢失',
+      '后门','入侵','黑客','木马',
+      // ===== 异常认知 =====
+      '不认识的人','陌生面孔',
+      '不是我写的','我没说过','我不记得',
+      '凭空出现','从未存在',
+      '不是真的','怎么可能','不敢相信',
+      '不是活人',
+      '不应该存在','不应该发生',
+      '虚假','伪造',
+      // ===== 都市传说/怪谈 =====
+      '都市传说','怪谈','秘闻','奇闻','异事',
+      '禁地','禁书','禁曲','禁术',
+      '试胆','密室逃脱',
+      '民间传说','志异','聊斋','搜神记',
+      '百鬼夜行','阴阳师','道士','法师','巫师','通灵师',
+      '算命','占卜','塔罗','命理',
+      '灵异事件','亲身经历','亲历','目击',
+      '恐怖故事','鬼故事',
+      // ===== 灵异物品 =====
+      '旧照片','旧录像','旧录音','旧信件','旧日记','旧报纸',
+      '旧物件','法器','护身符','辟邪',
+      '人偶','木偶',
+      '符咒','符纸','纸钱',
+      '佛像','神像','佛珠','念珠',
+      '铁链','牢笼','枷锁',
+      '雕像','石像','铜像','泥塑','陶俑',
+      '录像机','摄像机',
+      '毒药','迷药',
+      '蜡烛台','灯笼',
+      '藏宝图',
+      '底片','胶卷',
+      // ===== 视觉异常 =====
+      '花屏','频闪',
+      '红色的字','绿色的字','倒放',
+      '瞳孔','眼珠','凝视',
+      '扭曲','变形','像素化','马赛克',
+      '重影','叠影','拖影','鬼影',
+      '光斑','光晕','光球',
+      '暗影','阴暗','漆黑','伸手不见五指',
+      '血红','暗红','猩红','赤红',
+      '惨白','苍白','煞白','铁青',
+      '惨绿','暗绿','荧光绿','鬼火绿',
+      // ===== 感觉异常/身体反应 =====
+      '背后发凉','汗毛竖起','脊背发凉',
+      '浑身发冷','鸡皮疙瘩','头皮发麻','头皮发紧',
+      '胸口发闷','天旋地转','晕眩',
+      '触电感','麻痹感',
+      '反胃','干呕','胃痉挛',
+      '耳鸣','嗡嗡声','轰鸣',
+      '眼冒金星','眼前一黑',
+      '嗓子发紧','说不出话','失声',
+      '彻夜难眠','夜不能寐','辗转反侧',
+      '噩梦连连','梦境','梦话',
+      // ===== 时间异常 =====
+      '时间不对','时间停止','时间变慢','时间不多了',
+      '记忆断片',
+      '平行时空','异世界',
+      '周而复始',
+      // ===== 档案馆特有 =====
+      '午夜档案馆','档案馆','归档','档案员','值班员','夜班管理员',
+      '夜巡者','影子访客','数据幽灵','系统管理员',
+      '第七档案','第七号','第七层','第七个抽屉','第七档案室',
+      '封禁','禁言','删帖',
+      '访问记录','登录记录','操作记录'
+    ];
+
+    // 诡异题材辅助关键词 — 增加可信度（需要多个命中）
+    var eerieSupportKeywords = [
+      // 时间/深夜
+      '深夜','午夜','凌晨','半夜','夜半','子时','丑时','寅时',
+      '三点','四点','五点','黄昏','日落','天黑','入夜',
+      '月圆','满月','月食','日食',
+      // 环境/氛围
+      '黑暗','暗','黑','红','冷','湿','雾','雨','风','潮湿',
+      '安静','沉默','万籁俱寂','夜深人静',
+      '光线','阴影','暗影','寒冷','刺骨',
+      // 场所
+      '医院','宿舍','地下室','走廊','电梯','楼梯',
+      '阁楼','天台','楼顶','天花板','窗外','床下',
+      '树林','深山','隧道','下水道','桥',
+      '禁区','研究所','监狱','看守所',
+      '祠堂','庙宇','教堂',
+      // 物品/记录
+      '电话','手机','电脑','屏幕','摄像头','照片','录像','录音',
+      '视频','截图','监控',
+      '笔记','日记','地图','文件','信','档案',
+      '钥匙','锁','面具','镜子','娃娃',
+      '灯','蜡烛','手电筒',
+      '日记本','笔记本',
+      '相册','相框','胶卷',
+      '古董','古物',
+      // 认知/记忆
+      '记得','回忆','记忆','忘记','想不起来','记忆模糊',
+      '真实','假','不存在','消失','失踪','不见了',
+      '死亡','已故','过世','去世',
+      // 感官
+      '声音','噪音','呼吸','脚步','心跳',
+      '看到','听到','感觉','发现','注意','察觉',
+      '目光','注视',
+      '恶心','呕吐','失眠','睡不着',
+      '耳鸣','视线模糊',
+      '害怕','不安','恐惧','颤抖','冷汗','发抖',
+      // 人物
+      '陌生人','没人','空','独','孤',
+      '有人','不是人',
+      // 系统/技术
+      '系统','错误','警告','故障','崩溃','数据',
+      '用户','账号','访问','记录','异常',
+      '在线','上线','下线','论坛','帖子','发帖',
+      '回声','私信','消息','通知',
+      '版本','更新','维护','升级','修复',
+      '日志','权限','管理员',
+      // 常见时间词
+      '时间','昨天','前天','上周','去年',
+      // 认知相关
+      '奇怪','不可思议','不可能','怎么会',
+      '明明','可是','然而','到底','究竟是',
+      '身后','背后','回头',
+      '消失了','找不到','从未存在',
+      '看错了','记错了','不是真的',
+      '听到了','看到了','感觉到了',
+      // 传说/故事
+      '传说','故事','传闻','传言','流言',
+      '规则','守则','警告','提醒',
+      '探险','试胆','鬼屋',
+      '风水','占卜','星座',
+      '目击','真实经历',
+      // 物品
+      '药','信封','邮票','地址',
+      '画','油画',
+      '相机','望远镜',
+      '纸钱','香','铃铛'
+    ];
+
+    // 检查敏感词
+    var foundBanned = [];
+    bannedWords.forEach(function(word) {
+      if (combined.indexOf(word) >= 0) foundBanned.push(word);
+    });
+
+    if (foundBanned.length > 0) {
+      showModerationError(
+        '审核未通过',
+        '您的帖子包含不当内容，无法发布。',
+        '检测到违规关键词：' + foundBanned.join('、')
+      );
+      return;
+    }
+
+    // 检查主题相关性 — 必须命中核心关键词
+    var foundCore = [];
+    eerieCoreKeywords.forEach(function(word) {
+      if (combined.indexOf(word) >= 0) foundCore.push(word);
+    });
+
+    var supportScore = 0;
+    eerieSupportKeywords.forEach(function(word) {
+      if (combined.indexOf(word) >= 0) supportScore++;
+    });
+
+    // 短内容(<=10字)不检查主题
+    var totalLen = combined.length;
+    if (totalLen > 10) {
+      // 必须至少命中1个核心关键词
+      if (foundCore.length === 0) {
+        showModerationError(
+          '审核未通过',
+          '您的帖子与档案馆主题不符，无法发布。',
+          '本论坛仅接受与诡异、灵异、都市传说、未解之谜等相关的内容。请包含至少一个与主题相关的关键词。'
+        );
+        return;
+      }
+      // 长内容(>40字)还需要足够的辅助关键词
+      if (totalLen > 40 && foundCore.length + supportScore < 3) {
+        showModerationError(
+          '审核未通过',
+          '您的帖子与档案馆主题关联不足，无法发布。',
+          '帖子内容较长但缺乏足够的主题关联性。请增加更多与诡异、灵异题材相关的描述。'
+        );
+        return;
+      }
+    }
+
+    const overlay = document.getElementById('submit-success-overlay');
+    const progressBar = document.getElementById('progress-bar');
+    const countdown = document.getElementById('overlay-countdown');
+    const processing = document.getElementById('overlay-processing');
+    const complete = document.getElementById('overlay-complete');
+
+    // Save post to localStorage (robust, with verification and backup)
+    var categoryLabels = {whispers:'深夜碎语',urban:'都市传说',mystery:'未解之谜',archives:'第七档案',other:'其他'};
+    var currentUsername = '';
+    try { currentUsername = localStorage.getItem('midnight_archives_username') || ''; } catch(e) {}
+    var newPost = {
+      id: 'user-post-' + Date.now(),
+      title: titleInput.value.trim(),
+      content: textarea.value.trim(),
+      category: selectedCategory,
+      categoryLabel: categoryLabels[selectedCategory] || '其他',
+      timestamp: new Date().toLocaleString('zh-CN'),
+      username: currentUsername || '匿名者',
+      replies: []
+    };
+
+    // Initialize shared data and save post
+    // Auto-set token from config if available
+    if (window.__GITHUB_TOKEN__ && SharedData.setGitHubToken) {
+      SharedData.setGitHubToken(window.__GITHUB_TOKEN__);
+    }
+    var postSaved = false;
+    SharedData.init(function() {
+      SharedData.addPost(newPost, function(ok, reason) {
+        if (ok) {
+          postSaved = true;
+          showSuccessOverlay();
+        } else if (reason === 'rate_limit') {
+          submitBtn.disabled = false;
+          showModerationError('发帖过于频繁', '请等待 60 秒后再试。', '系统已记录您的操作频率。');
+        } else if (reason === 'validation') {
+          submitBtn.disabled = false;
+          showModerationError('数据验证失败', '帖子内容包含不合法字符。', '请检查内容后重试。');
+        } else {
+          // 远程失败但本地已保存，仍然显示成功
+          console.warn('[发帖] 远程保存失败，已保存到本地');
+          postSaved = true;
+          showSuccessOverlay();
+        }
+      });
+    });
+
+    // 超时保护：如果 3 秒内没有回调，也显示成功（本地已保存）
+    setTimeout(function() {
+      if (!postSaved) {
+        postSaved = true;
+        showSuccessOverlay();
+      }
+    }, 3000);
+
+    function showSuccessOverlay() {
+      overlay.classList.add('visible');
+
+      let seconds = 5;
+      countdown.textContent = '预计 ' + seconds + ' 秒后可见';
+      progressBar.style.width = '0%';
+
+      const interval = setInterval(() => {
+        seconds--;
+        const progress = ((5 - seconds) / 5) * 100;
+        progressBar.style.width = progress + '%';
+        countdown.textContent = seconds > 0 ? '预计 ' + seconds + ' 秒后发布' : '发布完成';
+        if (seconds <= 0) {
+          clearInterval(interval);
+          progressBar.style.width = '100%';
+          progressBar.classList.remove('pulsing');
+          processing.style.display = 'none';
+          complete.style.display = 'flex';
+          // Auto-redirect to forum after 2 seconds
+          setTimeout(function() {
+            window.location.href = 'forum.html';
+          }, 2000);
+        }
+      }, 1000);
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
