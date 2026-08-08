@@ -1,0 +1,359 @@
+<div class="midnight-archives-shell">
+  <style>
+    /* ===== Shell-specific styles ===== */
+    .midnight-archives-shell {
+      --shell-header-h: 60px;
+      --shell-sidebar-w: 240px;
+      position: relative;
+      min-height: 100vh;
+      background: var(--brand-background);
+      color: var(--brand-foreground);
+      font-family: var(--font-sans);
+    }
+
+    /* ===== Fixed Header ===== */
+    .shell-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--shell-header-h);
+      background: var(--brand-card);
+      border-bottom: 1px solid var(--brand-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--space-6);
+      z-index: 100;
+      animation: flicker 4s ease-in-out infinite;
+    }
+
+    .shell-header__logo {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      font-weight: 600;
+      color: var(--brand-primary-light);
+      animation: glow-pulse 3s ease-in-out infinite;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    .shell-header__nav {
+      display: flex;
+      gap: var(--space-8);
+      align-items: center;
+    }
+
+    .shell-header__nav-item {
+      font-size: var(--text-sm);
+      color: var(--brand-muted-foreground);
+      cursor: pointer;
+      padding: var(--space-2) 0;
+      position: relative;
+      transition: color var(--transition-fast);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .shell-header__nav-item:hover {
+      color: var(--brand-foreground);
+    }
+
+    .shell-header__nav-item[data-active="true"] {
+      color: var(--brand-primary-light);
+    }
+
+    .shell-header__nav-item[data-active="true"]::after {
+      content: "";
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--brand-primary);
+      border-radius: 1px;
+    }
+
+    .shell-header__user {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      white-space: nowrap;
+    }
+
+    .shell-header__avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-full);
+      background: var(--neutral-800);
+      border: 1px solid var(--brand-border);
+      flex-shrink: 0;
+    }
+
+    .shell-header__status {
+      font-size: var(--text-xs);
+      color: var(--brand-muted-foreground);
+    }
+
+    .shell-header__status .dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--state-success);
+      margin-right: var(--space-1);
+      animation: glow-pulse 2s ease-in-out infinite;
+    }
+
+    /* ===== Main Layout ===== */
+    .shell-layout {
+      display: flex;
+      padding-top: var(--shell-header-h);
+      min-height: 100vh;
+    }
+
+    /* ===== Left Sidebar ===== */
+    .shell-sidebar {
+      position: fixed;
+      top: var(--shell-header-h);
+      left: 0;
+      bottom: 0;
+      width: var(--shell-sidebar-w);
+      background: var(--brand-card);
+      border-right: 1px solid var(--brand-border);
+      overflow-y: auto;
+      padding: var(--space-6) 0;
+      display: flex;
+      flex-direction: column;
+      z-index: 50;
+    }
+
+    .sidebar-section {
+      padding: 0 var(--space-5);
+      margin-bottom: var(--space-8);
+    }
+
+    .sidebar-section__title {
+      font-size: var(--text-xs);
+      font-weight: 600;
+      color: var(--brand-muted-foreground);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: var(--space-4);
+    }
+
+    /* Category List */
+    .sidebar-categories {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .sidebar-category {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      margin: 0 calc(-1 * var(--space-4));
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: background var(--transition-fast);
+      color: var(--brand-foreground);
+      font-size: var(--text-sm);
+      position: relative;
+    }
+
+    .sidebar-category:hover {
+      background: var(--neutral-800);
+    }
+
+    .sidebar-category:hover::after {
+      content: "";
+      position: absolute;
+      bottom: 4px;
+      left: var(--space-4);
+      right: var(--space-4);
+      height: 1px;
+      background: var(--brand-primary-faint);
+    }
+
+    .sidebar-category__icon {
+      font-size: var(--text-base);
+      width: 20px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .sidebar-category[data-dom-id="cat-vanished"] {
+      color: var(--brand-muted-foreground);
+      font-style: italic;
+    }
+
+    /* Online Users */
+    .sidebar-online {
+      margin-top: auto;
+      padding-top: var(--space-6);
+      border-top: 1px solid var(--neutral-800);
+    }
+
+    .sidebar-online__list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .sidebar-online__user {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      font-size: var(--text-sm);
+      color: var(--brand-foreground);
+    }
+
+    .sidebar-online__dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--state-success);
+      flex-shrink: 0;
+      animation: glow-pulse 2s ease-in-out infinite;
+    }
+
+    .sidebar-online__typing {
+      font-size: var(--text-xs);
+      color: var(--brand-muted-foreground);
+      margin-left: auto;
+      animation: flicker 1.5s ease-in-out infinite;
+    }
+
+    /* ===== Main Content Area ===== */
+    .shell-content {
+      margin-left: var(--shell-sidebar-w);
+      flex: 1;
+      padding: var(--space-8) var(--space-6);
+      min-height: calc(100vh - var(--shell-header-h));
+    }
+
+    /* ===== Footer ===== */
+    .shell-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: var(--space-3) var(--space-6);
+      text-align: center;
+      font-size: var(--text-xs);
+      color: var(--neutral-600);
+      background: linear-gradient(to top, var(--brand-background), transparent);
+      pointer-events: none;
+      z-index: 40;
+    }
+
+    .shell-footer__text {
+      animation: flicker 8s ease-in-out infinite;
+      opacity: 0.6;
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 768px) {
+      .shell-sidebar {
+        display: none;
+      }
+      .shell-content {
+        margin-left: 0;
+      }
+      .shell-header__nav {
+        gap: var(--space-4);
+      }
+    }
+  </style>
+
+  <!-- ===== Header ===== -->
+  <header class="shell-header">
+    <div class="shell-header__logo animate-glow">午夜档案馆</div>
+
+    <nav class="shell-header__nav">
+      <a href="#" class="shell-header__nav-item" data-dom-id="nav-forum" <!-- SLOT: activeNavItem -->>论坛</a>
+      <a href="#" class="shell-header__nav-item" data-dom-id="nav-stories">故事</a>
+      <a href="#" class="shell-header__nav-item" data-dom-id="nav-submit">投稿</a>
+    </nav>
+
+    <div class="shell-header__user">
+      <div class="shell-header__avatar"></div>
+      <span class="shell-header__status">
+        <span class="dot"></span>
+        在线 · 存活中
+      </span>
+    </div>
+  </header>
+
+  <!-- ===== Layout ===== -->
+  <div class="shell-layout">
+    <!-- Left Sidebar -->
+    <aside class="shell-sidebar">
+      <!-- Categories -->
+      <div class="sidebar-section">
+        <h3 class="sidebar-section__title">档案分类</h3>
+        <ul class="sidebar-categories">
+          <li class="sidebar-category" data-dom-id="cat-whispers">
+            <span class="sidebar-category__icon">🫧</span>
+            <span>深夜碎语</span>
+          </li>
+          <li class="sidebar-category" data-dom-id="cat-urban">
+            <span class="sidebar-category__icon">🏙</span>
+            <span>都市传说</span>
+          </li>
+          <li class="sidebar-category" data-dom-id="cat-vanished">
+            <span class="sidebar-category__icon">👻</span>
+            <span>已消失的帖子</span>
+          </li>
+          <li class="sidebar-category" data-dom-id="cat-archives">
+            <span class="sidebar-category__icon">📁</span>
+            <span>第七档案</span>
+          </li>
+          <li class="sidebar-category" data-dom-id="cat-mysteries">
+            <span class="sidebar-category__icon">❓</span>
+            <span>未解之谜</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Online Users -->
+      <div class="sidebar-section sidebar-online">
+        <h3 class="sidebar-section__title">当前在线</h3>
+        <ul class="sidebar-online__list">
+          <li class="sidebar-online__user" data-dom-id="user-nightwatcher">
+            <span class="sidebar-online__dot"></span>
+            <span>夜巡者</span>
+          </li>
+          <li class="sidebar-online__user" data-dom-id="user-archivist">
+            <span class="sidebar-online__dot"></span>
+            <span>归档人</span>
+            <span class="sidebar-online__typing">输入中...</span>
+          </li>
+          <li class="sidebar-online__user" data-dom-id="user-shadow">
+            <span class="sidebar-online__dot"></span>
+            <span>影子访客</span>
+          </li>
+          <li class="sidebar-online__user" data-dom-id="user-anonymous">
+            <span class="sidebar-online__dot"></span>
+            <span>匿名者_7749</span>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Main Content Slot -->
+    <main class="shell-content">
+      <!-- SLOT: mainContent -->
+    </main>
+  </div>
+
+  <!-- ===== Footer ===== -->
+  <footer class="shell-footer">
+    <span class="shell-footer__text">系统运行中... 第 3,847 次归档...</span>
+  </footer>
+</div>

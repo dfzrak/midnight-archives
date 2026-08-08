@@ -1,0 +1,11 @@
+# 午夜档案馆 GitHub Pages 配置
+theme: jekyll-theme-minimal
+plugins:
+  - jekyll-seo-tag
+
+# 安全配置
+future: false
+show_drafts: false
+
+# 缓存配置
+incremental: false

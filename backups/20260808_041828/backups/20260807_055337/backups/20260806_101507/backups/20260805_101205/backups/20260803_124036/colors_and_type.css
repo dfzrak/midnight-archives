@@ -1,0 +1,220 @@
+/* ===== 午夜档案馆 — Brand CSS ===== */
+/* Eerie dark forum: deep black + blood crimson + cold neutral */
+
+:root {
+  /* Primary brand — blood crimson */
+  --brand-hue: 0;
+  --brand-sat: 85%;
+  --brand-light: 32%;
+  --brand-primary: hsl(0, 85%, 32%);
+  --brand-primary-light: hsl(0, 75%, 42%);
+  --brand-primary-lighter: hsl(0, 65%, 52%);
+  --brand-primary-faint: hsl(0, 50%, 18%);
+  --brand-primary-ghost: hsl(0, 40%, 12%);
+
+  /* Neutral scale — cold grays with slight blue tint */
+  --neutral-950: #0a0a0c;
+  --neutral-900: #111114;
+  --neutral-850: #16161a;
+  --neutral-800: #1c1c22;
+  --neutral-750: #232329;
+  --neutral-700: #2a2a33;
+  --neutral-600: #3a3a45;
+  --neutral-500: #555565;
+  --neutral-400: #78788a;
+  --neutral-300: #9a9aad;
+  --neutral-200: #bbbbcc;
+  --neutral-100: #dddde8;
+  --neutral-50: #f0f0f5;
+
+  /* State colors */
+  --state-success: #1a6b3a;
+  --state-warning: #8b6914;
+  --state-error: #8b1a1a;
+  --state-info: #1a4a6b;
+
+  /* Eerie accent — faint cold green glow */
+  --eerie-glow: hsl(160, 30%, 25%);
+  --eerie-glow-faint: hsl(160, 20%, 15%);
+
+  /* Semantic aliases */
+  --brand-background: var(--neutral-950);
+  --brand-foreground: var(--neutral-100);
+  --brand-card: var(--neutral-900);
+  --brand-card-foreground: var(--neutral-200);
+  --brand-popover: var(--neutral-850);
+  --brand-popover-foreground: var(--neutral-100);
+  --brand-primary-foreground: #f0e0e0;
+  --brand-muted: var(--neutral-800);
+  --brand-muted-foreground: var(--neutral-400);
+  --brand-border: var(--neutral-700);
+  --brand-input: var(--neutral-750);
+  --brand-ring: var(--brand-primary);
+  --brand-surface: var(--neutral-850);
+  --brand-surface-elevated: var(--neutral-800);
+
+  /* Radius scale — restrained */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* Typography — system sans-serif */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-display: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+
+  /* Type scale */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* Shadows — static surfaces use border, floating layers only */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
+  --shadow-glow: 0 0 20px hsla(0, 85%, 32%, 0.15);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 400ms ease;
+}
+
+/* ===== Global Reset & Base ===== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--brand-background);
+  color: var(--brand-foreground);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* CRT noise overlay — very subtle */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.4;
+}
+
+a {
+  color: var(--brand-primary-light);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--brand-primary-lighter);
+}
+
+/* ===== Utility Classes ===== */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+.text-primary { color: var(--brand-primary-light); }
+.text-muted { color: var(--brand-muted-foreground); }
+.text-eerie { color: var(--eerie-glow); }
+
+/* ===== Eerie Animations ===== */
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.97; }
+  75% { opacity: 0.99; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { text-shadow: 0 0 4px hsla(0, 85%, 32%, 0.3); }
+  50% { text-shadow: 0 0 8px hsla(0, 85%, 32%, 0.5); }
+}
+
+@keyframes drift {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-1px); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-flicker {
+  animation: flicker 4s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+.animate-drift {
+  animation: drift 6s ease-in-out infinite;
+}
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--neutral-900);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--neutral-600);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--neutral-500);
+}
+
+/* ===== Selection ===== */
+::selection {
+  background: var(--brand-primary-faint);
+  color: var(--neutral-50);
+}
+
+/* ===== Reduced Motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

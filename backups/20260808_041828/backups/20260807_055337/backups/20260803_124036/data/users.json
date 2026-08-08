@@ -1,0 +1,178 @@
+{
+  "users": {
+    "管理员": {
+      "coins": 100,
+      "transactions": [
+        {
+          "amount": 100,
+          "desc": "初始余额",
+          "time": "2026-08-01T04:35:00Z"
+        },
+        {
+          "amount": -5,
+          "desc": "解锁档案",
+          "time": "2026-07-31T20:44:42.179Z"
+        },
+        {
+          "amount": -5,
+          "desc": "解锁档案",
+          "time": "2026-07-31T20:44:48.083Z"
+        },
+        {
+          "amount": -20,
+          "desc": "通灵",
+          "time": "2026-07-31T20:45:01.990Z"
+        },
+        {
+          "amount": -20,
+          "desc": "通灵",
+          "time": "2026-07-31T20:58:53.885Z"
+        }
+      ],
+      "registered_at": "2026-08-01T04:35:00Z",
+      "device_token": "dt_admin_7b0pkcoclg5f6h"
+    },
+    "zero": {
+      "coins": 10,
+      "transactions": [
+        {
+          "amount": 10,
+          "desc": "初始余额",
+          "time": "2026-08-01T04:35:00Z"
+        }
+      ],
+      "registered_at": "2026-08-01T04:35:00Z",
+      "device_token": "dt_zero_twgiry4b5odpsh"
+    },
+    "旅行者": {
+      "coins": 100,
+      "transactions": [
+        {
+          "amount": 100,
+          "desc": "管理员发放",
+          "time": "2026-07-31T20:46:37.703777+00:00"
+        },
+        {
+          "amount": -5,
+          "desc": "解锁档案",
+          "time": "2026-07-31T20:46:52.883Z"
+        },
+        {
+          "amount": -20,
+          "desc": "通灵",
+          "time": "2026-07-31T20:47:11.295Z"
+        },
+        {
+          "amount": -20,
+          "desc": "通灵",
+          "time": "2026-07-31T20:47:27.081Z"
+        },
+        {
+          "amount": -5,
+          "desc": "解锁档案",
+          "time": "2026-07-31T20:47:34.353Z"
+        }
+      ],
+      "registered_at": "2026-08-01T04:35:00Z",
+      "device_token": "dt_traveler_1bedrd381lfv"
+    },
+    "旅者": {
+      "coins": 0,
+      "transactions": [
+        {
+          "amount": 100,
+          "desc": "管理员发放",
+          "time": "2026-08-01T07:49:55.227846+00:00"
+        },
+        {
+          "amount": -5,
+          "desc": "解锁档案",
+          "time": "2026-08-01T15:41:05.859Z"
+        },
+        {
+          "amount": -20,
+          "desc": "通灵",
+          "time": "2026-08-01T15:41:07.518Z"
+        },
+        {
+          "amount": -5,
+          "desc": "解锁档案",
+          "time": "2026-08-01T15:41:15.724Z"
+        },
+        {
+          "amount": -20,
+          "desc": "通灵",
+          "time": "2026-08-02T09:27:49.543Z"
+        },
+        {
+          "amount": -20,
+          "desc": "通灵",
+          "time": "2026-08-02T09:27:57.816Z"
+        },
+        {
+          "amount": -5,
+          "desc": "解锁档案",
+          "time": "2026-08-02T09:28:04.807Z"
+        },
+        {
+          "amount": -20,
+          "desc": "通灵",
+          "time": "2026-08-02T09:28:31.734Z"
+        },
+        {
+          "amount": -5,
+          "desc": "解锁档案",
+          "time": "2026-08-02T10:17:31.992Z"
+        }
+      ],
+      "registered_at": "2026-07-31T21:05:47.504Z",
+      "device_token": "dt_grt0d2nyk78ms9flmzb"
+    },
+    "服主": {
+      "coins": 0,
+      "transactions": [],
+      "registered_at": "2026-07-31T21:06:22.564Z",
+      "device_token": "dt_53ujcbr2je3ms9fmv8l"
+    },
+    "大狗": {
+      "coins": 70,
+      "transactions": [
+        {
+          "amount": 100,
+          "desc": "管理员发放",
+          "time": "2026-08-01T13:31:33.181883+00:00"
+        },
+        {
+          "amount": -5,
+          "desc": "解锁档案",
+          "time": "2026-08-02T09:50:48.463Z"
+        },
+        {
+          "amount": -20,
+          "desc": "通灵",
+          "time": "2026-08-02T09:51:17.158Z"
+        },
+        {
+          "amount": -5,
+          "desc": "解锁档案",
+          "time": "2026-08-02T10:39:45.370Z"
+        }
+      ],
+      "registered_at": "2026-07-31T21:48:54.141Z",
+      "device_token": "dt_xvatotk14fms9h5dhq"
+    },
+    "超级无敌暴龙战士": {
+      "coins": 0,
+      "transactions": [],
+      "registered_at": "2026-07-31T21:49:58.394Z",
+      "device_token": "dt_pdj1qdc2uu8ms9h75kq"
+    },
+    "觀因": {
+      "coins": 0,
+      "transactions": [],
+      "registered_at": "2026-08-02T08:46:59.518Z",
+      "device_token": "dt_tgf43f4awsmsbk3xry"
+    }
+  },
+  "last_updated": "2026-08-02T10:39:45.377Z"
+}
